@@ -1,0 +1,41 @@
+<nav class="navbar navbar-default navbar-fixed-top clearfix"
+     ng-class="{collapsed: $ctrl.collapsed}">
+
+  <!--<a ng-click="$ctrl.toggleCollapse()"
+     class="pull-left brand">
+     NextView
+  </a>-->
+  <h2 class="pull-left brand">NextView</h2>
+  <ul class="nav navbar-nav pull-right">
+    <li>
+    <div id="fileupload"style="float:right;margin:10px 20px"><span style="cursor:pointer">Upload</span></div>
+    </li>
+    <li ng-repeat="tab in $ctrl.tabs"
+        ng-class="{ 'active': $ctrl.activeTab === tab.name }">
+      <a ui-sref="{{ tab.fullName + '({state: tab.state})' }}">
+        {{ tab.text }}
+      </a>
+    </li>
+    <li><logout></logout></li>
+  </ul>
+</nav>
+<script>
+    $(function () {
+       $("#fileupload").uploadFile({
+          url:"/api/upload/",
+          fileName:"myfile",
+          dragDrop: false,
+          onSuccess:function(files,data,xhr,pd){
+             console.log(data.result);
+             if (data.result == 'Duplicate Sheet'){
+                     alert('Duplicate Sheet');
+                 }
+             else{
+                 console.log("in upload refresh");
+                 location.reload();
+             }
+             $('.ajax-file-upload-statusbar').hide();
+          },
+       });
+    });
+</script>

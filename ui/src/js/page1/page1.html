@@ -1,0 +1,57 @@
+<style>
+   .button {
+      background-color: #3396C9;
+      border: none;
+      color: white;
+      padding: 4px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 12px;
+      margin: 1px 2px;
+      cursor: pointer;
+    }
+</style>
+<body>
+<div class="container">
+<div class="row">
+<div class="widget col-md-6" style="width: 50%; height: 250px">
+
+  <div class="widget-content">
+
+    <div class="widget-title clearfix"
+         title="Sample Widg">
+      <span class="pull-left">Samlple Widg</span>
+    </div>
+
+    <div class="widget-body">
+      <highcharts options="$ctrl.chartOptions"></highcharts>
+    </div>
+  </div>
+</div>
+<div class="widget col-md-6" style="width: 50%; height: 250px">
+
+  <div class="widget-content">
+
+    <div class="widget-title clearfix"
+         title="Sample Widg">
+      <span class="pull-left">Samlple Widg</span>
+    </div>
+
+    <div class="widget-body">
+      <highcharts options="$ctrl.chartOptions2"></highcharts>
+    </div>
+  </div>
+</div>
+    </div>
+    </div>
+<input id="select" size="60" style="margin-top:1%;margin-left:7%;color:black;">
+<a href="" class="button" ng-click="$ctrl.check()">Submit</a>
+    </div>
+</body>
+<script>
+   configObject = {
+       autoClose: true,
+       }
+   $('#select').dateRangePicker(configObject);
+</script>
