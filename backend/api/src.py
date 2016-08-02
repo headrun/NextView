@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 from models import *
 
-@receiver(post_save, sender=Agent)
+@receiver(post_save, sender=TeamLead)
 def set_agent(sender, instance, **kwargs):
     print "here"
     user_obj = User.objects.filter(username=instance.name).values_list('id', flat=True)

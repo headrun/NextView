@@ -22,17 +22,7 @@ class Project(models.Model):
     def __unicode__(self):
         return self.name
 
-class CenterProject(models.Model):
-    center   = models.ForeignKey(Center, null=True)
-    project = models.ForeignKey(Project, null=True)
-
-    class Meta:
-        db_table = u'center_project_mapping'
-        unique_together = (("center","project"),)
-    def __unicode__(self):
-        return self.name
-
-class Agent(models.Model):
+class TeamLead(models.Model):
     name    = models.ForeignKey(User, null=True)
     center  = models.ForeignKey(Center, null=True)
     project = models.ForeignKey(Project, null=True)
@@ -57,7 +47,6 @@ class Customer(models.Model):
 class Centermanager(models.Model):
     name    = models.ForeignKey(User, null=True)
     center  = models.ForeignKey(Center, null=True)
-    project = models.ForeignKey(Project, null=True)
 
     class Meta:
         db_table = u'center_manager'
@@ -68,7 +57,6 @@ class Centermanager(models.Model):
 class Nextwealthmanager(models.Model):
     name    = models.ForeignKey(User, null=True)
     center  = models.ManyToManyField(Center)
-    project = models.ForeignKey(Project, null=True)
 
     class Meta:
         db_table = u'nextwealthmanager'
@@ -77,6 +65,7 @@ class Nextwealthmanager(models.Model):
         return user_obj[0]
 
 class RawTable(models.Model):
+    team_lead   = models.ForeignKey(TeamLead, null=True)
     employee    = models.CharField(max_length=255, default='')
     volume_type = models.CharField(max_length=255, default='')
     per_hour    = models.IntegerField(max_length=255, default=0)
@@ -92,3 +81,16 @@ class RawTable(models.Model):
         db_table = u'raw_table'
         unique_together = (("date","employee"),)
 
+class Error(models.Model):
+    volume_type = models.CharField(max_length=255, default='')
+    error_type = models.CharField(max_length=255, default='')
+    error_value = models.IntegerField(max_length=255,default=0)
+    date = models.DateField()
+    employee_id = models.CharField(max_length=255,default='')
+
+class Meta:
+    db_table = u'error_table'
+    unique_together = (("error_type","error_value"),)
+
+    def __unicode__(self):
+        return self.employee_id

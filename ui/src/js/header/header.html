@@ -5,17 +5,17 @@
      class="pull-left brand">
      NextView
   </a>-->
-  <h2 class="pull-left brand">NextView</h2>
+  <h2 class="pull-left brand" style="margin-top:10px;">NextView</h2>
   <ul class="nav navbar-nav pull-right">
     <li>
     <div id="fileupload"style="float:right;margin:10px 20px"><span style="cursor:pointer">Upload</span></div>
     </li>
-    <li ng-repeat="tab in $ctrl.tabs"
+    <!--<li ng-repeat="tab in $ctrl.tabs"
         ng-class="{ 'active': $ctrl.activeTab === tab.name }">
       <a ui-sref="{{ tab.fullName + '({state: tab.state})' }}">
         {{ tab.text }}
       </a>
-    </li>
+    </li>-->
     <li><logout></logout></li>
   </ul>
 </nav>

@@ -10,11 +10,9 @@ class CenterAdmin(admin.ModelAdmin):
     list_display = ['name']
 admin.site.register(Center,CenterAdmin)
 
-
-class AgentAdmin(admin.ModelAdmin):
+class TeamleadAdmin(admin.ModelAdmin):
     list_display = ['name']
-admin.site.register(Agent,AgentAdmin)
-
+admin.site.register(TeamLead,TeamleadAdmin)
 
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ['name']
@@ -24,16 +22,17 @@ class CentermanagerAdmin(admin.ModelAdmin):
     list_display = ['name']
 admin.site.register(Centermanager,CentermanagerAdmin)
 
-
 class NextwealthmanagerAdmin(admin.ModelAdmin):
     list_display = ['name']
 admin.site.register(Nextwealthmanager,NextwealthmanagerAdmin)
-
 
 class RawtableAdmin(admin.ModelAdmin):
     list_display = ['employee','volume_type','per_day','per_hour','norm','date','created_at','modified_at']
 admin.site.register(RawTable,RawtableAdmin)
 
+class ErrorAdmin(admin.ModelAdmin):
+    list_display = ['volume_type','error_type']
+admin.site.register(Error,ErrorAdmin)
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User

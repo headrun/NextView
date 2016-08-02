@@ -20,6 +20,10 @@ import re
 SOH_XL_HEADERS = ['Date', 'ID','Done','Passed / Cancelled','Platform','Emp id','Week','Month','Year','Target','Productivity','WC','WorkPacket']
 SOH_XL_MAN_HEADERS = ['Date', 'Done','Platform','Emp id','Target']
 
+#SOH_XL_HEADERS = ['Date','Id','Work Packet','Agent Reply', 'Avoidable','Concept','Others', 'Total Error' ,'Week' ,'Month' , 'Year']
+#SOH_XL_MAN_HEADERS = ['Date' , 'Id','Work Packet','Avoidable','Concept' ]
+
+
 # Create your views here.
 
 
@@ -55,6 +59,32 @@ def dashboard_insert(request):
     print result
     return HttpResponse(result)
 
+def error_insert(request):
+    volumes_list = Error.objects.values_list('volume_type',flat=True).distinct()
+    conn = redis.Redis(host="localhost", port=6379, db=0)
+    result = {}
+    volumes_dict = {}
+    date_values = {}
+    for volume in volumes_list:
+        date_list = Error.objects.filter(volume_type=volume).values_list('date',flat=True)
+        for date_v in date_list:
+            date_pattern = '*{0}_{1}*'.format(volume,date_v)
+            key_list = conn.keys(pattern=date_pattern)
+            for cur_key in key_list:
+                var = conn.hgetall(cur_key)
+                for key, value in var.iteritems():
+                    if date_values.has_key(volume):
+                        date_values[volume].append(int(value))
+                    else:
+                        date_values[volume] = [int(value)]
+    error_volume_data = {}
+    for key, value in date_values.iteritems():
+        error_volume_data[key] = sum(value)
+    error_percentage_data={}
+    error_percentage_data['volumes_types']=error_volume_data.keys()
+    error_percentage_data['error_volume_values'] = error_volume_data.values()
+
+    return HttpResponse(error_percentage_data)
 
 def get_order_of_headers(open_sheet, Default_Headers, mandatory_fileds=[]):
     indexes, sheet_indexes = {}, {}
@@ -87,7 +117,7 @@ def validate_sheet(open_sheet, request):
         all_headers = sorted(all_headers.items(), key=lambda x: x[1])
         if is_mandatory_available:
             status = ["Fields are not available: %s" % (", ".join(list(is_mandatory_available)))]
-            index_status.update({1: status})
+            #index_status.update({1: status})
             return "Failed", status
     else:
         status = "Number of Rows: %s" % (str(open_sheet.nrows))
@@ -127,7 +157,31 @@ def redis_insert(prj_obj):
         current_keys.append(key)
         conn.hmset(key,value)
 
+def redis_insert_two(prj_obj):
+    prj_name = prj_obj.name
+    data_dict = {}
 
+    dates_list = Error.objects.values_list('date').distinct()
+    all_dates = []
+
+    for date in dates_list:
+        part_date = str(date[0])
+    all_dates.append(part_date)
+    volumes_list = Error.objects.filter(date=date[0]).values_list('volume_type').distinct()
+    for volume in volumes_list:
+        value_dict = {}
+        error_type= Error.objects.filter(volume_type=volume[0], date=date[0]).values_list('error_type',flat=True)
+        redis_key = '{0}_{1}_{2}_{3}'.format(prj_name, volume[0], part_date,str(error_type[0]))
+        total = Error.objects.filter(volume_type=volume[0], date=date[0]).values_list('error_value').aggregate(Sum('error_value'))
+        value_dict[str(error_type[0])] = str(total['error_value__sum'])
+        data_dict[redis_key] = value_dict
+    print data_dict, all_dates
+
+    conn = redis.Redis(host="localhost", port=6379, db=0)
+    current_keys = []
+    for key, value in data_dict.iteritems():
+        current_keys.append(key)
+    conn.hmset(key, value)
 
 def upload(request):
     customer_data = {}
@@ -171,6 +225,58 @@ def upload(request):
                 var = 'Duplicate Sheet'
                 return HttpResponse(var)
         insert = redis_insert(prj_obj)
+    return HttpResponse(var)
+
+def error_upload(request):
+    customer_data = {}
+    agent_obj = Agent.objects.filter(name_id=request.user.id).values_list('id')[0][0]
+    prj_obj = Project.objects.filter(agent=agent_obj)[0]
+    fname = request.FILES['myfile']
+    var = fname.name.split('.')[-1].lower()
+    if var not in ['xls', 'xlsx', 'xlsb']:
+        return HttpResponse("Invalid File")
+    else:
+        try:
+            open_book = open_workbook(filename=None, file_contents=fname.read())
+            open_sheet = open_book.sheet_by_index(0)
+        except:
+            return HttpResponse("Invalid File")
+        sheet_headers = validate_sheet(open_sheet, request)
+        error_type={}
+        for row_idx in range(1, open_sheet.nrows):
+            for column, col_idx in sheet_headers:
+                #import pdb;pdb.set_trace()
+                cell_data = get_cell_data(open_sheet, row_idx, col_idx)
+                if column == 'avoidable':
+                    error_type['avoidable'] = ''.join(cell_data)
+                if column == 'concept':
+                    error_type['concept'] = ''.join(cell_data)
+                if column == 'work packet':
+                    customer_data['volume_type'] = ''.join(cell_data)
+                if column == 'id':
+                    customer_data['employee_id'] = ''.join(cell_data)
+                if column == 'date':
+                    cell_data = xlrd.xldate_as_tuple(int(cell_data.split('.')[0]), 0)
+                    cell_data ='%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
+                    customer_data['date'] = ''.join(cell_data)
+            print error_type
+            volume_dict = {'DataDownload': 'DD', 'CompanyCoordinates': 'CC', 'DetailFinancial': 'DF'}
+            if customer_data['volume_type'] in volume_dict.keys():
+                customer_data['volume_type'] = volume_dict[customer_data['volume_type']]
+            for key,value in error_type.iteritems():
+                #import pdb;pdb.set_trace()
+                if value :
+                    new_can = Error(employee_id=customer_data['employee_id'],
+                                       volume_type=customer_data['volume_type'],
+                                           date=customer_data['date'],error_type=key,error_value=int(float(value)),)
+                    print new_can
+                    try:
+                        new_can.save()
+                    except:
+                        var = 'Duplicate Sheet'
+                        return HttpResponse(var)
+
+        insert = redis_insert_two(prj_obj)
     return HttpResponse(var)
 
 def volume(request):
