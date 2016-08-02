@@ -9,7 +9,7 @@ from models import *
 def set_agent(sender, instance, **kwargs):
     print "here"
     user_obj = User.objects.filter(username=instance.name).values_list('id', flat=True)
-    group_obj = Group.objects.get(name='Agent')
+    group_obj = Group.objects.get(name='team_lead')
     group_obj.user_set.add(user_obj[0])
     print "successs"
 

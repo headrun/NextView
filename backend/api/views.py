@@ -185,8 +185,10 @@ def redis_insert_two(prj_obj):
 
 def upload(request):
     customer_data = {}
-    agent_obj = Agent.objects.filter(name_id=request.user.id).values_list('id')[0][0]
-    prj_obj = Project.objects.filter(agent=agent_obj)[0]
+    teamleader_obj_name = TeamLead.objects.filter(name_id=request.user.id)[0]
+    teamleader_obj = TeamLead.objects.filter(name_id=request.user.id).values_list('project_id')[0][0]
+    prj_obj = Project.objects.filter(id=teamleader_obj)[0]
+    center_obj = Center.objects.filter(id=Project.objects.filter(id=teamleader_obj).values_list('center_id',flat=True)[0])[0]
     fname = request.FILES['myfile']
     var = fname.name.split('.')[-1].lower()
     if var not in ['xls', 'xlsx', 'xlsb']:
@@ -218,7 +220,7 @@ def upload(request):
                 customer_data['volume_type'] = volume_dict[customer_data['volume_type']]
             new_can = RawTable(project=prj_obj, employee=customer_data['emp_id'],
                                volume_type=customer_data['volume_type'], per_hour=0,per_day=int(float(customer_data['cmplt_target'])),
-                               date=customer_data['date'], norm=int(float(customer_data['target'])))
+                               date=customer_data['date'], norm=int(float(customer_data['target'])),team_lead=teamleader_obj_name,center = center_obj)
             try:
                 new_can.save()
             except:
