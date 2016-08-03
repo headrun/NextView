@@ -31,7 +31,7 @@ class RawtableAdmin(admin.ModelAdmin):
 admin.site.register(RawTable,RawtableAdmin)
 
 class ErrorAdmin(admin.ModelAdmin):
-    list_display = ['volume_type','error_type']
+    list_display = ['volume_type','audited_errors','error_value']
 admin.site.register(Error,ErrorAdmin)
 
 from django.contrib.auth.forms import UserCreationForm

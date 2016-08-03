@@ -17,13 +17,14 @@ from datetime import timedelta
 from datetime import date
 import re
 
-SOH_XL_HEADERS = ['Date', 'ID','Done','Passed / Cancelled','Platform','Emp id','Week','Month','Year','Target','Productivity','WC','WorkPacket']
-SOH_XL_MAN_HEADERS = ['Date', 'Done','Platform','Emp id','Target']
+#SOH_XL_HEADERS = ['Date', 'ID','Done','Passed / Cancelled','Platform','Emp id','Week','Month','Year','Target','Productivity','WC','WorkPacket']
+#SOH_XL_MAN_HEADERS = ['Date', 'Done','Platform','Emp id','Target']
 
 #SOH_XL_HEADERS = ['Date','Id','Work Packet','Agent Reply', 'Avoidable','Concept','Others', 'Total Error' ,'Week' ,'Month' , 'Year']
 #SOH_XL_MAN_HEADERS = ['Date' , 'Id','Work Packet','Avoidable','Concept' ]
 
-
+SOH_XL_HEADERS =['Date','Id','Work Packet','Audited','Avoidable','Concept','Others','Total Error','Week','Month','Year']
+SOH_XL_MAN_HEADERS =['Date','Id','Work Packet','Audited','Total Error']
 # Create your views here.
 
 
@@ -64,27 +65,52 @@ def error_insert(request):
     conn = redis.Redis(host="localhost", port=6379, db=0)
     result = {}
     volumes_dict = {}
-    date_values = {}
+    vol_error_values = {}
+    vol_audit_data = {}
     for volume in volumes_list:
-        date_list = Error.objects.filter(volume_type=volume).values_list('date',flat=True)
-        for date_v in date_list:
-            date_pattern = '*{0}_{1}*'.format(volume,date_v)
-            key_list = conn.keys(pattern=date_pattern)
-            for cur_key in key_list:
-                var = conn.hgetall(cur_key)
-                for key, value in var.iteritems():
-                    if date_values.has_key(volume):
-                        date_values[volume].append(int(value))
+        key_pattern = '*{0}*error'.format(volume)
+        key_list = conn.keys(pattern=key_pattern)
+        for cur_key in key_list:
+            var = conn.hgetall(cur_key)
+            for key, value in var.iteritems():
+                if key == 'total_errors':
+                    if vol_error_values.has_key(volume):
+                        vol_error_values[volume].append(int(value))
                     else:
-                        date_values[volume] = [int(value)]
-    error_volume_data = {}
-    for key, value in date_values.iteritems():
-        error_volume_data[key] = sum(value)
-    error_percentage_data={}
-    error_percentage_data['volumes_types']=error_volume_data.keys()
-    error_percentage_data['error_volume_values'] = error_volume_data.values()
+                        vol_error_values[volume] = [int(value)]
+                else:
+                    if vol_audit_data.has_key(volume):
+                        vol_audit_data[volume].append(int(value))
+                    else:
+                        vol_audit_data[volume] = [int(value)]
 
-    return HttpResponse(error_percentage_data)
+    error_volume_data = {}
+    error_graph_data = []
+    for key, value in vol_error_values.iteritems():
+        error_graph = []
+        error_volume_data[key] = sum(value)
+        error_graph.append(key)
+        error_graph.append(sum(value))
+        error_graph_data.append(error_graph)
+    error_audit_data={}
+    for key, value in vol_audit_data.iteritems():
+        error_audit_data[key] = sum(value)
+    error_accuracy = {}
+    for volume in volumes_list :
+        percentage = (float(error_volume_data[volume])/error_audit_data[volume])*100
+        percentage = float('%.2f' % round(percentage,2))
+        error_accuracy[volume] = percentage
+    total_graph_data = {}
+    total_graph_data['error_count']= error_graph_data
+    total_graph_data['accuracy_graph'] = error_accuracy
+
+    print error_graph_data,error_accuracy
+
+
+
+
+
+    return HttpResponse(total_graph_data)
 
 def get_order_of_headers(open_sheet, Default_Headers, mandatory_fileds=[]):
     indexes, sheet_indexes = {}, {}
@@ -159,29 +185,41 @@ def redis_insert(prj_obj):
 
 def redis_insert_two(prj_obj):
     prj_name = prj_obj.name
-    data_dict = {}
+    '''data_dict = {}
 
     dates_list = Error.objects.values_list('date').distinct()
     all_dates = []
 
     for date in dates_list:
         part_date = str(date[0])
-    all_dates.append(part_date)
-    volumes_list = Error.objects.filter(date=date[0]).values_list('volume_type').distinct()
+    all_dates.append(part_date)'''
+    data_dict = {}
+    #import pdb;pdb.set_trace()
+    volumes_list = Error.objects.values_list('volume_type',flat=True).distinct()
     for volume in volumes_list:
         value_dict = {}
-        error_type= Error.objects.filter(volume_type=volume[0], date=date[0]).values_list('error_type',flat=True)
-        redis_key = '{0}_{1}_{2}_{3}'.format(prj_name, volume[0], part_date,str(error_type[0]))
-        total = Error.objects.filter(volume_type=volume[0], date=date[0]).values_list('error_value').aggregate(Sum('error_value'))
-        value_dict[str(error_type[0])] = str(total['error_value__sum'])
-        data_dict[redis_key] = value_dict
-    print data_dict, all_dates
+        #error_type= Error.objects.filter(volume_type=volume[0], date=date[0]).values_list('error_type',flat=True)
+        dates_values = Error.objects.filter(volume_type=volume).values_list('date',flat=True)
+        for date in dates_values:
+            error_data = {}
+            redis_key = '{0}_{1}_{2}_error'.format(prj_name, volume, date)
+            '''total = Error.objects.filter(volume_type=volume[0], date=date[0]).values_list('error_value').aggregate(Sum('error_value'))
+            value_dict[str(error_type[0])] = str(total['error_value__sum'])
+            data_dict[redis_key] = value_dict'''
+            #import pdb;pdb.set_trace()
+            audited_values = Error.objects.filter(date=date,volume_type=volume).values_list('audited_errors',flat=True)
+            total_errors = Error.objects.filter(date=date,volume_type=volume).values_list('error_value',flat=True)
+            error_data['audited_values'] = int(sum(audited_values))
+            error_data['total_errors'] = int(sum(total_errors))
+            data_dict[redis_key]=error_data
+
+    print data_dict
 
     conn = redis.Redis(host="localhost", port=6379, db=0)
     current_keys = []
     for key, value in data_dict.iteritems():
         current_keys.append(key)
-    conn.hmset(key, value)
+        conn.hmset(key, value)
 
 def upload(request):
     customer_data = {}
@@ -230,9 +268,12 @@ def upload(request):
     return HttpResponse(var)
 
 def error_upload(request):
+    #import pdb;pdb.set_trace()
     customer_data = {}
-    agent_obj = Agent.objects.filter(name_id=request.user.id).values_list('id')[0][0]
-    prj_obj = Project.objects.filter(agent=agent_obj)[0]
+    #teamleader_obj = TeamLead.objects.filter(name_id=request.user.id).values_list('id')[0][0]
+    teamleader_obj_name = TeamLead.objects.filter(id=request.user.id).values_list('id')[0][0]
+    teamleader_obj = TeamLead.objects.filter(id=request.user.id).values_list('project_id')[0][0]
+    prj_obj = Project.objects.filter(teamlead=teamleader_obj)[0]
     fname = request.FILES['myfile']
     var = fname.name.split('.')[-1].lower()
     if var not in ['xls', 'xlsx', 'xlsb']:
@@ -244,15 +285,15 @@ def error_upload(request):
         except:
             return HttpResponse("Invalid File")
         sheet_headers = validate_sheet(open_sheet, request)
-        error_type={}
+        audited_errors={}
         for row_idx in range(1, open_sheet.nrows):
             for column, col_idx in sheet_headers:
-                #import pdb;pdb.set_trace()
+               #import pdb;pdb.set_trace()
                 cell_data = get_cell_data(open_sheet, row_idx, col_idx)
-                if column == 'avoidable':
-                    error_type['avoidable'] = ''.join(cell_data)
-                if column == 'concept':
-                    error_type['concept'] = ''.join(cell_data)
+                if column == 'audited':
+                    audited_errors['audited'] = ''.join(cell_data)
+                if column == 'total error':
+                    customer_data['total_error'] = ''.join(cell_data)
                 if column == 'work packet':
                     customer_data['volume_type'] = ''.join(cell_data)
                 if column == 'id':
@@ -261,23 +302,22 @@ def error_upload(request):
                     cell_data = xlrd.xldate_as_tuple(int(cell_data.split('.')[0]), 0)
                     cell_data ='%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
                     customer_data['date'] = ''.join(cell_data)
-            print error_type
-            volume_dict = {'DataDownload': 'DD', 'CompanyCoordinates': 'CC', 'DetailFinancial': 'DF'}
+            print audited_errors
+            volume_dict = {'DataDownload': 'DD', 'CompanyCoordinates': 'CC', 'DetailFinancial': 'DF','GroupCompanies':'GC'}
             if customer_data['volume_type'] in volume_dict.keys():
                 customer_data['volume_type'] = volume_dict[customer_data['volume_type']]
-            for key,value in error_type.iteritems():
+            for key,value in audited_errors.iteritems():
                 #import pdb;pdb.set_trace()
                 if value :
                     new_can = Error(employee_id=customer_data['employee_id'],
                                        volume_type=customer_data['volume_type'],
-                                           date=customer_data['date'],error_type=key,error_value=int(float(value)),)
+                                           date=customer_data['date'],audited_errors=int(float(value)),error_value=int(float(customer_data['total_error'])),)
                     print new_can
                     try:
                         new_can.save()
                     except:
                         var = 'Duplicate Sheet'
                         return HttpResponse(var)
-
         insert = redis_insert_two(prj_obj)
     return HttpResponse(var)
 
