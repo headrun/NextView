@@ -83,8 +83,12 @@ DATABASES = {
            'init_command': 'SET storage_engine=INNODB,character_set_connection=utf8,collation_connection=utf8_unicode_ci',
            'charset' : 'utf8',
         },  
-        'NAME': 'nextone',
+        'NAME': 'nextview',
         'USER': 'root',
+<<<<<<< HEAD
+=======
+        'PASSWORD': 'asifa123',
+>>>>>>> 4c6097bac54988081db1fb282b3094a8873a18cb
         'HOST': 'localhost',
     }
 }

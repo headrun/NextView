@@ -11,6 +11,7 @@
 
              var self = this;
              var from_to = '/api/from_to/?'
+             var error_api = '/api/error_board'
              var someDate = new Date();
              var fi_dd = someDate.getDate();
              var fi_mm = someDate.getMonth() + 1;
@@ -35,6 +36,125 @@
                     }).error(function(error){ console.log("error")});
 
              var from_to_data = from_to + 'from=' + lastDate + '&to=' + firstDate;
+
+             $http({method:"GET", url:error_api}).success(function(result){
+                    self.high_data_error = [];
+                    self.high_data_error.push(result.result.error_count);
+                    self.high_data_error.push(result.result.accuracy_graph);
+                    console.log('Yesh');
+                    angular.extend(self.chartOptions3,{
+                    chart: {
+            type: 'column',
+            backgroundColor: "transparent"
+                },
+        title: {
+            text: ''
+        },
+        subtitle: {
+            text: ''
+        },
+        xAxis: {
+            type: 'category',
+            labels: {
+                rotation: -45,
+                style: {
+                    fontSize: '13px',
+                    fontFamily: 'Verdana, sans-serif'
+                }
+            }
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'errors'
+            }
+        },
+        legend: {
+            enabled: false
+        },
+        series: [{
+            name: 'error count',
+            data: self.high_data_error[0],
+            dataLabels: {
+                enabled: true,
+                rotation: -90,
+                color: '#FFFFFF',
+                align: 'right',
+                y: 10, // 10 pixels down from the top
+                style: {
+                    fontSize: '13px',
+                    fontFamily: 'Verdana, sans-serif'
+                }
+            }
+        }]
+
+                    });
+                    angular.extend(self.chartOptions4,{
+                                        chart: {
+            type: 'column',
+            backgroundColor: "transparent"
+                    },
+        title: {
+            text: ''
+        },
+        subtitle: {
+            text: ''
+        },
+        xAxis: {
+            type: 'category'
+        },
+        yAxis: {
+            title: {
+                text: 'In percentage'
+            }
+
+        },
+        legend: {
+            enabled: false
+        },
+        plotOptions: {
+            series: {
+                borderWidth: 0,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.y:.1f}%'
+                }
+            }
+        },
+
+        tooltip: {
+            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+            pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+        },
+
+        series: [{
+            name: 'accuracy',
+            colorByPoint: true,
+            data: [{
+                name: 'DF',
+                y: self.high_data_error[1].DF
+
+            }, {
+                name: 'DD',
+                y: self.high_data_error[1].DD
+
+            }, {
+                name: 'CC',
+                y: self.high_data_error[1].CC
+
+            }, {
+                name: 'GC',
+                y: self.high_data_error[1].GC
+
+            } ]
+        }],
+        drilldown: {
+            series: [ ]
+        }
+                    });
+
+             });
+
              $http({method:"GET", url:from_to_data}).success(function(result){
                     self.high_data_pre = [];
                     var final_data = result.result;
@@ -279,120 +399,8 @@
 
             self.chartOptions = {};
             self.chartOptions2 = {};
-            self.chartOptions3 = {
-            chart: {
-            type: 'column',
-            backgroundColor: "transparent"
-                },
-        title: {
-            text: ''
-        },
-        subtitle: {
-            text: ''
-        },
-        xAxis: {
-            type: 'category',
-            labels: {
-                rotation: -45,
-                style: {
-                    fontSize: '13px',
-                    fontFamily: 'Verdana, sans-serif'
-                }
-            }
-        },
-        yAxis: {
-            min: 0,
-            title: {
-                text: 'errors'
-            }
-        },
-        legend: {
-            enabled: false
-        },
-        series: [{
-            name: 'Population',
-            data: [
-                ['DF', 23],
-                ['DD', 16],
-                ['DC', 14],
-                ['FF', 14],
-            ],
-            dataLabels: {
-                enabled: true,
-                rotation: -90,
-                color: '#FFFFFF',
-                align: 'right',
-                y: 10, // 10 pixels down from the top
-                style: {
-                    fontSize: '13px',
-                    fontFamily: 'Verdana, sans-serif'
-                }
-            }
-        }]
-            };
-            self.chartOptions4 = {
-                    chart: {
-            type: 'column',
-            backgroundColor: "transparent"
-                    },
-        title: {
-            text: ''
-        },
-        subtitle: {
-            text: ''
-        },
-        xAxis: {
-            type: 'category'
-        },
-        yAxis: {
-            title: {
-                text: 'In percentage'
-            }
-
-        },
-        legend: {
-            enabled: false
-        },
-        plotOptions: {
-            series: {
-                borderWidth: 0,
-                dataLabels: {
-                    enabled: true,
-                    format: '{point.y:.1f}%'
-                }
-            }
-        },
-
-        tooltip: {
-            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
-            pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
-        },
-
-        series: [{
-            name: 'Brands',
-            colorByPoint: true,
-            data: [{
-                name: 'DF',
-                y: 56.33,
-
-            }, {
-                name: 'DD',
-                y: 24.03,
-
-            }, {
-                name: 'CC',
-                y: 10.38,
-
-            }, {
-                name: 'GC',
-                y: 4.77,
-
-            } ]
-        }],
-        drilldown: {
-            series: [ ]
-        }
-            }
+            self.chartOptions3 = {};
+            self.chartOptions4 = {};
             self.hideLoading();
 
             }],
