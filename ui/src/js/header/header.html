@@ -1,23 +1,48 @@
 <nav class="navbar navbar-default navbar-fixed-top clearfix"
      ng-class="{collapsed: $ctrl.collapsed}">
 
-  <!--<a ng-click="$ctrl.toggleCollapse()"
-     class="pull-left brand">
-     NextView
-  </a>-->
-  <h2 class="pull-left brand" style="margin-top:10px;">NextView</h2>
-  <ul class="nav navbar-nav pull-right">
-    <li>
-    <div id="fileupload"style="float:right;margin:10px 20px"><span style="cursor:pointer">Upload</span></div>
-    </li>
-    <!--<li ng-repeat="tab in $ctrl.tabs"
-        ng-class="{ 'active': $ctrl.activeTab === tab.name }">
-      <a ui-sref="{{ tab.fullName + '({state: tab.state})' }}">
-        {{ tab.text }}
-      </a>
-    </li>-->
-    <li><logout></logout></li>
-  </ul>
+      <h2 class="pull-left brand icon">NextView</h2>
+      <h2 class="pull-left brand project">Probe Dashboard</h2>
+
+        <ul class="nav navbar-nav pull-right">
+            <li>
+                <div class="dropdown" id='project_dropdown'>
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Project
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Probe</a></li>
+                        <li><a href="#">Realshopee</a></li>
+                    </ul>
+                </div>
+            </li>
+
+            <li>
+                <div class="dropdown" id="center_dropdown">
+                    <button class="btn btn-primary dropdown-toggle"  type="button" data-toggle="dropdown">Center
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Hubli</a></li>
+                        <li><a href="#">Salem</a></li>
+                    </ul>
+                </div>
+            </li>
+
+            <li>
+                <div id="fileupload" class="upload">
+                    <span>Upload</span>
+                </div>
+            </li>
+
+            <li class="user">
+                <span>{{ $ctrl.user.userName }}</span>
+                <br>
+                <span>{{ $ctrl.user.role }}</span>
+            </li>
+
+            <li><logout></logout></li>
+        </ul>
 </nav>
 <script>
     $(function () {

@@ -85,7 +85,6 @@ DATABASES = {
         },  
         'NAME': 'nextone',
         'USER': 'root',
-        'PASSWORD': 'deva123',
         'HOST': 'localhost',
     }
 }
