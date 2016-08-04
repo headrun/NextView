@@ -107,9 +107,6 @@ def error_insert(request):
     print error_graph_data,error_accuracy
 
 
-
-
-
     return HttpResponse(total_graph_data)
 
 def get_order_of_headers(open_sheet, Default_Headers, mandatory_fileds=[]):
@@ -138,6 +135,7 @@ def get_order_of_headers(open_sheet, Default_Headers, mandatory_fileds=[]):
 def validate_sheet(open_sheet, request):
     sheet_headers = []
     if open_sheet.nrows > 0:
+        import pdb;pdb.set_trace()
         is_mandatory_available, sheet_headers, all_headers = get_order_of_headers(open_sheet, SOH_XL_HEADERS, SOH_XL_MAN_HEADERS)
         sheet_headers = sorted(sheet_headers.items(), key=lambda x: x[1])
         all_headers = sorted(all_headers.items(), key=lambda x: x[1])
@@ -233,6 +231,7 @@ def upload(request):
         return HttpResponse("Invalid File")
     else:
         try:
+            import pdb;pdb.set_trace()
             open_book = open_workbook(filename=None, file_contents=fname.read())
             open_sheet = open_book.sheet_by_index(0)
         except:
@@ -336,7 +335,6 @@ def volume(request):
     response_data['data'] = data
     return HttpResponse(response_data)
 
-@loginRequired
 def user_data(request):
     user_group = request.user.groups.values_list('name',flat=True)[0]
     manager_dict = {}
