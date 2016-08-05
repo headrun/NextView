@@ -22,6 +22,7 @@ float: right!important;
 <nav class="navbar navbar-default"
      ng-class="{collapsed: $ctrl.collapsed}">
 
+<<<<<<< HEAD
          <div class="navbar-header">
              <div class="row">
                  <div class="col-md-4 col-xs-12 divv"><h2 class="pull-left brand icon">NextView</h2></div>
@@ -70,6 +71,39 @@ float: right!important;
                                 <li><logout></logout></li>
                              </ul>
                          </li>
+=======
+      <h2 class="pull-left brand icon">NextView</h2>
+      <h2 class="pull-left brand project">{{$ctrl.project_name}} Dashboard</h2>
+
+        <ul class="nav navbar-nav pull-right">
+            <li>
+                <div class="dropdown" id='project_dropdown'>
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Project
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li ng-repeat="pro in $ctrl.proj_list">
+                            <a href="" ng-click="$ctrl.clickFun(pro)">{{pro}}</a>
+                        </li>
+                        <!--<li><a ng-click="clickFun()">Probe</a></li>
+                        <li><a href="#">Realshopee</a></li>-->
+                    </ul>
+                </div>
+            </li>
+
+            <li>
+                <div class="dropdown" id="center_dropdown">
+                    <button class="btn btn-primary dropdown-toggle"  type="button" data-toggle="dropdown">Center
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li ng-repeat="cen in $ctrl.centers_list">
+                            <a href="" ng-click="$ctrl.clickFun2(cen)">{{cen}}</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+>>>>>>> 32e1d72d848455ed4a483539e79064b319f235e7
 
 
                      </ul>
