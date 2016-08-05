@@ -348,3 +348,12 @@ def from_to(request):
     #import pdb;pdb.set_trace()
     print result
     return HttpResponse(result)
+
+
+def drill_data(request):
+    graph_data={}
+    graph_data['DD']=5
+    graph_data['DF']=6
+    graph_data['CC']=8
+    graph_data['GC']=10
+    return HttpResponse(graph_data)
