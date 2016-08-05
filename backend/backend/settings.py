@@ -85,7 +85,18 @@ DATABASES = {
         },  
         'NAME': 'nexttview',
         'USER': 'root',
+<<<<<<< HEAD
         'PASSWORD': 'hdrn59!',
+=======
+<<<<<<< HEAD
+        'PASSWORD': 'asifa123',
+=======
+<<<<<<< HEAD
+        'PASSWORD': 'deva123',
+=======
+>>>>>>> 0fa2618581c848b05c8d6b9aa200935f0b5e47fa
+>>>>>>> 32e1d72d848455ed4a483539e79064b319f235e7
+>>>>>>> 029c79f152684c822b811f18392891dce035dc94
         'HOST': 'localhost',
     }
 }

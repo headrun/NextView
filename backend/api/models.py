@@ -59,7 +59,7 @@ class Nextwealthmanager(models.Model):
     center  = models.ManyToManyField(Center)
 
     class Meta:
-        db_table = u'nextwealthmanager'
+        db_table = u'nextwealth_manager'
     def __unicode__(self):
         user_obj = User.objects.filter(id=self.name_id).values_list('username',flat=True)
         return user_obj[0]
@@ -83,14 +83,15 @@ class RawTable(models.Model):
 
 class Error(models.Model):
     volume_type = models.CharField(max_length=255, default='')
-    error_type = models.CharField(max_length=255, default='')
-    error_value = models.IntegerField(max_length=255,default=0)
+    #error_type = models.CharField(max_length=255, default='')
+    audited_errors = models.IntegerField(max_length=255,default=0)
+    error_value = models.IntegerField(max_length=255,default=0,verbose_name='total_errors')
     date = models.DateField()
     employee_id = models.CharField(max_length=255,default='')
 
 class Meta:
     db_table = u'error_table'
-    unique_together = (("error_type","error_value"),)
+    unique_together = (("audited_errors","error_value"),)
 
     def __unicode__(self):
         return self.employee_id

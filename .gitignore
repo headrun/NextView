@@ -8,3 +8,8 @@ node_modules/*
 ui/src/libs/*
 ui/src/app.css
 backend/api/migrations/*
+<<<<<<< HEAD
+.idea
+=======
+.idea/
+>>>>>>> 4077efd2031c96dde4bb6e52c2156b1e0a04ad0f
