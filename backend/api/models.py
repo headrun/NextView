@@ -59,7 +59,7 @@ class Nextwealthmanager(models.Model):
     center  = models.ManyToManyField(Center)
 
     class Meta:
-        db_table = u'nextwealthmanager'
+        db_table = u'nextwealth_manager'
     def __unicode__(self):
         user_obj = User.objects.filter(id=self.name_id).values_list('username',flat=True)
         return user_obj[0]

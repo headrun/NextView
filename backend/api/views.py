@@ -339,17 +339,27 @@ def volume(request):
 @loginRequired
 def user_data(request):
     user_group = request.user.groups.values_list('name',flat=True)[0]
-    manager_dict = {}
-    if 'Center_Manager' in user_group:
-        center_id = Centermanager.objects.filter(name_id=request.user.id).values_list('center_name', flat=True)
-        center_name = Center.objects.filter(id = center_id).values_list('name',flat=True)[0]
-        project = Center.objects.filter(name = str(center_name)).values_list('project_name_id',flat=True)
-        project_names = Project.objects.filter(id__in = project).values_list('name',flat=True)
-        manager_dict[center_name]= str(project_names)
-    if 'Nextwealth_Manager' in user_group:
-        center_id = Nextwealthmanager.objects.filter(id=request.user.id).values_list('center_name')
-        print center_id
-    return HttpResponse(manager_dict)
+    dict = {}
+    if 'center_manager' in user_group:
+        center = Centermanager.objects.filter(name_id=request.user.id).values_list('center', flat=True)[0]
+        center_name = Center.objects.filter(id = center).values_list('name',flat=True)[0]
+
+        project_names = Project.objects.filter(center_id=center).values_list('name',flat=True)
+        dict['role'] = user_group
+        var = [x.encode('UTF8') for x in project_names]
+        dict[center_name] = var
+    if 'nextwealth_manager' in user_group:
+        center_name = Center.objects.values_list('id', flat=True)
+        dict['role'] = user_group
+        for center in center_name:
+            cant_name = Center.objects.filter(id = center).values_list('name',flat=True)[0]
+            project_names = Project.objects.filter(center_id=center).values_list('name', flat=True)
+            var = [x.encode('UTF8') for x in project_names]
+            dict[cant_name] = var
+        #center = Nextwealthmanager.objects.filter(name_id=request.user.id).values_list('center', flat=True)[0]
+        #center_id = Nextwealthmanager.objects.filter(id=request.user.id).values_list('center_name')
+        #print center_id
+    return HttpResponse(dict)
 
 
 def from_to(request):
