@@ -160,6 +160,39 @@ def get_cell_data(open_sheet, row_idx, col_idx):
         cell_data = ''
     return cell_data
 
+@loginRequired
+def project(request):
+    user_group = request.user.groups.values_list('name', flat=True)[0]
+    dict = {}
+
+    if 'team_lead' in user_group:
+        prj_id = TeamLead.objects.filter(name_id=request.user.id).values_list('project')[0][0]
+        project = str(Project.objects.filter(id=prj_id)[0])
+        return HttpResponse(project)
+    if 'center_manager' in user_group:
+        center = Centermanager.objects.filter(name_id=request.user.id).values_list('center', flat=True)[0]
+        center_name = Center.objects.filter(id=center).values_list('name', flat=True)[0]
+        project_names = Project.objects.filter(center_id=center).values_list('name', flat=True)
+        var = [x.encode('UTF8') for x in project_names]
+        dict['center'] = center_name
+        dict['project'] = var
+        dict['role'] = user_group
+        return HttpResponse(dict)
+    if 'nextwealth_manager' in user_group:
+        center_name = Center.objects.values_list('id', flat=True)
+        dict['role'] = user_group
+        for center in center_name:
+            cant_name = Center.objects.filter(id=center).values_list('name', flat=True)[0]
+            project_names = Project.objects.filter(center_id=center).values_list('name', flat=True)
+            var = [x.encode('UTF8') for x in project_names]
+            dict[cant_name] = var
+        return HttpResponse(dict)
+    if 'customer' in user_group:
+        prj_id = Customer.objects.filter(name_id=request.user.id).values_list('project')[0][0]
+        project = str(Project.objects.filter(id=prj_id)[0])
+        return HttpResponse(project)
+
+
 def redis_insert(prj_obj):
     prj_name = prj_obj.name
     data_dict = {}
@@ -268,11 +301,11 @@ def upload(request):
     return HttpResponse(var)
 
 def error_upload(request):
-    #import pdb;pdb.set_trace()
     customer_data = {}
     #teamleader_obj = TeamLead.objects.filter(name_id=request.user.id).values_list('id')[0][0]
-    teamleader_obj_name = TeamLead.objects.filter(id=request.user.id).values_list('id')[0][0]
-    teamleader_obj = TeamLead.objects.filter(id=request.user.id).values_list('project_id')[0][0]
+
+    #teamleader_obj_name = TeamLead.objects.filter(name_id=request.user.id).values_list('id')[0][0]
+    teamleader_obj = TeamLead.objects.filter(name_id=request.user.id).values_list('project_id')[0][0]
     prj_obj = Project.objects.filter(teamlead=teamleader_obj)[0]
     fname = request.FILES['myfile']
     var = fname.name.split('.')[-1].lower()
