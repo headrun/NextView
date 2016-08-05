@@ -17,17 +17,6 @@ from datetime import timedelta
 from datetime import date
 import re
 
-#SOH_XL_HEADERS = ['Date', 'ID','Done','Passed / Cancelled','Platform','Emp id','Week','Month','Year','Target','Productivity','WC','WorkPacket']
-#SOH_XL_MAN_HEADERS = ['Date', 'Done','Platform','Emp id','Target']
-
-#SOH_XL_HEADERS = ['Date','Id','Work Packet','Agent Reply', 'Avoidable','Concept','Others', 'Total Error' ,'Week' ,'Month' , 'Year']
-#SOH_XL_MAN_HEADERS = ['Date' , 'Id','Work Packet','Avoidable','Concept' ]
-
-SOH_XL_HEADERS =['Date','Id','Work Packet','Audited','Avoidable','Concept','Others','Total Error','Week','Month','Year']
-SOH_XL_MAN_HEADERS =['Date','Id','Work Packet','Audited','Total Error']
-# Create your views here.
-
-
 def dashboard_insert(request):
     week_dates_list = []
     start_date = date.today() - timedelta(days=7)
@@ -132,10 +121,9 @@ def get_order_of_headers(open_sheet, Default_Headers, mandatory_fileds=[]):
     return is_mandatory_available, sheet_indexes, indexes
 
 
-def validate_sheet(open_sheet, request):
+def validate_sheet(open_sheet, request, SOH_XL_HEADERS, SOH_XL_MAN_HEADERS):
     sheet_headers = []
     if open_sheet.nrows > 0:
-        import pdb;pdb.set_trace()
         is_mandatory_available, sheet_headers, all_headers = get_order_of_headers(open_sheet, SOH_XL_HEADERS, SOH_XL_MAN_HEADERS)
         sheet_headers = sorted(sheet_headers.items(), key=lambda x: x[1])
         all_headers = sorted(all_headers.items(), key=lambda x: x[1])
@@ -183,28 +171,15 @@ def redis_insert(prj_obj):
 
 def redis_insert_two(prj_obj):
     prj_name = prj_obj.name
-    '''data_dict = {}
-
-    dates_list = Error.objects.values_list('date').distinct()
-    all_dates = []
-
-    for date in dates_list:
-        part_date = str(date[0])
-    all_dates.append(part_date)'''
     data_dict = {}
     #import pdb;pdb.set_trace()
     volumes_list = Error.objects.values_list('volume_type',flat=True).distinct()
     for volume in volumes_list:
         value_dict = {}
-        #error_type= Error.objects.filter(volume_type=volume[0], date=date[0]).values_list('error_type',flat=True)
         dates_values = Error.objects.filter(volume_type=volume).values_list('date',flat=True)
         for date in dates_values:
             error_data = {}
             redis_key = '{0}_{1}_{2}_error'.format(prj_name, volume, date)
-            '''total = Error.objects.filter(volume_type=volume[0], date=date[0]).values_list('error_value').aggregate(Sum('error_value'))
-            value_dict[str(error_type[0])] = str(total['error_value__sum'])
-            data_dict[redis_key] = value_dict'''
-            #import pdb;pdb.set_trace()
             audited_values = Error.objects.filter(date=date,volume_type=volume).values_list('audited_errors',flat=True)
             total_errors = Error.objects.filter(date=date,volume_type=volume).values_list('error_value',flat=True)
             error_data['audited_values'] = int(sum(audited_values))
@@ -220,7 +195,6 @@ def redis_insert_two(prj_obj):
         conn.hmset(key, value)
 
 def upload(request):
-    customer_data = {}
     teamleader_obj_name = TeamLead.objects.filter(name_id=request.user.id)[0]
     teamleader_obj = TeamLead.objects.filter(name_id=request.user.id).values_list('project_id')[0][0]
     prj_obj = Project.objects.filter(id=teamleader_obj)[0]
@@ -231,39 +205,83 @@ def upload(request):
         return HttpResponse("Invalid File")
     else:
         try:
-            import pdb;pdb.set_trace()
             open_book = open_workbook(filename=None, file_contents=fname.read())
-            open_sheet = open_book.sheet_by_index(0)
+            #open_sheet = open_book.sheet_by_index(0)
         except:
             return HttpResponse("Invalid File")
-        sheet_headers = validate_sheet(open_sheet, request)
-        for row_idx in range(1, open_sheet.nrows):
-            for column, col_idx in sheet_headers:
-                cell_data = get_cell_data(open_sheet, row_idx, col_idx)
-                if column == 'done':
-                    customer_data['cmplt_target'] = ''.join(cell_data)
-                if column == 'platform':
-                    customer_data['volume_type'] = ''.join(cell_data)
-                if column == 'emp id':
-                    customer_data['emp_id'] = ''.join(cell_data)
-                if column == 'target':
-                    customer_data['target'] = ''.join(cell_data)
-                if column == 'date':
-                    cell_data = xlrd.xldate_as_tuple(int(cell_data.split('.')[0]), 0)
-                    cell_data ='%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
-                    customer_data['date'] = ''.join(cell_data)
-            volume_dict = {'DataDownload':'DD', 'CompanyCoordinates':'CC' , 'DetailFinancial':'DF','GroupCompanies':'GC'}
-            if customer_data['volume_type'] in volume_dict.keys():
-                customer_data['volume_type'] = volume_dict[customer_data['volume_type']]
-            new_can = RawTable(project=prj_obj, employee=customer_data['emp_id'],
-                               volume_type=customer_data['volume_type'], per_hour=0,per_day=int(float(customer_data['cmplt_target'])),
-                               date=customer_data['date'], norm=int(float(customer_data['target'])),team_lead=teamleader_obj_name,center = center_obj)
-            try:
-                new_can.save()
-            except:
-                var = 'Duplicate Sheet'
-                return HttpResponse(var)
-        insert = redis_insert(prj_obj)
+        excel_sheet_names = open_book.sheet_names()
+        sheet_index_dict = {}
+        if 'Production' in excel_sheet_names:
+            sheet_index_dict['Production'] = open_book.sheet_names().index('Production')
+        if 'Internal' in excel_sheet_names:
+            sheet_index_dict['Internal'] = open_book.sheet_names().index('Internal')
+        for key,value in sheet_index_dict.iteritems():
+            customer_data = {}
+            if key == 'Production':
+                SOH_XL_HEADERS = ['Date', 'ID', 'Done', 'Passed / Cancelled', 'Platform', 'Emp id', 'Week', 'Month',
+                                  'Year', 'Target', 'Productivity', 'WC', 'WorkPacket']
+                SOH_XL_MAN_HEADERS = ['Date', 'Done', 'Platform', 'Emp id', 'Target']
+                open_sheet = open_book.sheet_by_index(value)
+            if key =='Internal':
+                SOH_XL_HEADERS = ['Date', 'Id', 'Work Packet', 'Audited', 'Avoidable', 'Concept', 'Others',
+                                  'Total Error', 'Week', 'Month', 'Year']
+                SOH_XL_MAN_HEADERS = ['Date', 'Id', 'Work Packet', 'Audited', 'Total Error']
+                open_sheet = open_book.sheet_by_index(value)
+            sheet_headers = validate_sheet(open_sheet, request,SOH_XL_HEADERS,SOH_XL_MAN_HEADERS)
+            for row_idx in range(1, open_sheet.nrows):
+                for column, col_idx in sheet_headers:
+                    cell_data = get_cell_data(open_sheet, row_idx, col_idx)
+                    if key == 'Production':
+                    #cell_data = get_cell_data(open_sheet, row_idx, col_idx)
+                        if column == 'done':
+                            customer_data['cmplt_target'] = ''.join(cell_data)
+                        if column == 'platform':
+                            customer_data['volume_type'] = ''.join(cell_data)
+                        if column == 'emp id':
+                            customer_data['emp_id'] = ''.join(cell_data)
+                        if column == 'target':
+                            customer_data['target'] = ''.join(cell_data)
+                        if column == 'date':
+                            cell_data = xlrd.xldate_as_tuple(int(cell_data.split('.')[0]), 0)
+                            cell_data ='%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
+                            customer_data['date'] = ''.join(cell_data)
+
+                    if key == 'Internal':
+                        if column == 'audited':
+                            customer_data['audited'] = ''.join(cell_data)
+                        if column == 'total error':
+                            customer_data['total_error'] = ''.join(cell_data)
+                        if column == 'work packet':
+                            customer_data['volume_type'] = ''.join(cell_data)
+                        if column == 'id':
+                            customer_data['employee_id'] = ''.join(cell_data)
+                        if column == 'date':
+                            cell_data = xlrd.xldate_as_tuple(int(cell_data.split('.')[0]), 0)
+                            cell_data = '%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
+                            customer_data['date'] = ''.join(cell_data)
+
+                volume_dict = {'DataDownload':'DD', 'CompanyCoordinates':'CC' , 'DetailFinancial':'DF','GroupCompanies':'GC'}
+                if customer_data['volume_type'] in volume_dict.keys():
+                    customer_data['volume_type'] = volume_dict[customer_data['volume_type']]
+                if key == 'Production':
+                    new_can = RawTable(project=prj_obj, employee=customer_data['emp_id'],
+                                       volume_type=customer_data['volume_type'], per_hour=0,per_day=int(float(customer_data['cmplt_target'])),
+                                       date=customer_data['date'], norm=int(float(customer_data['target'])),team_lead=teamleader_obj_name,center = center_obj)
+                if key == 'Internal':
+                    new_can = Error(employee_id=customer_data['employee_id'],
+                                    volume_type=customer_data['volume_type'],
+                                    date=customer_data['date'], audited_errors=int(float(customer_data['audited'])),
+                                    error_value=int(float(customer_data['total_error'])), )
+                try:
+                    print customer_data
+                    new_can.save()
+                except:
+                    var = 'Duplicate Sheet'
+                    return HttpResponse(var)
+            if key == 'Production':
+                insert = redis_insert(prj_obj)
+            if key == 'Internal':
+                insert = redis_insert_two(prj_obj)
     return HttpResponse(var)
 
 def error_upload(request):
@@ -311,7 +329,6 @@ def error_upload(request):
                     new_can = Error(employee_id=customer_data['employee_id'],
                                        volume_type=customer_data['volume_type'],
                                            date=customer_data['date'],audited_errors=int(float(value)),error_value=int(float(customer_data['total_error'])),)
-                    print new_can
                     try:
                         new_can.save()
                     except:
@@ -363,7 +380,7 @@ def from_to(request):
     volumes_dict = {}
     date_values = {}
     for date_va in date_list:
-        date_pattern = '*{0}*'.format(date_va)
+        date_pattern = '*{0}'.format(date_va)
         key_list = conn.keys(pattern=date_pattern)
         for cur_key in key_list:
             var = conn.hgetall(cur_key)
