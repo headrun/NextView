@@ -22,30 +22,29 @@
         margin-left:0px;
         margin-right:0px;
     }
+    .all {
+    width: 550px;
+    height: 250px;
+    }
 
 </style>
 
 <body>
 <div class="container">
-    <div align="right">
-        <input value="2016-07-26 to 2016-08-01" id="select" size="19" style="margin-top:1%;margin-left:27%;color:black;margin-bottom:2%;height:23px;">
-        <a href="" class="button" ng-click="$ctrl.check()">Submit</a>
+    <div class="row">
+        <div class="col-md-12 col-xs-12" align="right"><input value="2016-07-26 to 2016-08-01" id="select" size="19" style="margin-top:1%;margin-left:27%;color:black;margin-bottom:2%;height:23px;">
+        <a href="" class="button" ng-click="$ctrl.check()">Submit</a></div>
     </div>
-<div class="row">
-<div class="widget col-md-6" style="width: 50%; height: 250px">
+        <div class="row">
+            <div class="widget col-md-6 col-xs-12 all" >
+                <div class="widget-content">
 
-  <div class="widget-content">
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 2d6b601e82607f85f7d2ce1acf9e03aba4d6c77b
     <div class="widget-title clearfix"
          title="Sample Widg">
-      <span class="pull-left">PRODUCTIVITY DASHBOARD</span>
+      <span class="pull-left">PRODUCTIVITY CHART</span>
     </div>
 
-<<<<<<< HEAD
                     <div class="widget-body">
                         <highcharts options="$ctrl.chartOptions"></highcharts>
                     </div>
@@ -53,59 +52,49 @@
             </div>
             <div class="widget col-md-6 col-xs-12 all" >
                 <div class="widget-content">
-=======
-    <div class="widget-body">
-      <highcharts options="$ctrl.chartOptions"></highcharts>
-    </div>
-  </div>
-</div>
-<div class="widget col-md-6" style="width: 50%; height: 250px">
 
-  <div class="widget-content">
->>>>>>> 2d6b601e82607f85f7d2ce1acf9e03aba4d6c77b
+                    <div class="widget-title clearfix"
+                         title="Sample Widg">
+                        <span class="pull-left">WORKPACKET WISE PERFORMANCE</span>
+                    </div>
 
-    <div class="widget-title clearfix"
-         title="Sample Widg">
-      <span class="pull-left">WORKPACKET WISE PERFORMANCE</span>
-    </div>
+                    <div class="widget-body">
+                        <highcharts options="$ctrl.chartOptions2"></highcharts>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="widget col-md-6 col-xs-12 all"  >
 
-    <div class="widget-body">
-      <highcharts options="$ctrl.chartOptions2"></highcharts>
-    </div>
-  </div>
-</div>
-    <div class="row" style="margin-top:23%;">
-    <div class="widget col-md-6" style="width: 50%; height: 250px" >
+                <div class="widget-content">
 
-  <div class="widget-content">
+                    <div class="widget-title clearfix"
+                         title="Sample Widg">
+                        <span class="pull-left">PACKET WISE ERROR</span>
+                    </div>
 
-    <div class="widget-title clearfix"
-         title="Sample Widg">
-      <span class="pull-left">PACKET WISE ERROR</span>
-    </div>
+                    <div class="widget-body">
+                        <highcharts options="$ctrl.chartOptions3"></highcharts>
+                    </div>
+                </div>
+            </div>
+            <div class="widget col-md-6 col-xs-12 all"  >
 
-    <div class="widget-body">
-        <highcharts options="$ctrl.chartOptions3"></highcharts>
-    </div>
-  </div>
-</div>
-            <div class="widget col-md-6" style="width: 50%; height: 250px" >
+                <div class="widget-content">
 
-  <div class="widget-content">
+                    <div class="widget-title clearfix"
+                         title="Sample Widg">
+                        <span class="pull-left">ERROR ACCURACY</span>
+                    </div>
 
-    <div class="widget-title clearfix"
-         title="Sample Widg">
-      <span class="pull-left">ERROR ACCURACY</span>
-    </div>
-
-    <div class="widget-body">
-        <highcharts options="$ctrl.chartOptions4"></highcharts>
-    </div>
-  </div>
-</div>
+                    <div class="widget-body">
+                        <highcharts options="$ctrl.chartOptions4"></highcharts>
+                    </div>
+                </div>
+            </div>
 
         </div>
-<<<<<<< HEAD
 </div>
 <!--</div>-->
     </div>
@@ -131,11 +120,6 @@
     </div>
   </div>
 
-=======
-    </div>
-    </div>
-    </div>
->>>>>>> 2d6b601e82607f85f7d2ce1acf9e03aba4d6c77b
 </body>
 <script>
    configObject = {
