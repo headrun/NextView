@@ -72,23 +72,6 @@
         legend: {
             enabled: false
         },
-        plotOptions:{
-            series:{
-            allowPointSelect: true,
-             point: {
-                events:{
-                    select: function(e) {
-                    console.log(e);
-                    $("#hello").html(e.target.category);
-                    //$("#temp").html(e.target.y);
-                    $("#temp").html(e.target.y);
-                    $('#myModal').modal('show');
-                    }
-                }
-             }
-            }
-        },
-
         series: [{
             name: 'error count',
             data: self.high_data_error[0],
@@ -131,18 +114,6 @@
         },
         plotOptions: {
             series: {
-                allowPointSelect: true,
-                point: {
-                    events:{
-                        select: function(e) {
-                        console.log(e);
-                        $("#hello").html(e.target.category);
-                    //$("#temp").html(e.target.y);
-                        $("#temp").html(e.target.y);
-                        $('#myModal').modal('show');
-                        }
-                    }
-                },
                 borderWidth: 0,
                 dataLabels: {
                     enabled: true,
@@ -217,19 +188,6 @@
                },
 
                plotOptions: {
-                series : {
-                    allowPointSelect: true,
-                    point: {
-                        events:{
-                            select: function(e) {
-                            console.log(e);
-                            $("#hello").html(e.target.category);
-                            $("#temp").html(e.target.y);
-                            $('#myModal').modal('show');
-                        }
-                    }
-                    }
-                },
                 bar: {
                  dataLabels: {
                  enabled: true
@@ -283,20 +241,6 @@
             valueSuffix: ''
         },
        plotOptions: {
-            series : {
-                allowPointSelect: true,
-                    point: {
-                        events:{
-                            select: function(e) {
-                            console.log(e);
-                            $("#hello").html(e.target.category);
-                            $("#temp").html(e.target.y);
-                            $('#myModal').modal('show');
-                        }
-                    }
-                    }
-                },
-
             bar: {
                 dataLabels: {
                     enabled: true

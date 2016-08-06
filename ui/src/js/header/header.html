@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <style>
     .divv {
         width:430px;
@@ -33,6 +34,14 @@ float: right!important;
       		<div class="col-md-4 col-xs-12 divv"><h2 class="pull-left brand icon">NextView</h2></div>
       		<div class="col-md-4 col-xs-12 divv"><h2 class="pull-left brand project">{{$ctrl.project_name}} Dashboard</h2></div>
 		    <div class="col-md-4 col-xs-12 divv">
+=======
+<nav class="navbar navbar-default navbar-fixed-top clearfix"
+     ng-class="{collapsed: $ctrl.collapsed}">
+
+      <h2 class="pull-left brand icon">NextView</h2>
+      <h2 class="pull-left brand project">Probe Dashboard</h2>
+
+>>>>>>> 2d6b601e82607f85f7d2ce1acf9e03aba4d6c77b
         <ul class="nav navbar-nav pull-right">
             <li>
                 <div class="dropdown" id='project_dropdown'>
@@ -40,11 +49,8 @@ float: right!important;
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu">
-                        <li ng-repeat="pro in $ctrl.proj_list">
-                            <a href="" ng-click="$ctrl.clickFun(pro)">{{pro}}</a>
-                        </li>
-                        <!--<li><a ng-click="clickFun()">Probe</a></li>
-                        <li><a href="#">Realshopee</a></li>-->
+                        <li><a href="#">Probe</a></li>
+                        <li><a href="#">Realshopee</a></li>
                     </ul>
                 </div>
             </li>
@@ -55,12 +61,12 @@ float: right!important;
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu">
-                        <li ng-repeat="cen in $ctrl.centers_list">
-                            <a href="" ng-click="$ctrl.clickFun2(cen)">{{cen}}</a>
-                        </li>
+                        <li><a href="#">Hubli</a></li>
+                        <li><a href="#">Salem</a></li>
                     </ul>
                 </div>
             </li>
+<<<<<<< HEAD
 	    
 	    <li>
                <div id="fileupload" class="upload">
@@ -83,7 +89,23 @@ float: right!important;
                  </div>
             </div>
         </div>
+=======
 
+            <li>
+                <div id="fileupload" class="upload">
+                    <span>Upload</span>
+                </div>
+            </li>
+
+            <li class="user">
+                <span>{{ $ctrl.user.userName }}</span>
+                <br>
+                <span>{{ $ctrl.user.role }}</span>
+            </li>
+>>>>>>> 2d6b601e82607f85f7d2ce1acf9e03aba4d6c77b
+
+            <li><logout></logout></li>
+        </ul>
 </nav>
 <script>
     $(function () {
