@@ -2,7 +2,7 @@
      ng-class="{collapsed: $ctrl.collapsed}">
 
       <h2 class="pull-left brand icon">NextView</h2>
-      <h2 class="pull-left brand project">{{$ctrl.project_name}} Dashboard</h2>
+      <h2 class="pull-left brand project">Probe Dashboard</h2>
 
         <ul class="nav navbar-nav pull-right">
             <li>
@@ -11,11 +11,8 @@
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu">
-                        <li ng-repeat="pro in $ctrl.proj_list">
-                            <a href="" ng-click="$ctrl.clickFun(pro)">{{pro}}</a>
-                        </li>
-                        <!--<li><a ng-click="clickFun()">Probe</a></li>
-                        <li><a href="#">Realshopee</a></li>-->
+                        <li><a href="#">Probe</a></li>
+                        <li><a href="#">Realshopee</a></li>
                     </ul>
                 </div>
             </li>
@@ -26,9 +23,8 @@
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu">
-                        <li ng-repeat="cen in $ctrl.centers_list">
-                            <a href="" ng-click="$ctrl.clickFun2(cen)">{{cen}}</a>
-                        </li>
+                        <li><a href="#">Hubli</a></li>
+                        <li><a href="#">Salem</a></li>
                     </ul>
                 </div>
             </li>
