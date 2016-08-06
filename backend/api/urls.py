@@ -6,14 +6,17 @@ urlpatterns = [
     url(r'^board','api.views.dashboard_insert', name="dashboard_insert"),
     url(r'^error_board','api.views.error_insert', name="error_insert"),
     #url(r'^upload/','api.views.upload', name="upload"),
-    url(r'^upload/','api.views.upload', name="upload"),
+    url(r'^upload/','api.views.error_upload', name="error_upload"),
     url(r'^by_volume/', 'api.views.volume', name="volume"),
     url(r'^user_data/', 'api.views.user_data', name="user_data"),
     url(r'^from_to/', 'api.views.from_to', name="from_to"),
+<<<<<<< HEAD
 <<<<<<< HEAD
     url(r'^drill_data/', 'api.views.drill_data', name="drill_data"),
 =======
     url(r'^project/', 'api.views.project', name="project"),
 >>>>>>> 029c79f152684c822b811f18392891dce035dc94
+=======
+>>>>>>> 2261ebeaf7fab329c3ebbce8b1ce4c588eec6099
     #url(r'^error_upload/','api.views.error_upload', name="error_upload"),
 ]

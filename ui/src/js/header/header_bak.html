@@ -1,0 +1,131 @@
+<style>
+    .divv {
+        width:430px;
+    }
+.navbar-collapse.collapse {
+display: block!important;
+}
+
+.navbar-nav>li, .navbar-nav {
+float: left !important;
+}
+
+
+.navbar-nav.navbar-right:last-child {
+margin-right: -15px !important;
+}
+
+.navbar-right {
+float: right!important;
+}
+</style>
+<nav class="navbar navbar-default"
+     ng-class="{collapsed: $ctrl.collapsed}">
+         <div class="navbar-header">
+             <div class="row">
+                 <div class="col-md-4 col-xs-12 divv"><h2 class="pull-left brand icon">NextView</h2></div>
+                 <div class="col-md-4 col-xs-12 divv"><h2 class="pull-left brand project">Probe Dashboard</h2></div>
+                 <div class="col-md-4 col-xs-12 divv">
+                    <ul class="nav navbar-nav pull-right">
+
+                         <li>
+                             <div class="dropdown" id='project_dropdown'>
+                                 <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Project
+                                     <span class="caret"></span>
+                                 </button>
+                                     <ul class="dropdown-menu">
+                                        <li><a href="#">Probe</a></li>
+                                        <li><a href="#">Realshopee</a></li>
+                                     </ul>
+                             </div>
+                         </li>
+
+                         <li>
+                             <div class="dropdown" id="center_dropdown">
+                                 <button class="btn btn-primary dropdown-toggle"  type="button" data-toggle="dropdown">Center
+                                     <span class="caret"></span>
+                                 </button>
+                                     <ul class="dropdown-menu">
+                                        <li><a href="#">Hubli</a></li>
+                                        <li><a href="#">Salem</a></li>
+                                     </ul>
+                             </div>
+                         </li>
+
+                         <li>
+                             <div id="fileupload" class="upload">
+                                 <span>Upload</span>
+                             </div>
+                         </li>
+
+                         <li class="dropdown user">
+                             <a href="" class="dropdown-toggle" data-toggle="dropdown" style="padding:0px;background-color:#0a0909;">
+                                 <i class="fa fa-angle-down pull-right"></i>
+                                 <b><span>{{ $ctrl.user.userName }}</span></b>
+                                 <br>
+                                 <span>{{ $ctrl.user.role }}</span>
+                             </a>
+                             <ul class="dropdown-menu" style="padding-top:0px;padding-bottom:0px;background-color:black;">
+                                <li><logout></logout></li>
+                             </ul>
+                         </li>
+
+      <h2 class="pull-left brand icon">NextView</h2>
+      <h2 class="pull-left brand project">{{$ctrl.project_name}} Dashboard</h2>
+
+        <ul class="nav navbar-nav pull-right">
+            <li>
+                <div class="dropdown" id='project_dropdown'>
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Project
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li ng-repeat="pro in $ctrl.proj_list">
+                            <a href="" ng-click="$ctrl.clickFun(pro)">{{pro}}</a>
+                        </li>
+                        <!--<li><a ng-click="clickFun()">Probe</a></li>
+                        <li><a href="#">Realshopee</a></li>-->
+                    </ul>
+                </div>
+            </li>
+
+            <li>
+                <div class="dropdown" id="center_dropdown">
+                    <button class="btn btn-primary dropdown-toggle"  type="button" data-toggle="dropdown">Center
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li ng-repeat="cen in $ctrl.centers_list">
+                            <a href="" ng-click="$ctrl.clickFun2(cen)">{{cen}}</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+
+                     </ul>
+                 </div>
+            </div>
+        </div>
+
+</nav>
+<script>
+    $(function () {
+       $("#fileupload").uploadFile({
+          url:"/api/upload/",
+          fileName:"myfile",
+          dragDrop: false,
+          onSuccess:function(files,data,xhr,pd){
+             console.log(data.result);
+             if (data.result == 'Duplicate Sheet'){
+                     alert('Duplicate Sheet');
+                 }
+             else{
+                 console.log("in upload refresh");
+                 location.reload();
+             }
+             $('.ajax-file-upload-statusbar').hide();
+          },
+       });
+    });
+</script>
