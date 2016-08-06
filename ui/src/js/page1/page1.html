@@ -11,83 +11,115 @@
     }
     .pull-left {
         color:white;
+        font-family: 'Soleto',sans-serif;
+        display: inline-block;
+        color: #cdcdcd;
+        font-weight: bold;
+        font-size: 1.2em;
+        line-height: 20px;
     }
     .row {
         margin-left:0px;
         margin-right:0px;
+    }
+    .all {
+    width: 550px;
+    height: 250px;
     }
 
 </style>
 
 <body>
 <div class="container">
-    <div align="right">
-        <input value="2016-07-26 to 2016-08-01" id="select" size="19" style="margin-top:1%;margin-left:27%;color:black;margin-bottom:2%;height:23px;">
-        <a href="" class="button" ng-click="$ctrl.check()">Submit</a>
+    <div class="row">
+        <div class="col-md-12 col-xs-12" align="right"><input value="2016-07-26 to 2016-08-01" id="select" size="19" style="margin-top:1%;margin-left:27%;color:black;margin-bottom:2%;height:23px;">
+        <a href="" class="button" ng-click="$ctrl.check()">Submit</a></div>
     </div>
-<div class="row">
-<div class="widget col-md-6" style="width: 50%; height: 250px">
+        <div class="row">
+            <div class="widget col-md-6 col-xs-12 all" >
+                <div class="widget-content">
 
-  <div class="widget-content">
 
     <div class="widget-title clearfix"
          title="Sample Widg">
-      <span class="pull-left">PRODUCTIVITY DASHBOARD</span>
+      <span class="pull-left">PRODUCTIVITY CHART</span>
     </div>
 
-    <div class="widget-body">
-      <highcharts options="$ctrl.chartOptions"></highcharts>
-    </div>
-  </div>
-</div>
-<div class="widget col-md-6" style="width: 50%; height: 250px">
+                    <div class="widget-body">
+                        <highcharts options="$ctrl.chartOptions"></highcharts>
+                    </div>
+                </div>
+            </div>
+            <div class="widget col-md-6 col-xs-12 all" >
+                <div class="widget-content">
 
-  <div class="widget-content">
+                    <div class="widget-title clearfix"
+                         title="Sample Widg">
+                        <span class="pull-left">WORKPACKET WISE PERFORMANCE</span>
+                    </div>
 
-    <div class="widget-title clearfix"
-         title="Sample Widg">
-      <span class="pull-left">WORKPACKET WISE PERFORMANCE</span>
-    </div>
+                    <div class="widget-body">
+                        <highcharts options="$ctrl.chartOptions2"></highcharts>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="widget col-md-6 col-xs-12 all"  >
 
-    <div class="widget-body">
-      <highcharts options="$ctrl.chartOptions2"></highcharts>
-    </div>
-  </div>
-</div>
-    <div class="row" style="margin-top:23%;">
-    <div class="widget col-md-6" style="width: 50%; height: 250px" >
+                <div class="widget-content">
 
-  <div class="widget-content">
+                    <div class="widget-title clearfix"
+                         title="Sample Widg">
+                        <span class="pull-left">PACKET WISE ERROR</span>
+                    </div>
 
-    <div class="widget-title clearfix"
-         title="Sample Widg">
-      <span class="pull-left">PACKET WISE ERROR</span>
-    </div>
+                    <div class="widget-body">
+                        <highcharts options="$ctrl.chartOptions3"></highcharts>
+                    </div>
+                </div>
+            </div>
+            <div class="widget col-md-6 col-xs-12 all"  >
 
-    <div class="widget-body">
-        <highcharts options="$ctrl.chartOptions3"></highcharts>
-    </div>
-  </div>
-</div>
-            <div class="widget col-md-6" style="width: 50%; height: 250px" >
+                <div class="widget-content">
 
-  <div class="widget-content">
+                    <div class="widget-title clearfix"
+                         title="Sample Widg">
+                        <span class="pull-left">ERROR ACCURACY</span>
+                    </div>
 
-    <div class="widget-title clearfix"
-         title="Sample Widg">
-      <span class="pull-left">ERROR ACCURACY</span>
-    </div>
-
-    <div class="widget-body">
-        <highcharts options="$ctrl.chartOptions4"></highcharts>
-    </div>
-  </div>
-</div>
+                    <div class="widget-body">
+                        <highcharts options="$ctrl.chartOptions4"></highcharts>
+                    </div>
+                </div>
+            </div>
 
         </div>
+</div>
+<!--</div>-->
     </div>
     </div>
     </div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+      <!-- Modal content-->
+      <div class="modal-content">
+         <div class="modal-header">
+             <button type="button" class="close" data-dismiss="modal">&times;</button>
+             <h4 class="modal-title" style="color:black;">Modal Header</h4>
+         </div>
+         <div class="modal-body">
+           <h1 id="hello" style="color:black;">Hello Hello</h1>
+           <p id="temp" style="color:black;">temper</p>
+         </div>
+         <div class="modal-footer">
+           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+         </div>
+       </div>
+    </div>
+  </div>
+
 </body>
 <script>
    configObject = {

@@ -1,9 +1,43 @@
-<nav class="navbar navbar-default navbar-fixed-top clearfix"
-     ng-class="{collapsed: $ctrl.collapsed}">
+<style>
+    .divv {
+        width:430px;
+        /*font-family: 'Soleto',sans-serif;
+        display: inline-block;
+        color: #cdcdcd;
+        font-weight: bold;
+        font-size: 1.4em;
+        line-height: 20px;
+	*/
+    }
+.navbar-collapse.collapse {
+display: block!important;
+}
 
+.navbar-nav>li, .navbar-nav {
+float: left !important;
+}
+
+<<<<<<< HEAD
       <h2 class="pull-left brand icon">NextView</h2>
       <h2 class="pull-left brand project">{{$ctrl.project_name}} Dashboard</h2>
+=======
+>>>>>>> 2261ebeaf7fab329c3ebbce8b1ce4c588eec6099
 
+.navbar-nav.navbar-right:last-child {
+margin-right: -15px !important;
+}
+
+.navbar-right {
+float: right!important;
+}
+</style>
+<nav class="navbar navbar-default"
+     ng-class="{collapsed: $ctrl.collapsed}">
+         <div class="navbar-header">
+             <div class="row">
+      		<div class="col-md-4 col-xs-12 divv"><h2 class="pull-left brand icon">NextView</h2></div>
+      		<div class="col-md-4 col-xs-12 divv"><h2 class="pull-left brand project">{{$ctrl.project_name}} Dashboard</h2></div>
+		    <div class="col-md-4 col-xs-12 divv">
         <ul class="nav navbar-nav pull-right">
             <li>
                 <div class="dropdown" id='project_dropdown'>
@@ -32,21 +66,29 @@
                     </ul>
                 </div>
             </li>
-
-            <li>
-                <div id="fileupload" class="upload">
+	    
+	    <li>
+               <div id="fileupload" class="upload">
                     <span>Upload</span>
-                </div>
+               </div>
             </li>
 
-            <li class="user">
-                <span>{{ $ctrl.user.userName }}</span>
-                <br>
-                <span>{{ $ctrl.user.role }}</span>
-            </li>
+           <li class="dropdown user">
+             <a href="" class="dropdown-toggle" data-toggle="dropdown" style="padding:0px;background-color:#0a0909;">
+                 <i class="fa fa-angle-down pull-right"></i>
+                 <b><span>{{ $ctrl.user.userName }}</span></b>
+                 <br>
+                 <span>{{ $ctrl.user.role }}</span>
+             </a>
+             <ul class="dropdown-menu" style="padding-top:0px;padding-bottom:0px;background-color:black;">
+                <li><logout></logout></li>
+             </ul>
+           </li>
+                     </ul>
+                 </div>
+            </div>
+        </div>
 
-            <li><logout></logout></li>
-        </ul>
 </nav>
 <script>
     $(function () {
