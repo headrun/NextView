@@ -49,6 +49,9 @@ def dashboard_insert(request):
     print result
     return HttpResponse(result)
 
+def center_project(request):
+    return HttpResponse("Hello")
+
 def error_insert(request):
     volumes_list = Error.objects.values_list('volume_type',flat=True).distinct()
     conn = redis.Redis(host="localhost", port=6379, db=0)
@@ -188,6 +191,7 @@ def project(request):
         prj_id = Customer.objects.filter(name_id=request.user.id).values_list('project')[0][0]
         project = str(Project.objects.filter(id=prj_id)[0])
         return HttpResponse(project)
+
 
 def redis_insert(prj_obj):
     prj_name = prj_obj.name
@@ -329,12 +333,8 @@ def upload(request):
                 if customer_data['volume_type'] in volume_dict.keys():
                     customer_data['volume_type'] = volume_dict[customer_data['volume_type']]
                 if key == 'Production':
-                    try :
-                        per_day_value = int(float(customer_data['cmplt_target']))
-                    except ValueError:
-                        per_day_value = 0
                     new_can = RawTable(project=prj_obj, employee=customer_data['emp_id'],
-                                       volume_type=customer_data['volume_type'], per_hour=0,per_day=per_day_value,
+                                       volume_type=customer_data['volume_type'], per_hour=0,per_day=int(float(customer_data['cmplt_target'])),
                                        date=customer_data['date'], norm=int(float(customer_data['target'])),team_lead=teamleader_obj_name,center = center_obj)
                 if key == 'Internal':
                     new_can = Error(employee_id=customer_data['employee_id'],
@@ -349,15 +349,14 @@ def upload(request):
                                             volume_type=customer_data['volume_type'],
                                             date=customer_data['date'], error_type=key, error_value=int(float(value)), )
                             try :
-                                pass
-                                #new_can.save()
+                                new_can.save()
                             except :
                                 var = 'Duplicate Sheet'
                                 return HttpResponse(var)
 
                 if key != 'Error':
                     try:
-                        #print customer_data
+                        print customer_data
                         new_can.save()
                     except:
                         var = 'Duplicate Sheet'
@@ -386,6 +385,7 @@ def error_upload(request):
         audited_errors={}
         for row_idx in range(1, open_sheet.nrows):
             for column, col_idx in sheet_headers:
+               #import pdb;pdb.set_trace()
                 cell_data = get_cell_data(open_sheet, row_idx, col_idx)
                 if column == 'audited':
                     audited_errors['audited'] = ''.join(cell_data)
@@ -455,137 +455,8 @@ def from_to(request):
     no_of_days = int(re.findall('\d+',str(no_of_days))[0])
     for i in range(0,no_of_days+1):
         date_list.append(str(from_date+timedelta(days=i)))
-    conn = redis.Redis(host="localhost", port=6379, db=0)
-    #below varaibles for productivity,wpf graphs
-    result = {}
-    volumes_dict = {}
-    date_values = {}
-    volume_list = RawTable.objects.values_list('volume_type', flat=True).distinct()
-    distinct_volumes = [x.encode('UTF8') for x in volume_list]
-    #below variable for error graphs.
-    vol_error_values = {}
-    vol_audit_data = {}
-    for date_va in date_list:
-        #below code for product,wpf graphs
-        for vol_type in volume_list:
-            date_pattern = '*{0}_{1}'.format(vol_type,date_va)
-            key_list = conn.keys(pattern=date_pattern)
-            if not key_list:
-                if date_values.has_key(vol_type):
-                    date_values[vol_type].append(0)
-                else:
-                    date_values[vol_type] = [0]
-            for cur_key in key_list:
-                var = conn.hgetall(cur_key)
-                for key,value in var.iteritems():
-                    if date_values.has_key(key):
-                        date_values[key].append(int(value))
-                    else:
-                        date_values[key]=[int(value)]
-                volumes_dict['data'] = date_values
-                volumes_dict['date'] = date_list
-                result['data'] = volumes_dict
-        # below code for error graphs
-        key_pattern = '*{0}*error'.format(date_va)
-        audit_key_list = conn.keys(pattern=key_pattern)
-        #import pdb;pdb.set_trace()
-        for cur_key in audit_key_list:
-            var = conn.hgetall(cur_key)
-            for key, value in var.iteritems():
-                error_vol_type = cur_key.split('_')[1]
-                if key == 'total_errors':
-                    if vol_error_values.has_key(error_vol_type):
-                        vol_error_values[error_vol_type].append(int(value))
-                    else:
-                        vol_error_values[error_vol_type] = [int(value)]
-                else:
-                    if vol_audit_data.has_key(error_vol_type):
-                        vol_audit_data[error_vol_type].append(int(value))
-                    else:
-                        vol_audit_data[error_vol_type] = [int(value)]
 
-    #below code for productivity,wpf graph
-    volumes_data = result['data']['data']
-    volume_bar_data = {}
-    volume_bar_data['volume_type']= volumes_data.keys()
-    volume_keys_data ={}
-    for key,value in volumes_data.iteritems():
-        volume_keys_data[key]= sum(value)
-    volume_list = RawTable.objects.values_list('volume_type',flat=True).distinct()
-    distinct_volumes= [x.encode('UTF8') for x in volume_list]
-    for vol in distinct_volumes :
-        if vol not in volume_keys_data and "DetailFinancial" not in vol:
-            volume_keys_data[vol]=0
-    volume_list_data=[]
-    volume_dict = {'DataDownload':'DD', 'CompanyCoordinates':'CC' , 'DetailFinancial':'DF','GroupCompanies':'GC','FES':'FES' ,
-                               'Legal & CDR':'Legal' ,'DetailFinancial with FES ':'DF/FES','Charges':'Charges',
-                               'Compliance':'Compliance' ,'LLP':'LLP','Manual Download' : 'MD'}
-
-
-    for key,value in volume_keys_data.iteritems() :
-        new_list=[]
-        if 'DetailFinancial' not in key:
-            if volume_dict.has_key(key):
-                new_list.append(volume_dict[key])
-            else:
-                new_list.append(key)
-            new_list.append(value)
-            volume_list_data.append(new_list)
-    volume_bar_data['volume_new_data']=volume_list_data
-    volume_bar_data['volume_values'] = volume_keys_data
-    result['volumes_data'] = volume_bar_data
-    #below code for error graphs
-    error_dist_vol = Error.objects.values_list('volume_type', flat=True).distinct()
-    error_volume_data = {}
-    error_graph_data = []
-    for key, value in vol_error_values.iteritems():
-        error_graph = []
-        if volume_dict.has_key(key):
-            key = volume_dict[key]
-            error_volume_data[key] = sum(value)
-        else:
-            error_volume_data[key] = sum(value)
-        error_graph.append(key)
-        error_graph.append(sum(value))
-        error_graph_data.append(error_graph)
-    volume_list = RawTable.objects.values_list('volume_type', flat=True).distinct()
-    distinct_volumes = [x.encode('UTF8') for x in volume_list]
-    for vol in distinct_volumes:
-        if vol not in error_volume_data.keys() and "DetailFinancial" not in vol:
-            if volume_dict.has_key(vol):
-                error_volume_data[volume_dict[vol]] = 0
-            else:
-                error_volume_data[vol] = 0
-    error_audit_data = {}
-    for key, value in vol_audit_data.iteritems():
-        error_audit_data[key] = sum(value)
-    error_accuracy = {}
-    for volume in error_dist_vol:
-        if (volume in error_volume_data.keys()) and (volume in error_audit_data.keys()):
-            percentage = (float(error_volume_data[volume]) / error_audit_data[volume]) * 100
-            percentage = float('%.2f' % round(percentage, 2))
-            error_accuracy[volume] = percentage
-    #import pdb;pdb.set_trace()
-    for vol in volume_list:
-        if vol not in error_accuracy.keys() and "DetailFinancial" not in vol:
-            if volume_dict.has_key(vol):
-                error_accuracy[volume_dict[vol]]=0
-            else:
-                error_accuracy[vol]=0
-    total_graph_data = {}
-    #result['error_count'] = error_graph_data
-    result['error_count'] = error_volume_data
-    result['accuracy_graph'] = error_accuracy
-    print result
-    return HttpResponse(result)
-
-    """from_date = datetime.datetime.strptime(request.GET['from'],'%Y-%m-%d').date()
-    to_date = datetime.datetime.strptime(request.GET['to'],'%Y-%m-%d').date()
-    date_list = []
-    no_of_days = to_date-from_date
-    no_of_days = int(re.findall('\d+',str(no_of_days))[0])
-    for i in range(0,no_of_days+1):
-        date_list.append(str(from_date+timedelta(days=i)))
+    
     conn = redis.Redis(host="localhost", port=6379, db=0)
     result = {}
     volumes_dict = {}
@@ -613,7 +484,7 @@ def from_to(request):
     volume_bar_data['volume_values'] = volume_keys_data
     result['volumes_data'] = volume_bar_data
     print result
-    return HttpResponse(result)"""
+    return HttpResponse(result)
 
 def chart_data(request):
     #import pdb;pdb.set_trace()
@@ -635,51 +506,3 @@ def chart_data(request):
         emp_packet['packet_value']= packet
         final_data.append(emp_packet)
     return HttpResponse(final_data)
-
-def yesterdays_data(request):
-    yesterday = date.today() - timedelta(1)
-    print yesterday
-    date_list = []
-    date_list.append(str(yesterday))
-    conn = redis.Redis(host="localhost", port=6379, db=0)
-    #below varaibles for productivity,wpf graphs
-    result = {}
-    volumes_dict = {}
-    date_values = {}
-    volume_list = RawTable.objects.values_list('volume_type', flat=True).distinct()
-    distinct_volumes = [x.encode('UTF8') for x in volume_list]
-    for date_va in date_list:
-        #below code for product,wpf graphs
-        for vol_type in volume_list:
-            date_pattern = '*{0}_{1}'.format(vol_type,date_va)
-            key_list = conn.keys(pattern=date_pattern)
-            if not key_list:
-                if date_values.has_key(vol_type):
-                    date_values[vol_type].append(0)
-                else:
-                    date_values[vol_type] = [0]
-            for cur_key in key_list:
-                var = conn.hgetall(cur_key)
-                for key,value in var.iteritems():
-                    if date_values.has_key(key):
-                        date_values[key].append(int(value))
-                    else:
-                        date_values[key]=[int(value)]
-                volumes_dict['data'] = date_values
-                volumes_dict['date'] = date_list
-                result['data'] = volumes_dict
-    #below code for productivity,wpf graph
-    volumes_data = result['data']['data']
-    volume_bar_data = {}
-    volume_bar_data['volume_type']= volumes_data.keys()
-    volume_keys_data ={}
-    for key,value in volumes_data.iteritems():
-        volume_keys_data[key]= sum(value)
-    for vol in distinct_volumes:
-        if vol not in volume_keys_data and "DetailFinancial" not in vol:
-            volume_keys_data[vol]=0
-    volume_bar_data['volume_values'] = volume_keys_data
-    result['volumes_data'] = volume_bar_data
-    print result
-    return HttpResponse(result)
-

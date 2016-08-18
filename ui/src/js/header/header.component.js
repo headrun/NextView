@@ -20,38 +20,45 @@
                 if (this.user.roles.indexOf("customer") >= 0) {
                     this.user.role = "Customer";
                 }
-                if (this.user.roles.indexOf("Center_Manager") >= 0) {
+                if (this.user.roles.indexOf("center_manager") >= 0) {
                     this.user.role = "Center Manager";
                 }
-                if (this.user.roles.indexOf("Nextwealth_Manager") >= 0) {
+                if (this.user.roles.indexOf("nextwealth_manager") >= 0) {
                     this.user.role = "Nextwealth Manager";
                 }
 
                 if((this.user.role == "Customer") || (this.user.role == "Team Lead") ){
                     $('#center_dropdown').hide();
                     $('#project_dropdown').hide();
+                    $('#only_project_dropdown').hide();
                 if (this.user.role == "Customer"){
                     $('#fileupload').hide();
+                    $('#only_project_dropdown').hide();
                     }
                 }
                 if((this.user.role == "Nextwealth Manager") || (this.user.role == "Center Manager")){
                     $('#fileupload').hide();
                 if (this.user.role == "Center Manager"){
                     $('#center_dropdown').hide();
+                    $('#project_dropdown').hide();
                     }
+                if(this.user.role == "Nextwealth Manager"){
+                    $('#only_project_dropdown').hide();
+                }
                 }
 
                this.collapsed = false;
 
                this.toggleCollapse = function () {
-               
+
                this.collapsed = !this.collapsed;
                }
               var project = 'api/project/';
               self.projects_list = ['realshopee', 'dell', 'probe'];
               self.centers_list = ['hubli', 'salem'];
-              console.log(self.clickFun);
+              
               self.clickFun = function(val){
+                console.log(val);
                 self.project_name = self.center + ' - ' + val;
               }
               self.clickFun = function(val){
@@ -61,10 +68,13 @@
                 self.project_name = val + ' - ' + self.ppp;
               }
 
+                self.onChange = function(page) {
+                    location.href = '#!'+page;
+                   //$location.path('/'+page);
+                }
 
               $http({method:"GET", url:project}).success(function(result){
 
-              console.log(result.result);
 
                 if (result.result['role'] == "center_manager")
                     {
@@ -75,9 +85,11 @@
                     self.project_name = center + ' - ' + proj_list[0];
                     }
                 else if (result.result['role'] == "nextwealth_manager"){
-                    var keys = Object.keys(result.result);
-                    var cent_list = [];
-                    var prj_list = [];
+                    self.centers = result.result.cen_pro;
+                    console.log(self.centers);
+                    //var keys = Object.keys(result.result);
+                    //var cent_list = [];
+                    //var prj_list = [];
                     cent_list.push(keys[0]);
                     cent_list.push(keys[2]);
                     var one = result.result[keys[0]];
@@ -93,13 +105,10 @@
                     //prj_list.push(result.result[keys[2]])
                     //for (i=0; i < keys.length; i++){
                     //}
-                    console.log(prj_list);
-                    console.log(cent_list);
                     //console.log(keys[2]);
                     self.project_name = cent_list[0] + ' - ' + prj_list[0];
                     self.center = cent_list[0];
                     self.ppp = prj_list[0];
-
 
 
                 }

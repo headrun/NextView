@@ -17,15 +17,13 @@
         font-weight: bold;
         font-size: 1.0em;
         line-height: 20px;
-        padding-top: 3px;
-        margin-top: 2px;
     }
     .row {
         margin-left:0px;
         margin-right:0px;
     }
     .all {
-    height: 270px;
+    height: 250px;
     padding-bottom:20px;
     }
   .widget-content {
@@ -74,10 +72,10 @@ border-color:white;
 
 <body>
     <div class="row">
-        <div class="col-md-6 col-xs-12"style="font-size:1.6em;"><h2 class="pull-left brand project">Probe Dashboard</h2></div>
+        <div class="col-md-6 col-xs-12"style="font-size:1.6em;"><h2 class="pull-left brand project">{{$ctrl.project_name}} Dashboard</h2></div>
         <div class="col-md-6 col-xs-12">
-            <button type="button" class="btn btn-primary btn-xs" ng-click="$ctrl.check()" style="float: right;margin-top:6px;">Submit</button>
-                <input value="2016-08-12 to 2016-08-18" id="select" size="19" style="float: right;color:#0a0909;margin:6px;">
+            <button type="button" class="btn btn-primary btn-xs" ng-click="$ctrl.check()" style="float: right;">Submit</button>
+                <input value="2016-07-26 to 2016-08-01" id="select" size="19" style="float: right; color:black;">
 
             <!--<input type="text" class="form-control" value="2016-07-26 to 2016-08-01" id="select" style="color:black;">
             <a href="" class="button" ng-click="$ctrl.check()">Submit</a>-->
@@ -100,21 +98,7 @@ border-color:white;
                     </div>
                 </div>
             </div>
-            <div class="widget col-md-6 col-xs-12 all"  >
-
-                <div class="widget-content">
-
-                    <div class="widget-title clearfix"
-                         title="Sample Widg">
-                        <span class="pull-left">Workpacket Wise Performance</span>
-                    </div>
-
-                    <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions3"></highcharts>
-                    </div>
-                </div>
-            </div>
-            <!--<div class="widget col-md-6 col-xs-12 all" >
+            <div class="widget col-md-6 col-xs-12 all" >
                 <div class="widget-content">
 
                     <div class="widget-title clearfix"
@@ -126,7 +110,7 @@ border-color:white;
                         <highcharts options="$ctrl.chartOptions2"></highcharts>
                     </div>
                 </div>
-            </div>-->
+            </div>
         </div>
     <div class="row">
             <div class="widget col-md-6 col-xs-12 all"  >
@@ -135,11 +119,11 @@ border-color:white;
 
                     <div class="widget-title clearfix"
                          title="Sample Widg">
-                        <span class="pull-left">Packetwise error count</span>
+                        <span class="pull-left">Packet Wise Error</span>
                     </div>
 
                     <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions5"></highcharts>
+                        <highcharts options="$ctrl.chartOptions3"></highcharts>
                     </div>
                 </div>
             </div>
@@ -149,7 +133,7 @@ border-color:white;
 
                     <div class="widget-title clearfix"
                          title="Sample Widg">
-                        <span class="pull-left">Internal Accuracy</span>
+                        <span class="pull-left">Error Accuracy</span>
                     </div>
 
                     <div class="widget-body">
@@ -167,15 +151,15 @@ border-color:white;
       <div class="modal-content">
          <div class="modal-header">
              <button type="button" class="close" data-dismiss="modal">&times;</button>
-             <h4 class="modal-title">PRODUCTIVITY CHART</h4>
+             <h4 class="modal-title" style="color:black;">PRODUCTIVITY CHART</h4>
          </div>
          <div class="modal-body">
              <!--<p>hey{{$ctrl.names}}</p>-->
-                 <table style="color:white; padding:5px;border:1px solid white;" border = 1px solid white; >
+             <table style="color:black; padding:5px;" border = 1px solid black; >
                  <tr ng-repeat= "x in $ctrl.names">
 
-                    <td style="padding:5px;" >{{x.emp}}</td>
-                     <td style="padding:5px;" >{{x.packet_value}}</td>
+                    <td style="color:black; padding:5px;" >{{x.emp}}</td>
+                     <td style="color:black; padding:5px;" >{{x.packet_value}}</td>
 
                  </tr>
              </table>
@@ -195,11 +179,11 @@ border-color:white;
       <div class="modal-content">
          <div class="modal-header">
              <button type="button" class="close" data-dismiss="modal">&times;</button>
-             <h4 class="modal-title" >WORKPACKET WISE PERFORMANCE</h4>
+             <h4 class="modal-title" style="color:black;">WORKPACKET WISE PERFORMANCE</h4>
          </div>
          <div class="modal-body">
            <h1 id="wpp_hello" style="color:black;">Hello Hello</h1>
-           <p id="wpp_temp" style="color:black;"></p>
+           <p id="wpp_temp" style="color:black;">temper</p>
          </div>
          <div class="modal-footer">
            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -215,11 +199,11 @@ border-color:white;
       <div class="modal-content">
          <div class="modal-header">
              <button type="button" class="close" data-dismiss="modal">&times;</button>
-             <h4 class="modal-title" >Internal Accuracy</h4>
+             <h4 class="modal-title" style="color:black;">ERROR ACCURACY</h4>
          </div>
          <div class="modal-body">
-           <h1 id="perc_hello" >Hello Hello</h1>
-           <p id="perc_temp" ></p>
+           <h1 id="perc_hello" style="color:black;">Hello Hello</h1>
+           <p id="perc_temp" style="color:black;">temper</p>
          </div>
          <div class="modal-footer">
            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -227,7 +211,6 @@ border-color:white;
        </div>
     </div>
   </div>
-
 
 <div class="modal fade" id="pwe_myModal" role="dialog">
     <div class="modal-dialog">
@@ -235,11 +218,11 @@ border-color:white;
       <div class="modal-content">
          <div class="modal-header">
              <button type="button" class="close" data-dismiss="modal">&times;</button>
-             <h4 class="modal-title" >Workpacket Wise Performance</h4>
+             <h4 class="modal-title" style="color:black;">PACKET WISE ERROR</h4>
          </div>
          <div class="modal-body">
-           <h1 id="pwe_hello" >Hello Hello</h1>
-           <p id="pwe_temp" ></p>
+           <h1 id="pwe_hello" style="color:black;">Hello Hello</h1>
+           <p id="pwe_temp" style="color:black;">temper</p>
          </div>
          <div class="modal-footer">
            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -247,6 +230,7 @@ border-color:white;
        </div>
     </div>
   </div>
+
 
 </body>
 <script>

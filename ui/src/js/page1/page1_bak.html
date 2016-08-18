@@ -1,0 +1,185 @@
+<style>
+   .button {
+      background-color: #3396C9;
+      color: white;
+      padding-bottom: 3px;
+      padding-top: 4px;
+      padding-left: 2px;
+      padding-right: 2px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .pull-left {
+        color:white;
+    }
+    .row {
+        margin-left:0px;
+        margin-right:0px;
+    }
+
+</style>
+
+<body>
+<div class="container">
+    <div align="right">
+        <input value="2016-07-26 to 2016-08-01" id="select" size="19" style="margin-top:1%;margin-left:27%;color:black;margin-bottom:2%;height:23px;">
+        <a href="" class="button" ng-click="$ctrl.check()">Submit</a>
+    </div>
+<div class="row">
+<div class="widget col-md-6" style="width: 50%; height: 250px">
+
+  <div class="widget-content">
+
+    <div class="widget-title clearfix"
+         title="Sample Widg">
+      <span class="pull-left">PRODUCTIVITY CHART</span>
+    </div>
+
+    <div class="widget-body">
+      <highcharts options="$ctrl.chartOptions"></highcharts>
+    </div>
+  </div>
+</div>
+<div class="widget col-md-6" style="width: 50%; height: 250px">
+
+  <div class="widget-content">
+
+    <div class="widget-title clearfix"
+         title="Sample Widg">
+      <span class="pull-left">WORKPACKET WISE PERFORMANCE</span>
+    </div>
+
+    <div class="widget-body">
+      <highcharts options="$ctrl.chartOptions2"></highcharts>
+    </div>
+  </div>
+</div>
+    <div class="row" style="margin-top:23%;">
+    <div class="widget col-md-6" style="width: 50%; height: 250px" >
+
+  <div class="widget-content">
+
+    <div class="widget-title clearfix"
+         title="Sample Widg">
+      <span class="pull-left">PACKET WISE ERROR</span>
+    </div>
+
+    <div class="widget-body">
+        <highcharts options="$ctrl.chartOptions3"></highcharts>
+    </div>
+  </div>
+</div>
+            <div class="widget col-md-6" style="width: 50%; height: 250px" >
+
+  <div class="widget-content">
+
+    <div class="widget-title clearfix"
+         title="Sample Widg">
+      <span class="pull-left">ERROR ACCURACY</span>
+    </div>
+
+    <div class="widget-body">
+        <highcharts options="$ctrl.chartOptions4"></highcharts>
+    </div>
+  </div>
+</div>
+
+        </div>
+    </div>
+    </div>
+    </div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+      <!-- Modal content-->
+      <div class="modal-content">
+         <div class="modal-header">
+             <button type="button" class="close" data-dismiss="modal">&times;</button>
+             <h4 class="modal-title" style="color:black;">PRODUCTIVITY CHART</h4>
+         </div>
+         <div class="modal-body">
+             <!--<p>hey{{$ctrl.names}}</p>-->
+             <table style="color:black; padding:5px;" border = 1px solid black; >
+                 <tr ng-repeat= "x in $ctrl.names">
+
+                    <td style="color:black; padding:5px;" >{{x.emp}}</td>
+                     <td style="color:black; padding:5px;" >{{x.packet_value}}</td>
+
+                 </tr>
+             </table>
+           <!--<h1 id="hello" style="color:black;">Hello Hello</h1>
+           <p id="temp" style="color:black;"></p>-->
+         </div>
+         <div class="modal-footer">
+           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+         </div>
+       </div>
+    </div>
+  </div>
+
+<div class="modal fade" id="workpacket_per" role="dialog">
+    <div class="modal-dialog">
+      <!-- Modal content-->
+      <div class="modal-content">
+         <div class="modal-header">
+             <button type="button" class="close" data-dismiss="modal">&times;</button>
+             <h4 class="modal-title" style="color:black;">WORKPACKET WISE PERFORMANCE</h4>
+         </div>
+         <div class="modal-body">
+           <h1 id="wpp_hello" style="color:black;">Hello Hello</h1>
+           <p id="wpp_temp" style="color:black;">temper</p>
+         </div>
+         <div class="modal-footer">
+           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+         </div>
+       </div>
+    </div>
+  </div>
+
+
+<div class="modal fade" id="percent_graph" role="dialog">
+    <div class="modal-dialog">
+      <!-- Modal content-->
+      <div class="modal-content">
+         <div class="modal-header">
+             <button type="button" class="close" data-dismiss="modal">&times;</button>
+             <h4 class="modal-title" style="color:black;">ERROR ACCURACY</h4>
+         </div>
+         <div class="modal-body">
+           <h1 id="perc_hello" style="color:black;">Hello Hello</h1>
+           <p id="perc_temp" style="color:black;">temper</p>
+         </div>
+         <div class="modal-footer">
+           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+         </div>
+       </div>
+    </div>
+  </div>
+
+<div class="modal fade" id="pwe_myModal" role="dialog">
+    <div class="modal-dialog">
+      <!-- Modal content-->
+      <div class="modal-content">
+         <div class="modal-header">
+             <button type="button" class="close" data-dismiss="modal">&times;</button>
+             <h4 class="modal-title" style="color:black;">PACKET WISE ERROR</h4>
+         </div>
+         <div class="modal-body">
+           <h1 id="pwe_hello" style="color:black;">Hello Hello</h1>
+           <p id="pwe_temp" style="color:black;">temper</p>
+         </div>
+         <div class="modal-footer">
+           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+         </div>
+       </div>
+    </div>
+  </div>
+
+
+</body>
+<script>
+   configObject = {
+       autoClose: true,
+       }
+   $('#select').dateRangePicker(configObject);
+</script>

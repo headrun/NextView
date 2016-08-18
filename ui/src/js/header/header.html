@@ -1,27 +1,9 @@
 <style>
-    .divv {
-        width:430px;
-        /*font-family: 'Soleto',sans-serif;
-        display: inline-block;
-        color: #cdcdcd;
-        font-weight: bold;
-        font-size: 1.4em;
-        line-height: 20px;
-	*/
-    }
+
 .navbar-collapse.collapse {
 display: block!important;
 }
 
-.navbar-nav>li, .navbar-nav {
-float: left !important;
-}
-
-<<<<<<< HEAD
-      <h2 class="pull-left brand icon">NextView</h2>
-      <h2 class="pull-left brand project">{{$ctrl.project_name}} Dashboard</h2>
-=======
->>>>>>> 2261ebeaf7fab329c3ebbce8b1ce4c588eec6099
 
 .navbar-nav.navbar-right:last-child {
 margin-right: -15px !important;
@@ -30,43 +12,58 @@ margin-right: -15px !important;
 .navbar-right {
 float: right!important;
 }
+
+.navbar-header {
+float: none;
+}
+
+.navbar {
+margin-bottom:0px;
+}
 </style>
 <nav class="navbar navbar-default"
-     ng-class="{collapsed: $ctrl.collapsed}">
+     ng-class="{collapsed: $ctrl.collapsed}"style="border-top-color: black;border-left-color: black;">
          <div class="navbar-header">
              <div class="row">
-      		<div class="col-md-4 col-xs-12 divv"><h2 class="pull-left brand icon">NextView</h2></div>
-      		<div class="col-md-4 col-xs-12 divv"><h2 class="pull-left brand project">{{$ctrl.project_name}} Dashboard</h2></div>
-		    <div class="col-md-4 col-xs-12 divv">
-        <ul class="nav navbar-nav pull-right">
+      		<div class="col-md-6 col-xs-12"style="font-size:2.0em;"><h2 class="pull-left brand icon">NextView</h2></div>
+      		<!--<div class="col-md-4 col-xs-12"style="font-size:1.6em;"><h2 class="pull-left brand project">{{$ctrl.project_name}} Dashboard</h2></div>-->
+		    <div class="col-md-6 col-xs-12"style="font-size:1.2em;">
+        <ul class="nav navbar-nav pull-right" style="float:right;">
             <li>
-                <div class="dropdown" id='project_dropdown'>
-                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Project
+                <div class="dropdown" id='only_project_dropdown'>
+                    <button class="btn btn-primary dropdown-toggle"style="background-color:black;border-color:white;margin-right:0px;" type="button" data-toggle="dropdown">Project
                         <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu">
-                        <li ng-repeat="pro in $ctrl.proj_list">
-                            <a href="" ng-click="$ctrl.clickFun(pro)">{{pro}}</a>
-                        </li>
-                        <!--<li><a ng-click="clickFun()">Probe</a></li>
-                        <li><a href="#">Realshopee</a></li>-->
+                    <ul class="dropdown-menu" style="min-width:0px;">
+                        <li><a href="#!/page1">Probe</a></li>
+                        <li><a href="#!/page3">Dell</a></li>
+                        <!--<li ng-repeat="pro in $ctrl.proj_list">
+                            <a href="" ng-click="$ctrl.clickFun(pro)" style="padding-top:0px;padding-bottom:0px;margin-right:0px;">{{pro}}</a>
+                        </li>-->
                     </ul>
+                </div>
+                <div>
+                    <select id="center_dropdown" ng-model="projects" ng-options="center for (center, projects) in $ctrl.centers"style="background-color:#0a0909;border-color:white;margin-top:12px;border-radius:0.2em;">
+                        <option value=''>Center</option>
+                    </select>
+                    <select id="project_dropdown" ng-disabled="!projects" ng-model="page" ng-options="project for (project, pages) in projects"
+                            ng-change="$ctrl.onChange(page)"style="background-color:#0a0909;border-color:white;margin-top:12px;border-radius:0.2em;">
+                        <option value=''>Project</option>
+                    </select>
                 </div>
             </li>
 
-            <li>
+            <!--<li>
                 <div class="dropdown" id="center_dropdown">
-                    <button class="btn btn-primary dropdown-toggle"  type="button" data-toggle="dropdown">Center
+                    <button class="btn btn-primary dropdown-toggle"style="background-color:black;border-color:white;margin-right:0px;"  type="button" data-toggle="dropdown">Center
                         <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu"style="min-width:0px;">
                         <li ng-repeat="cen in $ctrl.centers_list">
-                            <a href="" ng-click="$ctrl.clickFun2(cen)">{{cen}}</a>
-                        </li>
+                            <a href="" ng-click="$ctrl.clickFun2(cen)"style="padding-top:0px;padding-bottom:0px;margin-right:0px;">{{cen}}</a>
                     </ul>
                 </div>
-            </li>
-	    
+            </li>-->
 	    <li>
                <div id="fileupload" class="upload">
                     <span>Upload</span>
@@ -74,13 +71,14 @@ float: right!important;
             </li>
 
            <li class="dropdown user">
-             <a href="" class="dropdown-toggle" data-toggle="dropdown" style="padding:0px;background-color:#0a0909;">
-                 <i class="fa fa-angle-down pull-right"></i>
-                 <b><span>{{ $ctrl.user.userName }}</span></b>
-                 <br>
-                 <span>{{ $ctrl.user.role }}</span>
-             </a>
-             <ul class="dropdown-menu" style="padding-top:0px;padding-bottom:0px;background-color:black;">
+
+                   <a href="" class="dropdown-toggle" data-toggle="dropdown" style="padding:0px;background-color:#0a0909;">
+                     <i class="fa fa-angle-down pull-right"></i>
+                     <b><span><i class="fa fa-user" style="font-size:22px;"></i>{{ $ctrl.user.userName }}</span></b>
+                     <br>
+                     <span style="font-size:15px;">{{ $ctrl.user.role }}</span>
+                   </a>
+             <ul class="dropdown-menu" style="text-align:left;padding-top:0px;padding-bottom:0px;padding-left:10px;background-color:black;">
                 <li><logout></logout></li>
              </ul>
            </li>
