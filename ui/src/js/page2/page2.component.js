@@ -1,10 +1,10 @@
 ;(function (angular) {
   "use strict";
 
-  angular.module("page1")
-         .component("page1", {
+  angular.module("page2")
+         .component("page2", {
 
-           "templateUrl": "/js/page1/page1.html",
+           "templateUrl": "/js/page2/page2.html",
            "controller": ['$http',
 
            function ($http) {
@@ -307,7 +307,7 @@
 
 
         angular.extend(self.chartOptions4.yAxis.title,{
-                text: 'In Percentage'
+                text: 'errors'
               });  
               angular.extend(self.chartOptions4.plotOptions.series.point.events,{
                 select: function(e) {
@@ -557,7 +557,7 @@
             gridLineDashStyle: 'solid',
             min: 0,
             title: {
-                text: 'total'
+                text: 'errors'
             }
         },
         legend: {
@@ -719,7 +719,7 @@
              }); 
 
         angular.extend(self.chartOptions4.yAxis.title,{
-                text: 'In Percentage'
+                text: 'errors'
               });
               angular.extend(self.chartOptions4.plotOptions.series.point.events,{
                 select: function(e) {
@@ -970,7 +970,7 @@
             gridLineDashStyle: 'solid',
             min: 0,
             title: {
-                text: 'total'
+                text: ''
             }
         },
         legend: {
@@ -1036,7 +1036,7 @@
             yAxis: {
                 gridLineColor: 'a2a2a2',
                 title: {
-                    text: 'In Percentage'
+                    text: 'errors'
                 }
             },
             plotOptions:{

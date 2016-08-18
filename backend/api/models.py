@@ -79,7 +79,7 @@ class RawTable(models.Model):
 
     class Meta:
         db_table = u'raw_table'
-        unique_together = (("date","employee"),)
+        #unique_together = (("date","employee"),)
 
 class Error(models.Model):
     volume_type = models.CharField(max_length=255, default='')
@@ -89,9 +89,35 @@ class Error(models.Model):
     date = models.DateField()
     employee_id = models.CharField(max_length=255,default='')
 
-class Meta:
-    db_table = u'error_table'
-    unique_together = (("audited_errors","error_value"),)
+    class Meta:
+        db_table = u'api_error'
+        #db_table = u'api_error'
+        #unique_together = (("audited_errors","error_value"),)
 
     def __unicode__(self):
         return self.employee_id
+
+class Externalerrors(models.Model):
+    volume_type = models.CharField(max_length=255, default='')
+    error_type = models.CharField(max_length=255, default='')
+    error_value = models.IntegerField(max_length=255, default=0)
+    date = models.DateField()
+    employee_id = models.CharField(max_length=255, default='')
+
+    class Meta:
+        db_table = u'external_errors'
+        #unique_together = (("error_type", "error_value"),)
+
+    def __unicode__(self):
+        return self.employee_id
+
+class Authoringtable(models.Model):
+    project = models.ForeignKey(Project, null=True)
+    sheet_name = models.CharField(max_length=255, default='')
+    table_schema = models.CharField(max_length=255, default='')
+    sheet_field = models.CharField(max_length=255, default='')
+
+    class Meta:
+        db_table = u'authoring_table'
+    def __unicode__(self):
+        return self.table_schema
