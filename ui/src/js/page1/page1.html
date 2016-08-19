@@ -83,10 +83,8 @@ border-color:white;
             <a href="" class="button" ng-click="$ctrl.check()">Submit</a>-->
         </div>
         </div>
-
-    </div>
     <div class="row">
-            <div class="widget col-md-6 col-xs-12 all" >
+            <div class="widget col-md-12 col-xs-12 all" >
                 <div class="widget-content">
 
 
@@ -97,20 +95,6 @@ border-color:white;
 
                     <div class="widget-body">
                         <highcharts options="$ctrl.chartOptions"></highcharts>
-                    </div>
-                </div>
-            </div>
-            <div class="widget col-md-6 col-xs-12 all"  >
-
-                <div class="widget-content">
-
-                    <div class="widget-title clearfix"
-                         title="Sample Widg">
-                        <span class="pull-left">Workpacket Wise Performance</span>
-                    </div>
-
-                    <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions3"></highcharts>
                     </div>
                 </div>
             </div>
@@ -129,7 +113,21 @@ border-color:white;
             </div>-->
         </div>
     <div class="row">
-            <div class="widget col-md-6 col-xs-12 all"  >
+            <div class="widget col-md-3 col-xs-6 all"  >
+
+                <div class="widget-content">
+
+                    <div class="widget-title clearfix"
+                         title="Sample Widg">
+                        <span class="pull-left">Packetwise error count</span>
+                    </div>
+
+                    <div class="widget-body">
+                        <highcharts options="$ctrl.chartOptions5"></highcharts>
+                    </div>
+                </div>
+            </div>
+            <div class="widget col-md-3 col-xs-6 all"  >
 
                 <div class="widget-content">
 
@@ -159,6 +157,34 @@ border-color:white;
             </div>
 
         </div>
+    <div class="row">
+        <div class="widget col-md-6 col-xs-12 all"  >
+                <div class="widget-content">
+                    <div class="widget-title clearfix"
+                         title="Sample Widg">
+                        <span class="pull-left">Error Accuracy Graph</span>
+                    </div>
+                    <div class="widget-body">
+                        <highcharts options="$ctrl.chartOptions6"></highcharts>
+                    </div>
+                </div>
+        </div>
+                    <div class="widget col-md-6 col-xs-12 all"  >
+
+                <div class="widget-content">
+
+                    <div class="widget-title clearfix"
+                         title="Sample Widg">
+                        <span class="pull-left">Workpacket Wise Performance</span>
+                    </div>
+
+                    <div class="widget-body">
+                        <highcharts options="$ctrl.chartOptions3"></highcharts>
+                    </div>
+                </div>
+            </div>
+
+    </div>
 <!--</div>-->
 
 <div class="modal fade" id="myModal" role="dialog">
