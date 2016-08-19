@@ -238,6 +238,13 @@ def redis_insert_two(prj_obj):
         conn.hmset(key, value)
 
 def upload(request):
+    """if request.method == 'POST':
+        form = DocumentForm(request.POST, request.FILES['myfile'])
+        if form.is_valid:
+            newdoc = Document(document=request.FILES['myfile'])
+            var = "general"
+            #import pdb;pdb.set_trace()
+            newdoc.save()"""
     teamleader_obj_name = TeamLead.objects.filter(name_id=request.user.id)[0]
     teamleader_obj = TeamLead.objects.filter(name_id=request.user.id).values_list('project_id')[0][0]
     prj_obj = Project.objects.filter(id=teamleader_obj)[0]
@@ -252,121 +259,92 @@ def upload(request):
             #open_sheet = open_book.sheet_by_index(0)
         except:
             return HttpResponse("Invalid File")
-        excel_sheet_names = open_book.sheet_names()
-        sheet_index_dict = {}
-        if 'Production' in excel_sheet_names:
-            sheet_index_dict['Production'] = open_book.sheet_names().index('Production')
-        if 'Internal' in excel_sheet_names:
-            sheet_index_dict['Internal'] = open_book.sheet_names().index('Internal')
-        if 'Error' in excel_sheet_names:
-            sheet_index_dict['Error'] = open_book.sheet_names().index('Error')
         #import pdb;pdb.set_trace()
+        excel_sheet_names = open_book.sheet_names()
+        file_sheet_name = Authoringtable.objects.values_list('sheet_name',flat=True).distinct()
+        file_sheet_names = [x.encode('UTF8') for x in file_sheet_name]
+        sheet_index_dict = {}
+        for sh_name in file_sheet_names:
+            if sh_name in excel_sheet_names:
+                sheet_index_dict[sh_name] = open_book.sheet_names().index(sh_name)
         for key,value in sheet_index_dict.iteritems():
             customer_data = {}
-            if key == 'Production':
-                SOH_XL_HEADERS = ['Date', 'ID', 'Done', 'Passed / Cancelled', 'Platform', 'Emp id', 'Week', 'Month',
-                                  'Year', 'Target', 'Productivity', 'WC', 'WorkPacket']
-                SOH_XL_MAN_HEADERS = ['Date', 'Done', 'Platform', 'Emp id', 'Target']
-                open_sheet = open_book.sheet_by_index(value)
-            if key =='Internal':
-                SOH_XL_HEADERS = ['Date', 'Id', 'Work Packet', 'Audited', 'Avoidable', 'Concept', 'Others',
-                                  'Total Error', 'Week', 'Month', 'Year']
-                SOH_XL_MAN_HEADERS = ['Date', 'Id', 'Work Packet', 'Audited', 'Total Error']
-                open_sheet = open_book.sheet_by_index(value)
-            if key=='Error' :
-                SOH_XL_HEADERS = ['Date', 'Id', 'Work Packet', 'Agent Reply', 'Avoidable', 'Concept', 'Others',
-                                  'Total Error', 'Week', 'Month', 'Year']
-                SOH_XL_MAN_HEADERS = ['Date', 'Id', 'Work Packet', 'Avoidable', 'Concept']
-                open_sheet = open_book.sheet_by_index(value)
+            open_sheet = open_book.sheet_by_index(value)
+            SOH_XL_HEADERS = open_sheet.row_values(0)
+            main_headers = Authoringtable.objects.filter(sheet_name=sh_name).values_list('sheet_field',flat=True)
+            sheet_main_headers = [x.encode('UTF8') for x in main_headers]
+            table_schema = Authoringtable.objects.filter(sheet_name=sh_name).values_list('table_schema',flat=True)
+            table_schema = [x.encode('UTF8') for x in table_schema]
+            mapping_table={}
+            for sh_filed,t_field in zip(sheet_main_headers,table_schema):
+                mapping_table[sh_filed] = t_field
+            SOH_XL_MAN_HEADERS = [x.title() for x in main_headers]
             sheet_headers = validate_sheet(open_sheet, request,SOH_XL_HEADERS,SOH_XL_MAN_HEADERS)
-            error_type = {}
+
             for row_idx in range(1, open_sheet.nrows):
+                error_type = {}
                 for column, col_idx in sheet_headers:
                     cell_data = get_cell_data(open_sheet, row_idx, col_idx)
-                    if key == 'Production':
-                    #cell_data = get_cell_data(open_sheet, row_idx, col_idx)
-                        if column == 'done':
-                            customer_data['cmplt_target'] = ''.join(cell_data)
-                        if column == 'platform':
-                            customer_data['volume_type'] = ''.join(cell_data)
-                        if column == 'emp id':
-                            customer_data['emp_id'] = ''.join(cell_data)
-                        if column == 'target':
-                            customer_data['target'] = ''.join(cell_data)
-                        if column == 'date':
-                            cell_data = xlrd.xldate_as_tuple(int(cell_data.split('.')[0]), 0)
-                            cell_data ='%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
-                            customer_data['date'] = ''.join(cell_data)
+                    #if key == 'Error':
+                    if column in ['avoidable','concept','total error'] and key == 'Error':
+                        column_name = mapping_table.get(column, '')
+                        error_type[column_name] = ''.join(cell_data)
+                    elif column !="date" and column in mapping_table.keys():
+                        column_name = mapping_table.get(column,'')
+                        customer_data[column_name] = ''.join(cell_data)
+                    elif column == "date":
+                        cell_data = xlrd.xldate_as_tuple(int(cell_data.split('.')[0]), 0)
+                        cell_data = '%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
+                        customer_data['date'] = ''.join(cell_data)
 
-                    if key == 'Internal':
-                        if column == 'audited':
-                            customer_data['audited'] = ''.join(cell_data)
-                        if column == 'total error':
-                            customer_data['total_error'] = ''.join(cell_data)
-                        if column == 'work packet':
-                            customer_data['volume_type'] = ''.join(cell_data)
-                        if column == 'id':
-                            customer_data['employee_id'] = ''.join(cell_data)
-                        if column == 'date':
-                            cell_data = xlrd.xldate_as_tuple(int(cell_data.split('.')[0]), 0)
-                            cell_data = '%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
-                            customer_data['date'] = ''.join(cell_data)
-                    if key=='Error' :
-                        if column == 'avoidable':
-                            error_type['avoidable'] = ''.join(cell_data)
-                        if column == 'concept':
-                            error_type['concept'] = ''.join(cell_data)
-                        if column == 'work packet':
-                            customer_data['volume_type'] = ''.join(cell_data)
-                        if column == 'id':
-                            customer_data['employee_id'] = ''.join(cell_data)
-                        if column == 'date':
-                            cell_data = xlrd.xldate_as_tuple(int(cell_data.split('.')[0]), 0)
-                            cell_data = '%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
-                            customer_data['date'] = ''.join(cell_data)
-
-                volume_dict = {'DataDownload':'DD', 'CompanyCoordinates':'CC' , 'DetailFinancial':'DF','GroupCompanies':'GC'}
+                volume_dict = {'DataDownload':'DD', 'CompanyCoordinates':'CC' , 'DetailFinancial':'DF','GroupCompanies':'GC','FES':'FES' ,
+                               'Legal & CDR':'Legal' ,'DetailFinancial with FES ':'DF/FES','Charges':'Charges',
+                               'Compliance':'Compliance' ,'LLP':'LLP','Manual Download' : 'MD'}
                 if customer_data['volume_type'] in volume_dict.keys():
                     customer_data['volume_type'] = volume_dict[customer_data['volume_type']]
-                if key == 'Production':
-                    try :
-                        per_day_value = int(float(customer_data['cmplt_target']))
-                    except ValueError:
-                        per_day_value = 0
-                    new_can = RawTable(project=prj_obj, employee=customer_data['emp_id'],
-                                       volume_type=customer_data['volume_type'], per_hour=0,per_day=per_day_value,
-                                       date=customer_data['date'], norm=int(float(customer_data['target'])),team_lead=teamleader_obj_name,center = center_obj)
-                if key == 'Internal':
-                    new_can = Error(employee_id=customer_data['employee_id'],
-                                    volume_type=customer_data['volume_type'],
-                                    date=customer_data['date'], audited_errors=int(float(customer_data['audited'])),
-                                    error_value=int(float(customer_data['total_error'])), )
 
-                if key == 'Error':
-                    for key, value in error_type.iteritems():
-                        if value:
-                            new_can = Externalerrors(employee_id=customer_data['employee_id'],
-                                            volume_type=customer_data['volume_type'],
-                                            date=customer_data['date'], error_type=key, error_value=int(float(value)), )
-                            try :
-                                pass
-                                #new_can.save()
-                            except :
-                                var = 'Duplicate Sheet'
-                                return HttpResponse(var)
+                for sh_name in sheet_index_dict.keys():
+                    if sh_name == 'Production':
+                        try :
+                            per_day_value = int(float(customer_data['cmplt_target']))
+                        except ValueError:
+                            per_day_value = 0
+                        new_can = RawTable(project=prj_obj, employee=customer_data['emp_id'],
+                                           volume_type=customer_data['volume_type'], per_hour=0,per_day=per_day_value,
+                                           date=customer_data['date'], norm=int(float(customer_data['target'])),team_lead=teamleader_obj_name,center = center_obj)
+                    if sh_name == 'Internal':
+                        new_can = Error(employee_id=customer_data['employee_id'],
+                                        volume_type=customer_data['volume_type'],
+                                        date=customer_data['date'], audited_errors=int(float(customer_data['audited'])),
+                                        error_value=int(float(customer_data['total_error'])), )
 
-                if key != 'Error':
-                    try:
-                        #print customer_data
-                        new_can.save()
-                    except:
-                        var = 'Duplicate Sheet'
-                        return HttpResponse(var)
-            if key == 'Production':
-                insert = redis_insert(prj_obj)
-            if key == 'Internal':
-                insert = redis_insert_two(prj_obj)
+                    if sh_name == 'Error':
+                        #import pdb;pdb.set_trace()
+                        for er_key, er_value in error_type.iteritems():
+                            if er_value:
+                                new_can = Externalerrors(employee_id=customer_data['employee_id'],
+                                                volume_type=customer_data['volume_type'],
+                                                date=customer_data['date'], error_type=er_key,agent_reply=customer_data['agent_reply'], error_value=int(float(er_value)), )
+                                try :
+                                    new_can.save()
+                                except :
+                                    var = 'Duplicate Sheet'
+                                    return HttpResponse(var)
+
+                    if sh_name != 'Error':
+                        try:
+                            print customer_data
+                            new_can.save()
+                        except:
+                            var = 'Duplicate Sheet'
+                            return HttpResponse(var)
+                if sh_name == 'Production':
+                    insert = redis_insert(prj_obj)
+                if sh_name == 'Internal':
+                    insert = redis_insert_two(prj_obj)
+    #var ="hai"
     return HttpResponse(var)
+
 
 def error_upload(request):
     customer_data = {}

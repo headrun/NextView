@@ -36,7 +36,8 @@ class ErrorAdmin(admin.ModelAdmin):
 admin.site.register(Error,ErrorAdmin)
 
 class ExternalerrorsAdmin(admin.ModelAdmin):
-    list_display = ['volume_type', 'error_type', 'error_value']
+    list_display = ['volume_type', 'error_type', 'error_value','agent_reply','date','employee_id']
+    list_filter = ('volume_type', 'date')
 admin.site.register(Externalerrors,ExternalerrorsAdmin)
 
 class AuthoringtableAdmin(admin.ModelAdmin):
