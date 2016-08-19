@@ -103,6 +103,7 @@ class Externalerrors(models.Model):
     error_value = models.IntegerField(max_length=255, default=0)
     date = models.DateField()
     employee_id = models.CharField(max_length=255, default='')
+    agent_reply = models.CharField(max_length=255, default='')
 
     class Meta:
         db_table = u'external_errors'
