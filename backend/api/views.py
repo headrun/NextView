@@ -237,6 +237,54 @@ def redis_insert_two(prj_obj):
         current_keys.append(key)
         conn.hmset(key, value)
 
+def redis_insert_three(prj_obj):
+    prj_name = prj_obj.name
+    data_dict = {}
+    #import pdb;pdb.set_trace()
+    volumes_list = Externalerrors.objects.values_list('volume_type',flat=True).distinct()
+    for volume in volumes_list:
+        value_dict = {}
+        dates_values = Externalerrors.objects.filter(volume_type=volume).values_list('date',flat=True).distinct()
+        for date in dates_values:
+            extr_error_data = {}
+            redis_key = '{0}_{1}_{2}_externalerror'.format(prj_name, volume, date)
+            avoidable_count = 0
+            concept_count = 0
+            total_error_count = 0
+            extranal_data = Externalerrors.objects.filter(date=date,volume_type=volume).values('error_type','error_value','agent_reply')
+            for ex_data in extranal_data:
+                #import pdb;pdb.set_trace()
+                if ex_data['agent_reply'] in ['Reverted']:
+                    if ex_data['error_type']== 'avoidable':
+                        avoidable_count = avoidable_count+int(ex_data['error_value'])
+                        total_error_count = int(ex_data['error_value']) + total_error_count
+                    if ex_data['error_type']== 'concept':
+                        concept_count = concept_count+ int(ex_data['error_value'])
+                else :
+                    if ex_data['error_type']== 'avoidable':
+                        avoidable_count = avoidable_count+int(ex_data['error_value'])
+                        #total_error_count = int(ex_data['error_value']) + total_error_count
+                    if ex_data['error_type']== 'concept':
+                        concept_count = concept_count+ int(ex_data['error_value'])
+                    total_error_count = int(ex_data['error_value']) + total_error_count
+            extr_error_data['avoidable'] = avoidable_count
+            extr_error_data['concept'] = concept_count
+            extr_error_data['total_errors'] = total_error_count
+            #import pdb;pdb.set_trace()
+            print extr_error_data
+            data_dict[redis_key]= extr_error_data
+
+    print data_dict
+
+    conn = redis.Redis(host="localhost", port=6379, db=0)
+    current_keys = []
+    for key, value in data_dict.iteritems():
+        current_keys.append(key)
+        conn.hmset(key, value)
+
+
+
+
 def upload(request):
     """if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES['myfile'])
@@ -286,7 +334,7 @@ def upload(request):
                 for column, col_idx in sheet_headers:
                     cell_data = get_cell_data(open_sheet, row_idx, col_idx)
                     #if key == 'Error':
-                    if column in ['avoidable','concept','total error'] and key == 'Error':
+                    if column in ['avoidable','concept'] and key == 'Error':
                         column_name = mapping_table.get(column, '')
                         error_type[column_name] = ''.join(cell_data)
                     elif column !="date" and column in mapping_table.keys():
@@ -298,7 +346,7 @@ def upload(request):
                         customer_data['date'] = ''.join(cell_data)
 
                 volume_dict = {'DataDownload':'DD', 'CompanyCoordinates':'CC' , 'DetailFinancial':'DF','GroupCompanies':'GC','FES':'FES' ,
-                               'Legal & CDR':'Legal' ,'DetailFinancial with FES ':'DF/FES','Charges':'Charges',
+                               'Legal & CDR':'Legal' ,'DetailFinancial with FES':'DFES','Charges':'Charges',
                                'Compliance':'Compliance' ,'LLP':'LLP','Manual Download' : 'MD'}
                 if customer_data['volume_type'] in volume_dict.keys():
                     customer_data['volume_type'] = volume_dict[customer_data['volume_type']]
@@ -338,10 +386,12 @@ def upload(request):
                         except:
                             var = 'Duplicate Sheet'
                             return HttpResponse(var)
-                if sh_name == 'Production':
-                    insert = redis_insert(prj_obj)
-                if sh_name == 'Internal':
-                    insert = redis_insert_two(prj_obj)
+            if key == 'Production':
+                insert = redis_insert(prj_obj)
+            if key == 'Internal':
+                insert = redis_insert_two(prj_obj)
+            if key == 'Error':
+                insert = redis_insert_three(prj_obj)
     #var ="hai"
     return HttpResponse(var)
 
