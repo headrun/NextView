@@ -577,7 +577,14 @@ def from_to(request):
                 extrnl_error_sum[volume_dict[vol]]=0
             else:
                 extrnl_error_sum[vol]=0
+    extr_err_acc_name = []
+    extr_err_acc_perc = []
+    for key,value in extr_err_accuracy.iteritems():
+        extr_err_acc_name.append(key)
+        extr_err_acc_perc.append(value)
     result['extr_err_accuracy'] = extr_err_accuracy
+    result['extr_err_accuracy']['extr_err_name'] = extr_err_acc_name
+    result['extr_err_accuracy']['extr_err_perc'] = extr_err_acc_perc
     result['extrn_error_count'] = extrnl_error_sum
     print result
     return HttpResponse(result)

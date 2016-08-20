@@ -391,6 +391,16 @@
         }]
 
               });
+              angular.extend(self.chartOptions6,{
+        xAxis: {
+            categories: self.high_data[0].extr_err_accuracy.extr_err_name
+        },
+        series: [{
+            name: 'Accuracy',
+            data: self.high_data[0].extr_err_accuracy.extr_err_perc
+        },]
+
+              });
 
            angular.extend(self.chartOptions, {
                chart: {
@@ -653,22 +663,19 @@
                     },
             };
             self.chartOptions6 = {
-            title: {
-            text: 'Monthly Average Temperature',
+                        title: {
+            text: '',
             x: -20 //center
         },
         subtitle: {
-            text: 'Source: WorldClimate.com',
+            text: '',
             x: -20
-        },
-        xAxis: {
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         },
         yAxis: {
             title: {
-                text: 'Temperature (°C)'
+                text: ''
             },
+            gridLineColor: 'a2a2a2',
             plotLines: [{
                 value: 0,
                 width: 1,
@@ -684,10 +691,6 @@
             verticalAlign: 'middle',
             borderWidth: 0
         },
-        series: [{
-            name: 'Tokyo',
-            data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
-        },]
             };
             self.hideLoading();
             self.names;
