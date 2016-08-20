@@ -1,2 +1,2 @@
-# bootstrap
-Bootstrap for Django - Angular Projects
+# Dashboard
+DAshboard for different voice and non voice projects

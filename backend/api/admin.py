@@ -37,11 +37,12 @@ admin.site.register(Error,ErrorAdmin)
 
 class ExternalerrorsAdmin(admin.ModelAdmin):
     list_display = ['volume_type', 'error_type', 'error_value','agent_reply','date','employee_id']
-    list_filter = ('volume_type', 'date')
+    list_filter = ('volume_type', 'date','agent_reply')
 admin.site.register(Externalerrors,ExternalerrorsAdmin)
 
 class AuthoringtableAdmin(admin.ModelAdmin):
     list_display = ['sheet_name','table_schema','sheet_field','project']
+    list_filter = ['sheet_name']
 admin.site.register(Authoringtable,AuthoringtableAdmin)
 
 from django.contrib.auth.forms import UserCreationForm
