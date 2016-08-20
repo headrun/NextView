@@ -44,13 +44,12 @@
                     console.log('Yesterday_data');
              });*/
 
-             $http({method:"GET", url:from_to_data}).success(function(result){
+              $http({method:"GET", url:from_to_data}).success(function(result){
                     self.high_data_pre = [];
                     var final_data = result.result;
                     console.log(final_data);
                     self.high_data_pre.push(final_data);
-                    //console.log(self.high_data_pre);
-                angular.extend(self.chartOptions5,{
+              angular.extend(self.chartOptions5,{
                 series: [{
                         name: 'Brands',
                         colorByPoint: true,
@@ -88,10 +87,8 @@
                             y: self.high_data_pre[0].error_count.CC
                         }]
                     }]
-             }); 
-
-
-        angular.extend(self.chartOptions4.yAxis.title,{
+             });
+              angular.extend(self.chartOptions4.yAxis.title,{
                 text: 'In Percentage'
               });  
               angular.extend(self.chartOptions4.plotOptions.series.point.events,{
@@ -141,7 +138,25 @@
 
              }]
              });
-                angular.extend(self.chartOptions, {
+              angular.extend(self.chartOptions3,{
+              series: [{
+            colorByPoint: true,
+            name: 'error count',
+            data: self.high_data_pre[0].volumes_data.volume_new_data,
+            dataLabels: {
+                enabled: true,
+                rotation: -90,
+                color: '#FFFFFF',
+                align: 'right',
+                y: 10, // 10 pixels down from the top
+                style: {
+                    fontSize: '13px',
+                    fontFamily: 'Verdana, sans-serif'
+                }
+            }
+        }]
+              });
+              angular.extend(self.chartOptions, {
                xAxis: {
                  categories: self.high_data_pre[0].data.date,
                  title: {
@@ -208,152 +223,7 @@
                 },
                 ]
              });
-
-           angular.extend(self.chartOptions2, {
-         chart: {
-            type: 'bar',
-            backgroundColor: "transparent"
-        },
-        title: {
-            text: ''
-        },
-        subtitle: {
-            text: ''
-        },
-        xAxis: {
-            gridLineColor: '#a2a2a2',
-            categories: ["MD","LLP","CC","DD","Compliance","Legal","Charges","GC","FES"],
-            title: {
-                text: null
-            }
-        },
-        yAxis: {
-            gridLineColor: 'a2a2a2',
-            min: 0,
-            title: {
-                text: 'total achieved',
-                align: 'high'
-            },
-            labels: {
-                overflow: 'justify'
-            }
-        },
-        tooltip: {
-            valueSuffix: ''
-        },
-       plotOptions: {
-            series : {
-                allowPointSelect: true,
-                    point: {
-                        events:{
-                            select: function(e) {
-                            console.log(e);
-                            $("#wpp_hello").html(e.target.category);
-                            $("#wpp_temp").html(e.target.y);
-                            $('#workpacket_per').modal('show');
-                        }
-                    }
-                    }
-                },
-
-            bar: {
-                dataLabels: {
-                    enabled: true
-                }
-            }
-        },
-        legend: {
-            layout: 'vertical',
-            align: 'right',
-            verticalAlign: 'top',
-            x: -40,
-            y: 80,
-            floating: true,
-            borderWidth: 1,
-            //backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
-            shadow: true
-        },
-        credits: {
-            enabled: false
-        },
-        series: [{
-            name: 'package',
-            data: [self.high_data_pre[0].volumes_data.volume_values.MD, self.high_data_pre[0].volumes_data.volume_values.LLP,
-            self.high_data_pre[0].volumes_data.volume_values.CC,self.high_data_pre[0].volumes_data.volume_values.DD,
-            self.high_data_pre[0].volumes_data.volume_values.Compliance,self.high_data_pre[0].volumes_data.volume_values.Legal,
-            self.high_data_pre[0].volumes_data.volume_values.Charges,self.high_data_pre[0].volumes_data.volume_values.GC,
-            self.high_data_pre[0].volumes_data.volume_values.FES]
-        }]
-             });
-
-            angular.extend(self.chartOptions3,{
-                    chart: {
-            type: 'column',
-            backgroundColor: "transparent"
-                },
-        title: {
-            text: ''
-        },
-        subtitle: {
-            text: ''
-        },
-        xAxis: {
-            type: 'category',
-            labels: {
-                rotation: -45,
-                style: {
-                    fontSize: '13px',
-                    fontFamily: 'Verdana, sans-serif'
-                }
-            }
-        },
-        yAxis: {
-            gridLineColor: 'a2a2a2',
-            gridLineDashStyle: 'solid',
-            min: 0,
-            title: {
-                text: 'total'
-            }
-        },
-        legend: {
-            enabled: false
-        },
-        plotOptions:{
-            series:{
-            allowPointSelect: true,
-             point: {
-                events:{
-                    select: function(e) {
-                    console.log(e);
-                    $("#pwe_hello").html(e.target.name);
-                    //$("#temp").html(e.target.y);
-                    $("#pwe_temp").html(e.target.y);
-                    $('#pwe_myModal').modal('show');
-                    }
-                }
-             }
-            }
-        },
-
-        series: [{
-            colorByPoint: true,
-            name: 'error count',
-            data: self.high_data_pre[0].volumes_data.volume_new_data,
-            dataLabels: {
-                enabled: true,
-                rotation: -90,
-                color: '#FFFFFF',
-                align: 'right',
-                y: 10, // 10 pixels down from the top
-                style: {
-                    fontSize: '13px',
-                    fontFamily: 'Verdana, sans-serif'
-                }
-            }
-        }]
-
-                    });
-                    });
+              });
 
 
             self.check = function() {
@@ -463,6 +333,25 @@
 
              }]
              });
+              angular.extend(self.chartOptions3,{
+                      series: [{
+            colorByPoint: true,
+            name: 'error count',
+            data: self.high_data[0].volumes_data.volume_new_data,
+            dataLabels: {
+                enabled: true,
+                rotation: -90,
+                color: '#FFFFFF',
+                align: 'right',
+                y: 10, // 10 pixels down from the top
+                style: {
+                    fontSize: '13px',
+                    fontFamily: 'Verdana, sans-serif'
+                }
+            }
+        }]
+
+              });
 
            angular.extend(self.chartOptions, {
                chart: {
@@ -560,88 +449,34 @@
                 ]
              });
 
-           angular.extend(self.chartOptions2, {
-           chart : {
-                 backgroundColor: "transparent",
-                 type: 'bar'
-               },
-        title: {
-            text: ''
-        },
-        subtitle: {
-            text: ''
-        },
-        xAxis: {
-            categories: ["MD","LLP","CC","DD","Compliance","Legal","Charges","GC","FES"],
-            //categories: ["DD"],
-            title: {
-                text: null
+                });
             }
-        },
-        yAxis: {
-            gridLineColor: 'a2a2a2',
-            min: 0,
-            title: {
-                text: 'total achieved',
-                align: 'high'
-            },
-            labels: {
-                overflow: 'justify'
-            }
-        },
-        tooltip: {
-            valueSuffix: ''
-        },
-       plotOptions: {
-            series : {
-                allowPointSelect: true,
-                    point: {
-                        events:{
-                            select: function(e) {
-                            console.log(e);
-                            $("#wpp_hello").html(e.target.category);
-                            $("#wpp_temp").html(e.target.y);
-                            $('#workpacket_per').modal('show');
-                        }
-                    }
-                    }
+
+            self.chartOptions = {
+                chart : {
+                 backgroundColor: "transparent"
                 },
-
-            bar: {
-                dataLabels: {
-                    enabled: true
+                               yAxis: {
+                gridLineColor: 'a2a2a2',
+                min: 0,
+                title: {
+                 text: 'per day achieved',
+                 align: 'high'
+                },
+                labels: {
+                 overflow: 'justify'
                 }
-            }
-        },
-        /*legend: {
-            layout: 'vertical',
-            align: 'right',
-            verticalAlign: 'top',
-            x: -40,
-            y: 80,
-            floating: true,
-            borderWidth: 1,
-            backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
-            shadow: true
-        },*/
-        credits: {
-            enabled: false
-        },
-        series: [{
-            name: 'Past Week',
-            //data:[self.high_data[0].volumes_data.volume_values.DD]
-            data:[self.high_data[0].volumes_data.volume_values.MD,
-            self.high_data[0].volumes_data.volume_values.LLP,self.high_data[0].volumes_data.volume_values.CC,
-            self.high_data[0].volumes_data.volume_values.DD,self.high_data[0].volumes_data.volume_values.Compliance,
-            self.high_data[0].volumes_data.volume_values.Legal,self.high_data[0].volumes_data.volume_values.Charges,
-            self.high_data[0].volumes_data.volume_values.GC,self.high_data[0].volumes_data.volume_values.FES]
+               },
 
-        }]
-
-             });
-
-            angular.extend(self.chartOptions3,{
-                    chart: {
+               tooltip: {
+                valueSuffix: ''
+               },
+               credits: {
+                enabled: false
+               },
+            };
+            self.chartOptions3 = {
+            chart: {
             type: 'column',
             backgroundColor: "transparent"
                 },
@@ -688,55 +523,7 @@
              }
             }
         },
-
-        series: [{
-            colorByPoint: true,
-            name: 'error count',
-            data: self.high_data[0].volumes_data.volume_new_data,
-            dataLabels: {
-                enabled: true,
-                rotation: -90,
-                color: '#FFFFFF',
-                align: 'right',
-                y: 10, // 10 pixels down from the top
-                style: {
-                    fontSize: '13px',
-                    fontFamily: 'Verdana, sans-serif'
-                }
-            }
-        }]
-
-                    });
-
-                });
-
-            }
-
-            self.chartOptions = {
-                chart : {
-                 backgroundColor: "transparent"
-                },
-                               yAxis: {
-                gridLineColor: 'a2a2a2',
-                min: 0,
-                title: {
-                 text: 'per day achieved',
-                 align: 'high'
-                },
-                labels: {
-                 overflow: 'justify'
-                }
-               },
-
-               tooltip: {
-                valueSuffix: ''
-               },
-               credits: {
-                enabled: false
-               },
             };
-            self.chartOptions2 = {};
-            self.chartOptions3 = {};
             self.chartOptions4 = {
             chart: {
                 type: 'column',
