@@ -282,7 +282,46 @@
                             y: self.high_data[0].error_count.CC
                         }]
                     }]  
-             }); 
+             });
+             angular.extend(self.chartOptions5_2,{
+                series: [{
+                        name: 'Brands',
+                        colorByPoint: true,
+                        data: [{
+                            name: 'DF',
+                            y: self.high_data[0].extrn_error_count.DF
+                        }, {
+                            name: 'DD',
+                            y: self.high_data[0].extrn_error_count.DD,
+                            sliced: true,
+                            selected: true
+                        }, {
+                            name: 'GC',
+                            y: self.high_data[0].extrn_error_count.GC
+                        }, {
+                            name: 'FES',
+                            y: self.high_data[0].extrn_error_count.FES
+                        }, {
+                            name: 'Compliance',
+                            y: self.high_data[0].extrn_error_count.Compliance
+                        }, {
+                            name: 'LLP',
+                            y: self.high_data[0].extrn_error_count.LLP
+                        }, {
+                            name: 'MD',
+                            y: self.high_data[0].extrn_error_count.MD
+                        }, {
+                            name: 'Charges',
+                            y: self.high_data[0].extrn_error_count.Charges
+                        }, {
+                            name: 'Legal',
+                            y: self.high_data[0].extrn_error_count.Legal
+                        }, {
+                            name: 'CC',
+                            y: self.high_data[0].extrn_error_count.CC
+                        }]
+                    }]
+             });
 
         angular.extend(self.chartOptions4.yAxis.title,{
                 text: 'In Percentage'
@@ -556,6 +595,35 @@
 
             };
             self.chartOptions5 = {
+                        chart: {
+                        backgroundColor: "transparent",
+               plotBackgroundColor: null,
+               plotBorderWidth: null,
+               plotShadow: false,
+               type: 'pie'
+            },
+            title: {
+               text: ''
+            },
+            tooltip: {
+               pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+               pie: {
+                   allowPointSelect: true,
+                   cursor: 'pointer',
+                   dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.y} ',
+                        style: {
+                             //color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'white'
+                             color:(Highcharts.theme && Highcharts.theme.background2) || '#EEE'
+                               }
+                            }
+                        }
+                    },
+            };
+            self.chartOptions5_2 = {
                         chart: {
                         backgroundColor: "transparent",
                plotBackgroundColor: null,
