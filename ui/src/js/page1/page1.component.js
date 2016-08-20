@@ -38,6 +38,10 @@
 
              var from_to_data = from_to + 'from=' + lastDate + '&to=' + firstDate;
 
+                self.first = firstDate;
+                self.last = lastDate;
+
+
              /*$http({method:"GET", url:yesterdays_data}).success(function(result){
                     self.high_data_yesterday = [];
                     self.high_data_yesterday.push(result.result);
@@ -234,9 +238,11 @@
                 $http.get(from_to + 'from=' + from + '&to=' + to).success(
                     function(data, status)
                     {
+                    self.first = from;
+                    self.second = to;
                         console.log('Sucess');
                     }).error(function(error){ console.log("error")});
-                var from_to_data = from_to + 'from=' + from + '&to=' + to
+                var from_to_data = from_to + 'from=' + from + '&to=' + to;
                 console.log(from_to_data);
                 $http({method:"GET", url:from_to_data}).success(function(result){
                     var final_data = result.result;
@@ -695,6 +701,8 @@
             self.hideLoading();
             self.names;
             self.names_2;
+            self.first;
+            self.last;
 
             }],
 
