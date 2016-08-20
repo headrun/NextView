@@ -97,6 +97,7 @@ class Error(models.Model):
     def __unicode__(self):
         return self.employee_id
 
+
 class Externalerrors(models.Model):
     volume_type = models.CharField(max_length=255, default='')
     error_type = models.CharField(max_length=255, default='')
@@ -111,6 +112,7 @@ class Externalerrors(models.Model):
 
     def __unicode__(self):
         return self.employee_id
+
 
 class Authoringtable(models.Model):
     project = models.ForeignKey(Project, null=True)

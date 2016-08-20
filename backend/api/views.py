@@ -120,7 +120,6 @@ def get_order_of_headers(open_sheet, Default_Headers, mandatory_fileds=[]):
         indexes.update({val: ind_sheet})
     return is_mandatory_available, sheet_indexes, indexes
 
-
 def validate_sheet(open_sheet, request, SOH_XL_HEADERS, SOH_XL_MAN_HEADERS):
     sheet_headers = []
     if open_sheet.nrows > 0:
@@ -282,9 +281,6 @@ def redis_insert_three(prj_obj):
         current_keys.append(key)
         conn.hmset(key, value)
 
-
-
-
 def upload(request):
     """if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES['myfile'])
@@ -408,7 +404,6 @@ def user_data(request):
         center_id = Nextwealthmanager.objects.filter(id=request.user.id).values_list('center_name')
         print center_id
     return HttpResponse(manager_dict)
-
 
 def from_to(request):
     from_date = datetime.datetime.strptime(request.GET['from'],'%Y-%m-%d').date()
@@ -582,12 +577,17 @@ def from_to(request):
                 extrnl_error_sum[volume_dict[vol]]=0
             else:
                 extrnl_error_sum[vol]=0
+    extr_err_acc_name = []
+    extr_err_acc_perc = []
+    for key,value in extr_err_accuracy.iteritems():
+        extr_err_acc_name.append(key)
+        extr_err_acc_perc.append(value)
     result['extr_err_accuracy'] = extr_err_accuracy
+    result['extr_err_accuracy']['extr_err_name'] = extr_err_acc_name
+    result['extr_err_accuracy']['extr_err_perc'] = extr_err_acc_perc
     result['extrn_error_count'] = extrnl_error_sum
     print result
     return HttpResponse(result)
-
-
 
 def chart_data(request):
     #import pdb;pdb.set_trace()
