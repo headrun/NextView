@@ -555,7 +555,7 @@ def from_to(request):
     extrnl_error_sum = {}
     for key,value in extrnl_error_values.iteritems():
         extrnl_error_sum[key] = sum(value)
-    result['extrn_error_count']= extrnl_error_sum
+
     #beow code for external erro accuracy
     packet_sum_data = result['volumes_data']['volume_values']
     #import pdb;pdb.set_trace()
@@ -566,7 +566,19 @@ def from_to(request):
             percentage = 100  - float('%.2f' % round(percentage, 2))
             extr_err_accuracy[er_key] = percentage
     #print extr_err_accuracy
+    for vol in volume_list:
+        if vol not in extr_err_accuracy.keys() and "DetailFinancial" not in vol:
+            if volume_dict.has_key(vol):
+                extr_err_accuracy[volume_dict[vol]]=0
+            else:
+                extr_err_accuracy[vol]=0
+        if vol not in extrnl_error_sum.keys() and "DetailFinancial" not in vol:
+            if volume_dict.has_key(vol):
+                extrnl_error_sum[volume_dict[vol]]=0
+            else:
+                extrnl_error_sum[vol]=0
     result['extr_err_accuracy'] = extr_err_accuracy
+    result['extrn_error_count'] = extrnl_error_sum
     print result
     return HttpResponse(result)
 
