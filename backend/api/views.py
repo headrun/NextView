@@ -17,7 +17,7 @@ from datetime import timedelta
 from datetime import date
 import re
 
-def dashboard_insert(request):
+"""def dashboard_insert(request):
     week_dates_list = []
     start_date = date.today() - timedelta(days=7)
     for i in range(0,7):
@@ -47,7 +47,7 @@ def dashboard_insert(request):
 
     result['data'] = volumes_dict 
     print result
-    return HttpResponse(result)
+    return HttpResponse(result)  """
 
 def error_insert(request):
     volumes_list = Error.objects.values_list('volume_type',flat=True).distinct()
@@ -426,6 +426,7 @@ def from_to(request):
     vol_audit_data = {}
     #below variable for external errors
     extrnl_error_values = {}
+    extrnl_err_type = {}
     for date_va in date_list:
         #below code for product,wpf graphs
         for vol_type in volume_list:
@@ -468,7 +469,7 @@ def from_to(request):
         #import pdb;pdb.set_trace()
         extr_key_pattern = '*{0}*_externalerror'.format(date_va)
         extr_key_list = conn.keys(pattern=extr_key_pattern)
-        # import pdb;pdb.set_trace()
+
         for cur_key in extr_key_list:
             var = conn.hgetall(cur_key)
             for key, value in var.iteritems():
@@ -478,6 +479,17 @@ def from_to(request):
                         extrnl_error_values[error_vol_type].append(int(value))
                     else:
                         extrnl_error_values[error_vol_type] = [int(value)]
+                else:
+                    if extrnl_err_type.has_key(error_vol_type):
+                        pass
+                    else:
+                        extrnl_err_type[error_vol_type]={}
+
+                    if extrnl_err_type[error_vol_type].has_key(key):
+                        extrnl_err_type[error_vol_type][key].append(int(value))
+                    else:
+                        extrnl_err_type[error_vol_type][key]=[int(value)]
+
     #below code for productivity,wpf graph
     volumes_data = result['data']['data']
     volume_bar_data = {}
@@ -539,7 +551,6 @@ def from_to(request):
             percentage = (float(error_volume_data[volume]) / error_audit_data[volume]) * 100
             percentage = float('%.2f' % round(percentage, 2))
             error_accuracy[volume] = percentage
-    #import pdb;pdb.set_trace()
     for vol in volume_list:
         if vol not in error_accuracy.keys() and "DetailFinancial" not in vol:
             if volume_dict.has_key(vol):
@@ -551,14 +562,12 @@ def from_to(request):
     result['error_count'] = error_volume_data
     result['accuracy_graph'] = error_accuracy
     #below code for external graphs
-    #import pdb;pdb.set_trace()
     extrnl_error_sum = {}
     for key,value in extrnl_error_values.iteritems():
         extrnl_error_sum[key] = sum(value)
 
     #beow code for external erro accuracy
     packet_sum_data = result['volumes_data']['volume_values']
-    #import pdb;pdb.set_trace()
     extr_err_accuracy={}
     for er_key,er_value in extrnl_error_sum.iteritems():
         if packet_sum_data.has_key(er_key):
@@ -582,6 +591,21 @@ def from_to(request):
     for key,value in extr_err_accuracy.iteritems():
         extr_err_acc_name.append(key)
         extr_err_acc_perc.append(value)
+    err_type_keys=[]
+    err_type_avod = []
+    err_type_concept =[]
+    for key,value in extrnl_err_type.iteritems():
+        err_type_keys.append(key)
+        for avod_key,avod_value in value.iteritems():
+            extrnl_err_type[key][avod_key] = sum(avod_value)
+            if avod_key == 'avoidable':
+                err_type_avod.append(extrnl_err_type[key][avod_key])
+            if avod_key == 'concept':
+                err_type_concept.append(extrnl_err_type[key][avod_key])
+    result['error_types'] = {}
+    result ['error_types']['err_type_keys'] = err_type_keys
+    result['error_types']['err_type_avod'] = err_type_avod
+    result['error_types']['err_type_concept'] = err_type_concept
     result['extr_err_accuracy'] = extr_err_accuracy
     result['extr_err_accuracy']['extr_err_name'] = extr_err_acc_name
     result['extr_err_accuracy']['extr_err_perc'] = extr_err_acc_perc
@@ -590,7 +614,6 @@ def from_to(request):
     return HttpResponse(result)
 
 def chart_data(request):
-    #import pdb;pdb.set_trace()
     to_date = datetime.datetime.strptime(request.GET['date'], '%Y-%m-%d').date()
     work_packet = str(request.GET['packet'])
     packet_dict = {}
@@ -598,7 +621,6 @@ def chart_data(request):
     packet_values = RawTable.objects.filter(date=to_date,volume_type=work_packet).values_list('per_day',flat=True)
     emp_names= [x.encode('UTF8') for x in emp_name]
     work_packet_values = [int(x) for x in packet_values]
-    #import pdb;pdb.set_trace()
 
     final_data=[]
     packet_dict['emp_names']=emp_names
