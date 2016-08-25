@@ -42,9 +42,14 @@
                 },
                 function(newVal){
                     if (newVal.state) {
-                        self.location = newVal.state.split(' - ')[0];
-                        self.project = newVal.state.split(' - ')[1];
+                        self.location = newVal.state.split(' - ')[0] + ' - ';
+                        self.project = newVal.state.split(' - ')[1] + ' - ';
                         self.tabData.state = JSON.parse("{}");
+                        var from_to_data = from_to + 'from=' + lastDate + '&to=' + firstDate + '&project=' + self.project
+                         + '&center=' + self.location;
+                         $http({method:"GET", url:from_to_data}).success(function(result){
+                            console.log('Inside from to');
+                         });
                     }
                 });
              };
@@ -52,11 +57,11 @@
                return unWatch && unWatch();
              }
 
-             $http.get(from_to + 'from=' + lastDate + '&to=' + firstDate).success(
+             /*$http.get(from_to + 'from=' + lastDate + '&to=' + firstDate).success(
                     function(data, status)
                     {
                         console.log('Sucess');
-                    }).error(function(error){ console.log("error")});
+                    }).error(function(error){ console.log("error")});*/
 
              var from_to_data = from_to + 'from=' + lastDate + '&to=' + firstDate;
 

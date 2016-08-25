@@ -425,6 +425,8 @@ def user_data(request):
 def from_to(request):
     from_date = datetime.datetime.strptime(request.GET['from'],'%Y-%m-%d').date()
     to_date = datetime.datetime.strptime(request.GET['to'],'%Y-%m-%d').date()
+    project = request.GET['project']
+    center = request.GET['center']
     date_list = []
     no_of_days = to_date-from_date
     no_of_days = int(re.findall('\d+',str(no_of_days))[0])

@@ -38,7 +38,6 @@
               //self.projects_list = ['realshopee', 'dell', 'probe'];
               //self.centers_list = ['hubli', 'salem'];
               self.clickFun = function(val){
-              
                 console.log('Yesh clicked');
                 //self.selectedValue = val;
                 //var page = "page1";

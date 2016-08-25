@@ -85,7 +85,6 @@ DATABASES = {
         },
         'NAME': 'nextview',
         'USER': 'root',
-        'PASSWORD': 'deva123',
         'HOST': 'localhost',
     }
 }
