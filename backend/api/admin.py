@@ -28,7 +28,7 @@ admin.site.register(Nextwealthmanager,NextwealthmanagerAdmin)
 
 class RawtableAdmin(admin.ModelAdmin):
     list_display = ['employee','volume_type','per_day','per_hour','norm','date','created_at','modified_at']
-    list_filter = ('volume_type', 'date')
+    list_filter = ('volume_type', 'date','project')
 admin.site.register(RawTable,RawtableAdmin)
 
 class ErrorAdmin(admin.ModelAdmin):

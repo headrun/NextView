@@ -3,7 +3,7 @@ from django.contrib import admin
 
 urlpatterns = [ 
     # Examples:
-    url(r'^board','api.views.dashboard_insert', name="dashboard_insert"),
+    #url(r'^board','api.views.dashboard_insert', name="dashboard_insert"),
     url(r'^error_board','api.views.error_insert', name="error_insert"),
     #url(r'^upload/','api.views.upload', name="upload"),
     url(r'^upload/','api.views.upload', name="upload"),
