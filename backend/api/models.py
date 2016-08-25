@@ -35,8 +35,8 @@ class TeamLead(models.Model):
 
 class Customer(models.Model):
     name    = models.ForeignKey(User, null=True)
-    center  = models.ForeignKey(Center, null=True)
-    project = models.ForeignKey(Project, null=True)
+    center  = models.ManyToManyField(Center, null=True)
+    project = models.ManyToManyField(Project, null=True)
 
     class Meta:
         db_table = u'customer'

@@ -5,9 +5,9 @@
          .component("page1", {
 
            "templateUrl": "/js/page1/page1.html",
-           "controller": ['$http',
+           "controller": ['$http','$scope',
 
-           function ($http) {
+           function ($http,$scope) {
 
              var self = this;
              var from_to = '/api/from_to/?'
@@ -29,6 +29,28 @@
 
              console.log(firstDate);
              console.log(lastDate);
+             self.updateState();
+             console.log('Hello from page1 yesh');
+             //console.log(self.updateState);
+             //console.log(self.selectedValue);
+
+             $scope.options = self.tabData;
+             var unWatch;
+             this.$onInit = function () {
+                unWatch = $scope.$watch(function(scope) {
+                    return scope.options.state;
+                },
+                function(newVal){
+                    if (newVal.state) {
+                        self.location = newVal.state.split(' - ')[0];
+                        self.project = newVal.state.split(' - ')[1];
+                        self.tabData.state = JSON.parse("{}");
+                    }
+                });
+             };
+             this.$onDestroy = function () {
+               return unWatch && unWatch();
+             }
 
              $http.get(from_to + 'from=' + lastDate + '&to=' + firstDate).success(
                     function(data, status)
@@ -37,6 +59,10 @@
                     }).error(function(error){ console.log("error")});
 
              var from_to_data = from_to + 'from=' + lastDate + '&to=' + firstDate;
+
+                self.first = firstDate;
+                self.last = lastDate;
+
 
              /*$http({method:"GET", url:yesterdays_data}).success(function(result){
                     self.high_data_yesterday = [];
@@ -234,9 +260,11 @@
                 $http.get(from_to + 'from=' + from + '&to=' + to).success(
                     function(data, status)
                     {
+                    self.first = from;
+                    self.second = to;
                         console.log('Sucess');
                     }).error(function(error){ console.log("error")});
-                var from_to_data = from_to + 'from=' + from + '&to=' + to
+                var from_to_data = from_to + 'from=' + from + '&to=' + to;
                 console.log(from_to_data);
                 $http({method:"GET", url:from_to_data}).success(function(result){
                     var final_data = result.result;
@@ -695,13 +723,21 @@
             self.hideLoading();
             self.names;
             self.names_2;
+            self.first;
+            self.last;
+            self.location = '';
+            self.project = '';
 
             }],
 
             "bindings": {
 
               "hideLoading": "&",
-              "showLoading": "&"
+              "showLoading": "&",
+              "updateState": "&",
+              "selectedValue": "=",
+              "selectDropdown": "&",
+              "tabData": "<"
             }
          });
 

@@ -106,9 +106,26 @@ def project(request):
             dict['cen_pro'][cant_name] = var
         return HttpResponse(dict)
     if 'customer' in user_group:
-        prj_id = Customer.objects.filter(name_id=request.user.id).values_list('project')[0][0]
-        project = str(Project.objects.filter(id=prj_id)[0])
-        return HttpResponse(project)
+        details = {}
+        select_list = []
+        center_list = Customer.objects.filter(name_id=request.user.id).values_list('center')
+        project_list = Customer.objects.filter(name_id=request.user.id).values_list('project')
+        if (len(center_list) & len(project_list)) == 1:
+            select_list.append('none')
+        if len(center_list) < 2:
+            center_name = str(Center.objects.filter(id=center_list[0][0])[0])
+            for project in project_list:
+                project_name = str(Project.objects.filter(id=project[0])[0])
+                select_list.append(center_name + ' - ' + project_name)
+        elif len(center_list) >= 2:
+            for center in center_list:
+                center_name = str(Center.objects.filter(id=center[0])[0])
+                for project in project_list:
+                    project_name = str(Project.objects.filter(id=project[0])[0])
+                    select_list.append(center_name + ' - ' + project_name)
+        details['list'] = select_list
+        details['role'] = 'customer'
+        return HttpResponse(details)
 
 def redis_insert(prj_obj):
     prj_name = prj_obj.name
