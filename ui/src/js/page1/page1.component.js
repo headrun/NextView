@@ -5,9 +5,9 @@
          .component("page1", {
 
            "templateUrl": "/js/page1/page1.html",
-           "controller": ['$http',
+           "controller": ['$http','$scope',
 
-           function ($http) {
+           function ($http,$scope) {
 
              var self = this;
              var from_to = '/api/from_to/?'
@@ -29,6 +29,28 @@
 
              console.log(firstDate);
              console.log(lastDate);
+             self.updateState();
+             console.log('Hello from page1 yesh');
+             //console.log(self.updateState);
+             //console.log(self.selectedValue);
+
+             $scope.options = self.tabData;
+             var unWatch;
+             this.$onInit = function () {
+                unWatch = $scope.$watch(function(scope) {
+                    return scope.options.state;
+                },
+                function(newVal){
+                    if (newVal.state) {
+                        self.location = newVal.state.split(' - ')[0];
+                        self.project = newVal.state.split(' - ')[1];
+                        self.tabData.state = JSON.parse("{}");
+                    }
+                });
+             };
+             this.$onDestroy = function () {
+               return unWatch && unWatch();
+             }
 
              $http.get(from_to + 'from=' + lastDate + '&to=' + firstDate).success(
                     function(data, status)
@@ -703,13 +725,19 @@
             self.names_2;
             self.first;
             self.last;
+            self.location = '';
+            self.project = '';
 
             }],
 
             "bindings": {
 
               "hideLoading": "&",
-              "showLoading": "&"
+              "showLoading": "&",
+              "updateState": "&",
+              "selectedValue": "=",
+              "selectDropdown": "&",
+              "tabData": "<"
             }
          });
 

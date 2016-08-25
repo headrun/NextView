@@ -2,7 +2,10 @@
 
   <header active-tab="$ctrl.activePage"
           tabs="$ctrl.pages"
-          tabs-order="$ctrl.pagesOrder"></header>
+          tabs-order="$ctrl.pagesOrder"
+          update-state="$ctrl.updateState(pageName, state)"
+          selected-value="$ctrl.selectedValue"
+          select-dropdown="$ctrl.selectDropdown"></header>
 
   <div class="dashboard-content" ui-view
        autoscroll="false"></div>

@@ -21,6 +21,7 @@ float: none;
 margin-bottom:0px;
 }
 </style>
+
 <nav class="navbar navbar-default"
      ng-class="{collapsed: $ctrl.collapsed}"style="border-top-color: black;border-left-color: black;">
          <div class="navbar-header">
@@ -29,19 +30,30 @@ margin-bottom:0px;
                  <div>
                     <ul class="nav navbar-nav pull-right" style="float:right;">
             <li>
-                <div class="dropdown" id='only_project_dropdown'>
+                <!--<p>{{$ctrl.mapping_list}}</p>-->
+                <div class="dropdown" id="select_dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Select
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li ng-repeat="item in $ctrl.mapping_list">
+                            <a href="" ng-click="$ctrl.clickFun(item)">{{item}}</a>
+                        </li>
+                        <!--<li><a href="#">HTML</a></li>
+                        <li><a href="#">CSS</a></li>
+                        <li><a href="#">JavaScript</a></li>-->
+                    </ul>
+                </div>
+                <!--<div class="dropdown" id='only_project_dropdown'>
                     <button class="btn btn-primary dropdown-toggle"style="background-color:black;border-color:white;margin-right:0px;" type="button" data-toggle="dropdown">Project
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" style="min-width:0px;">
                         <li><a href="#!/page1">Probe</a></li>
                         <li><a href="#!/page3">Dell</a></li>
-                        <!--<li ng-repeat="pro in $ctrl.proj_list">
-                            <a href="" ng-click="$ctrl.clickFun(pro)" style="padding-top:0px;padding-bottom:0px;margin-right:0px;">{{pro}}</a>
-                        </li>-->
                     </ul>
-                </div>
-                <div>
+                </div>-->
+                <!--<div>
                     <select id="center_dropdown" ng-model="projects" ng-options="center for (center, projects) in $ctrl.centers"style="background-color:#0a0909;border-color:white;margin-top:12px;border-radius:0.2em;">
                         <option value=''>Center</option>
                     </select>
@@ -49,7 +61,7 @@ margin-bottom:0px;
                             ng-change="$ctrl.onChange(page)"style="background-color:#0a0909;border-color:white;margin-top:12px;border-radius:0.2em;">
                         <option value=''>Project</option>
                     </select>
-                </div>
+                </div>-->
             </li>
             <li>
                <div id="fileupload" class="upload">
