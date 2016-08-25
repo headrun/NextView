@@ -124,3 +124,15 @@ class Authoringtable(models.Model):
         db_table = u'authoring_table'
     def __unicode__(self):
         return self.table_schema
+
+class Document(models.Model):
+    document = models.FileField(upload_to='media/preprocessing/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    #status = models.IntegerField(max_length=2, default=0)
+    description = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        db_table = u'upload_table'
+
+    def __unicode__(self):
+        return self.description
