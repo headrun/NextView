@@ -127,18 +127,19 @@ def project(request):
         details['role'] = 'customer'
         return HttpResponse(details)
 
-def redis_insert(prj_obj):
+def redis_insert(prj_obj,center_obj):
     prj_name = prj_obj.name
+    center_name = center_obj.name
     data_dict = {}
-    dates_list = RawTable.objects.filter(project=prj_obj).values_list('date').distinct()
+    dates_list = RawTable.objects.filter(project=prj_obj,center=center_obj).values_list('date').distinct()
     all_dates = []
     for date in dates_list:
         part_date = str(date[0].date())
         all_dates.append(part_date)
-        volumes_list = RawTable.objects.filter(date=date[0],project=prj_obj).values_list('volume_type').distinct()
+        volumes_list = RawTable.objects.filter(date=date[0],project=prj_obj,center=center_obj ).values_list('volume_type').distinct()
         for volume in volumes_list:
             value_dict = {}
-            redis_key = '{0}_{1}_{2}'.format(prj_name,volume[0],part_date)
+            redis_key = '{0}_{1}_{2}_{3}'.format(prj_name,center_name,volume[0],part_date)
             total = RawTable.objects.filter(volume_type=volume[0],date=date[0]).values_list('per_day').aggregate(Sum('per_day'))
             value_dict[str(volume[0])] = str(total['per_day__sum'])
             data_dict[redis_key] = value_dict
@@ -150,8 +151,9 @@ def redis_insert(prj_obj):
         current_keys.append(key)
         conn.hmset(key,value)
 
-def redis_insert_two(prj_obj):
+def redis_insert_two(prj_obj,center_obj):
     prj_name = prj_obj.name
+    center_name = center_obj.name
     data_dict = {}
     #import pdb;pdb.set_trace()
     volumes_list = Error.objects.values_list('volume_type',flat=True).distinct()
@@ -160,7 +162,7 @@ def redis_insert_two(prj_obj):
         dates_values = Error.objects.filter(volume_type=volume).values_list('date',flat=True)
         for date in dates_values:
             error_data = {}
-            redis_key = '{0}_{1}_{2}_error'.format(prj_name, volume, date)
+            redis_key = '{0}_{1}_{2}_{3}_error'.format(prj_name,center_name, volume, date)
             audited_values = Error.objects.filter(date=date,volume_type=volume).values_list('audited_errors',flat=True)
             total_errors = Error.objects.filter(date=date,volume_type=volume).values_list('error_value',flat=True)
             error_data['audited_values'] = int(sum(audited_values))
@@ -175,17 +177,17 @@ def redis_insert_two(prj_obj):
         current_keys.append(key)
         conn.hmset(key, value)
 
-def redis_insert_three(prj_obj):
+def redis_insert_three(prj_obj,center_obj):
     prj_name = prj_obj.name
+    center_name = center_obj.name
     data_dict = {}
-    #import pdb;pdb.set_trace()
     volumes_list = Externalerrors.objects.values_list('volume_type',flat=True).distinct()
     for volume in volumes_list:
         value_dict = {}
         dates_values = Externalerrors.objects.filter(volume_type=volume).values_list('date',flat=True).distinct()
         for date in dates_values:
             extr_error_data = {}
-            redis_key = '{0}_{1}_{2}_externalerror'.format(prj_name, volume, date)
+            redis_key = '{0}_{1}_{2}_{3}_externalerror'.format(prj_name,center_name, volume, date)
             avoidable_count = 0
             concept_count = 0
             total_error_count = 0
@@ -230,7 +232,8 @@ def upload(request):
     teamleader_obj_name = TeamLead.objects.filter(name_id=request.user.id)[0]
     teamleader_obj = TeamLead.objects.filter(name_id=request.user.id).values_list('project_id')[0][0]
     prj_obj = Project.objects.filter(id=teamleader_obj)[0]
-    center_obj = Center.objects.filter(id=Project.objects.filter(id=teamleader_obj).values_list('center_id',flat=True)[0])[0]
+    #center_obj = Center.objects.filter(id=Project.objects.filter(id=teamleader_obj).values_list('center_id',flat=True)[0])[0]
+    center_obj = Center.objects.filter(id=Project.objects.filter(id=teamleader_obj).values_list('center_id', flat=True)[0])[0]
     fname = request.FILES['myfile']
     var = fname.name.split('.')[-1].lower()
     if var not in ['xls', 'xlsx', 'xlsb']:
@@ -288,7 +291,7 @@ def upload(request):
                 dell_volmes = ['Demo','Demo Check','Charge','Copay' ,'Payment']
                 if key in ['Production','Rawdata']:
                     rec_status = 0
-                    if prj_obj.name != "Dell":
+                    if prj_obj.name == "Dell":
                         rec_status =rec_status +1
                         try :
                             per_day_value = int(float(customer_data['cmplt_target']))
@@ -331,11 +334,11 @@ def upload(request):
                         var = 'Duplicate Sheet'
                         return HttpResponse(var)
         if key in ['Production','Rawdata']:
-            insert = redis_insert(prj_obj)
+            insert = redis_insert(prj_obj,center_obj)
         if key == 'Internal':
-            insert = redis_insert_two(prj_obj)
+            insert = redis_insert_two(prj_obj,center_obj)
         if key == 'Error':
-            insert = redis_insert_three(prj_obj)
+            insert = redis_insert_three(prj_obj,center_obj)
     return HttpResponse(var)
 
 def user_data(request):

@@ -42,7 +42,7 @@ admin.site.register(Externalerrors,ExternalerrorsAdmin)
 
 class AuthoringtableAdmin(admin.ModelAdmin):
     list_display = ['sheet_name','table_schema','sheet_field','project']
-    list_filter = ['sheet_name']
+    list_filter = ['sheet_name','project']
 admin.site.register(Authoringtable,AuthoringtableAdmin)
 
 from django.contrib.auth.forms import UserCreationForm
