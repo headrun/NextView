@@ -30,10 +30,13 @@
               };
 
   var sharedProps = [{"name": "show-loading", "value": "$ctrl.showLoading()"},
-		     {"name": "hide-loading", "value": "$ctrl.hideLoading()"}];
+		     {"name": "hide-loading", "value": "$ctrl.hideLoading()"},
+		     {"name": "tab-data", "value":"$ctrl.tab"}];
 
   // If one uses a menu bar, the order of appearance is here
   var pagesOrder = ["page1", "page2", "page3"];
+
+  var stre = 'Hello';
 
   angular.module("dashboard")
          .component("dashboard", {
@@ -66,6 +69,11 @@
 
                this.pages = pages;
                this.pagesOrder = pagesOrder;
+               this.selectDropdown = function(str) {
+
+               }
+
+               this.selectedValue = stre;
 
                // Update URL without refresh (maintaining state in URL)
                function updateUrl (pageName) {
@@ -87,14 +95,14 @@
                this.updateState = function (pageName, state) {
 
                  state = state || {};
+                 this.tab = this.pages[pageName];
 
-                 var tab = this.pages[pageName];
-
-                 tab.state = state;
-                 tab.stateStr = JSON.stringify(state);
+                 this.tab.state = state;
+                 this.tab.stateStr = JSON.stringify(state);
 
                  this.setActivePage(pageName);
                  updateUrl(pageName);
+
                };
 
                // on navigation, update the state of current page
@@ -133,8 +141,11 @@
                }
 
                // Update the state of current page when the component is rendered
+
                this.updateState(stateName,
                                 JSON.parse($state.params.state || "{}"));
+               this.selectDropdown(stre);
+
              }]
          });
 

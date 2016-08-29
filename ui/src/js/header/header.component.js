@@ -12,8 +12,6 @@
 
                this.user = Session.get();
 
-
-
                 if (this.user.roles.indexOf("team_lead") >= 0) {
                     this.user.role = "Team Lead";
                 }
@@ -26,27 +24,12 @@
                 if (this.user.roles.indexOf("nextwealth_manager") >= 0) {
                     this.user.role = "Nextwealth Manager";
                 }
-
-                if((this.user.role == "Customer") || (this.user.role == "Team Lead") ){
-                    $('#center_dropdown').hide();
-                    $('#project_dropdown').hide();
-                    $('#only_project_dropdown').hide();
-                if (this.user.role == "Customer"){
+                if (this.user.role == "Customer") {
                     $('#fileupload').hide();
-                    $('#only_project_dropdown').hide();
-                    }
                 }
-                if((this.user.role == "Nextwealth Manager") || (this.user.role == "Center Manager")){
-                    $('#fileupload').hide();
-                if (this.user.role == "Center Manager"){
-                    $('#center_dropdown').hide();
-                    $('#project_dropdown').hide();
-                    }
-                if(this.user.role == "Nextwealth Manager"){
-                    $('#only_project_dropdown').hide();
+                if (this.user.role == "Team Lead") {
+                    $('#select_dropdown').hide();
                 }
-                }
-
                this.collapsed = false;
 
                this.toggleCollapse = function () {
@@ -54,29 +37,57 @@
                this.collapsed = !this.collapsed;
                }
               var project = 'api/project/';
-              self.projects_list = ['realshopee', 'dell', 'probe'];
-              self.centers_list = ['hubli', 'salem'];
-              
+              //self.projects_list = ['realshopee', 'dell', 'probe'];
+              //self.centers_list = ['hubli', 'salem'];
               self.clickFun = function(val){
-                console.log(val);
-                self.project_name = self.center + ' - ' + val;
+                console.log('Yesh clicked');
+                //self.selectedValue = val;
+                //var page = "page1";
+                self.cen_pro_name['state'] = val;
+                val = '';
+                self.updateState({'state':self.cen_pro_name, 'pageName':'page1'});
+                //self.updateState({'state':JSON.parse("{}"), 'pageName':'page1'});
+                //self.cen_pro_name = {};
+                //var resp_list = val.split(' - ');
+                //console.log(resp_list);
+                //self.cen_pro_name = val;
+                //var page = "page1";
+                //console.log(self.cen_pro_name);
+                //var page = "page1";
+
+                //self.selectDropdown({'state':self.cen_pro_name});
+
+                //self.pro_name = resp_list[1];
+                //self.project_name = self.center + ' - ' + val;
               }
-              self.clickFun = function(val){
+              /*self.clickFun = function(val){
                 self.project_name = self.center + ' - ' + val;
               }
               self.clickFun2 = function(val){
                 self.project_name = val + ' - ' + self.ppp;
-              }
+              }*/
 
                 self.onChange = function(page) {
                     location.href = '#!'+page;
                    //$location.path('/'+page);
                 }
 
+
               $http({method:"GET", url:project}).success(function(result){
 
+                //console.log('from project api');
+                //console.log(result.result.list[0]);
 
-                if (result.result['role'] == "center_manager")
+                if (result.result.role == "customer") {
+                    if (result.result.list[0] == "none") {
+                        $('#select_dropdown').hide();
+                    }
+                    var map_list = result.result.list;
+                    self.mapping_list = map_list;
+                }
+
+
+                /*if (result.result['role'] == "center_manager")
                     {
                     var center = result.result['center'];
                     self.center = center;
@@ -112,22 +123,31 @@
 
 
                 }
+                else if (result.result['role'] == "customer"){
+                    console.log('Customer logged in');
+                }
                 else {
                     self.project_name = result.result;
-                    }
+                    }*/
                 //console.log(self.project_name);
               });
               self.project_name = '';
               self.proj_list = '';
               self.center = '';
               self.ppp = '';
+              self.mapping_list = '';
               self.center_list = [];
+              self.cen_pro_name = {};
+              //self.pro_name = '';
              }
            ],
            "bindings": {
-             "tabsOrder": "<",
-             "tabs"     : "<",
-             "activeTab": "<"
+             "tabsOrder"  : "<",
+             "tabs"       : "<",
+             "activeTab"  : "<",
+             "updateState": "&",
+             "selectedValue": "=",
+             "selectDropdown": "&"
            }
          });
 }(window.angular));

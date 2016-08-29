@@ -14,4 +14,6 @@ urlpatterns = [
     url(r'^chart_data/', 'api.views.chart_data', name="chart_data"),
     url(r'^yesterdays_data/', 'api.views.yesterdays_data', name="yesterdays_data"),
     #url(r'^error_upload/','api.views.error_upload', name="error_upload"),
+    #url(r'^def_display/', 'api.views.default_display', name="default_display"),
+
 ]

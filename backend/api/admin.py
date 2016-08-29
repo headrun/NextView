@@ -28,11 +28,12 @@ admin.site.register(Nextwealthmanager,NextwealthmanagerAdmin)
 
 class RawtableAdmin(admin.ModelAdmin):
     list_display = ['employee','volume_type','per_day','per_hour','norm','date','created_at','modified_at']
-    list_filter = ('volume_type', 'date')
+    list_filter = ('volume_type', 'date','project')
 admin.site.register(RawTable,RawtableAdmin)
 
 class ErrorAdmin(admin.ModelAdmin):
     list_display = ['volume_type','audited_errors','error_value']
+    list_filter = ('volume_type','audited_errors')
 admin.site.register(Error,ErrorAdmin)
 
 class ExternalerrorsAdmin(admin.ModelAdmin):
@@ -42,7 +43,7 @@ admin.site.register(Externalerrors,ExternalerrorsAdmin)
 
 class AuthoringtableAdmin(admin.ModelAdmin):
     list_display = ['sheet_name','table_schema','sheet_field','project']
-    list_filter = ['sheet_name']
+    list_filter = ['sheet_name','project']
 admin.site.register(Authoringtable,AuthoringtableAdmin)
 
 from django.contrib.auth.forms import UserCreationForm
