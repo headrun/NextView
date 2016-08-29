@@ -42,6 +42,10 @@ def get_order_of_headers(open_sheet, Default_Headers, mandatory_fileds=[]):
         indexes.update({val: ind_sheet})
     return is_mandatory_available, sheet_indexes, indexes
 
+"""def default_display(request):
+    import pdb;pdb.set_trace()
+    return HttpResponse('Hello hello')"""
+
 def validate_sheet(open_sheet, request, SOH_XL_HEADERS, SOH_XL_MAN_HEADERS):
     sheet_headers = []
     if open_sheet.nrows > 0:
@@ -230,10 +234,11 @@ def upload(request):
             var = "general"
             newdoc.save()"""
     teamleader_obj_name = TeamLead.objects.filter(name_id=request.user.id)[0]
-    teamleader_obj = TeamLead.objects.filter(name_id=request.user.id).values_list('project_id')[0][0]
-    prj_obj = Project.objects.filter(id=teamleader_obj)[0]
+    teamleader_obj = TeamLead.objects.filter(name_id=request.user.id).values_list('project_id','center_id')[0]
+    prj_obj = Project.objects.filter(id=teamleader_obj[0])[0]
+    center_obj = Center.objects.filter(id=teamleader_obj[1])[0]
     #center_obj = Center.objects.filter(id=Project.objects.filter(id=teamleader_obj).values_list('center_id',flat=True)[0])[0]
-    center_obj = Center.objects.filter(id=Project.objects.filter(id=teamleader_obj).values_list('center_id', flat=True)[0])[0]
+    #center_obj = Center.objects.filter(id=Project.objects.filter(id=teamleader_obj).values_list('center_id', flat=True)[0])[0]
     fname = request.FILES['myfile']
     var = fname.name.split('.')[-1].lower()
     if var not in ['xls', 'xlsx', 'xlsb']:
@@ -245,6 +250,7 @@ def upload(request):
         except:
             return HttpResponse("Invalid File")
         excel_sheet_names = open_book.sheet_names()
+
         file_sheet_name = Authoringtable.objects.filter(project=prj_obj).values_list('sheet_name',flat=True).distinct()
         file_sheet_names = [x.encode('UTF8') for x in file_sheet_name]
         sheet_index_dict = {}
@@ -255,19 +261,19 @@ def upload(request):
             customer_data = {}
             open_sheet = open_book.sheet_by_index(value)
             SOH_XL_HEADERS = open_sheet.row_values(0)
-            main_headers = Authoringtable.objects.filter(sheet_name=key).values_list('sheet_field',flat=True)
+            main_headers = Authoringtable.objects.filter(sheet_name=key,project=prj_obj).values_list('sheet_field',flat=True)
             sheet_main_headers = [x.encode('UTF8') for x in main_headers]
-            table_schema = Authoringtable.objects.filter(sheet_name=key).values_list('table_schema',flat=True)
+            table_schema = Authoringtable.objects.filter(sheet_name=key,project=prj_obj).values_list('table_schema',flat=True)
             table_schema = [x.encode('UTF8') for x in table_schema]
             mapping_table={}
             for sh_filed,t_field in zip(sheet_main_headers,table_schema):
                 mapping_table[sh_filed] = t_field
             SOH_XL_MAN_HEADERS = [x.title() for x in main_headers]
-            sheet_headers = validate_sheet(open_sheet, request,SOH_XL_HEADERS,SOH_XL_MAN_HEADERS)
-
+            sheet_headers = validate_sheet(open_sheet,request,SOH_XL_HEADERS,SOH_XL_MAN_HEADERS)
             for row_idx in range(1, open_sheet.nrows):
                 error_type = {}
                 for column, col_idx in sheet_headers:
+
                     cell_data = get_cell_data(open_sheet, row_idx, col_idx)
                     if column in ['avoidable','concept'] and key == 'Error':
                         column_name = mapping_table.get(column, '')
@@ -289,9 +295,10 @@ def upload(request):
             #for sh_name in sheet_index_dict.keys():
                 new_can = 0
                 dell_volmes = ['Demo','Demo Check','Charge','Copay' ,'Payment']
+
                 if key in ['Production','Rawdata']:
                     rec_status = 0
-                    if prj_obj.name == "Dell":
+                    if prj_obj.name != "Dell":
                         rec_status =rec_status +1
                         try :
                             per_day_value = int(float(customer_data['cmplt_target']))
@@ -333,12 +340,12 @@ def upload(request):
                     except:
                         var = 'Duplicate Sheet'
                         return HttpResponse(var)
-        if key in ['Production','Rawdata']:
-            insert = redis_insert(prj_obj,center_obj)
-        if key == 'Internal':
-            insert = redis_insert_two(prj_obj,center_obj)
-        if key == 'Error':
-            insert = redis_insert_three(prj_obj,center_obj)
+            if key in ['Production','Rawdata']:
+                insert = redis_insert(prj_obj,center_obj)
+            if key == 'Internal':
+                insert = redis_insert_two(prj_obj,center_obj)
+            if key == 'Error':
+                insert = redis_insert_three(prj_obj,center_obj)
     return HttpResponse(var)
 
 def user_data(request):
@@ -356,7 +363,17 @@ def user_data(request):
     return HttpResponse(manager_dict)
 
 
-def product_total_graph(request,date_list,prj_id):
+def graph_data_alignment(volumes_data,name_key):
+    productivity_series_list = []
+    for vol_name, vol_values in volumes_data.iteritems():
+        prod_dict = {}
+        prod_dict['name'] = vol_name
+        prod_dict[name_key] = vol_values
+        productivity_series_list.append(prod_dict)
+
+    return productivity_series_list
+
+def product_total_graph(request,date_list,prj_id,center_obj):
     conn = redis.Redis(host="localhost", port=6379, db=0)
     result = {}
     volumes_dict = {}
@@ -388,12 +405,7 @@ def product_total_graph(request,date_list,prj_id):
     #import pdb;pdb.set_trace()
     #below code is to generate productivity chcart format
     volumes_data = result['data']['data']
-    productivity_series_list = []
-    for vol_name,vol_values in volumes_data.iteritems():
-        prod_dict = {}
-        prod_dict['name'] = vol_name
-        prod_dict['data'] = vol_values
-        productivity_series_list.append(prod_dict)
+    productivity_series_list = graph_data_alignment(volumes_data,name_key='data')
     result['productivity_data'] = productivity_series_list
     volume_bar_data = {}
     volume_bar_data['volume_type']= volumes_data.keys()
@@ -426,6 +438,7 @@ def product_total_graph(request,date_list,prj_id):
     return result
 
 
+
 def internal_extrnal_graphs(request,date_list,packet_sum_data):
     extr_volumes_list = Externalerrors.objects.values_list('volume_type', flat=True).distinct()
     conn = redis.Redis(host="localhost", port=6379, db=0)
@@ -440,7 +453,6 @@ def internal_extrnal_graphs(request,date_list,packet_sum_data):
         # below code for internal error
         key_pattern = '*{0}*_error'.format(date_va)
         audit_key_list = conn.keys(pattern=key_pattern)
-        # import pdb;pdb.set_trace()
         for cur_key in audit_key_list:
             var = conn.hgetall(cur_key)
             for key, value in var.iteritems():
@@ -520,9 +532,8 @@ def internal_extrnal_graphs(request,date_list,packet_sum_data):
             else:
                 error_accuracy[vol] = 0
     total_graph_data = {}
-    # result['error_count'] = error_graph_data
-    result['error_count'] = error_volume_data
-    result['accuracy_graph'] = error_accuracy
+    result['internal_error_count'] = graph_data_alignment(error_volume_data,name_key='y')
+    result['internal_accuracy_graph'] = graph_data_alignment(error_accuracy,name_key='y')
     # below code for external graphs
     extrnl_error_sum = {}
     for key, value in extrnl_error_values.iteritems():
@@ -536,16 +547,16 @@ def internal_extrnal_graphs(request,date_list,packet_sum_data):
             if packet_sum_data[er_key] != 0:
                 percentage = (float(er_value) / packet_sum_data[er_key]) * 100
                 percentage = 100 - float('%.2f' % round(percentage, 2))
-                extr_err_accuracy[er_key] = percentage
+                extr_err_accuracy[er_key] = [percentage]
             else:
-                extr_err_accuracy[er_key] = 0
+                extr_err_accuracy[er_key] = [0]
     # print extr_err_accuracy
     for vol in volume_list:
         if vol not in extr_err_accuracy.keys() and "DetailFinancial" not in vol:
             if volume_dict.has_key(vol):
-                extr_err_accuracy[volume_dict[vol]] = 0
+                extr_err_accuracy[volume_dict[vol]] = [0]
             else:
-                extr_err_accuracy[vol] = 0
+                extr_err_accuracy[vol] = [0]
         if vol not in extrnl_error_sum.keys() and "DetailFinancial" not in vol:
             if volume_dict.has_key(vol):
                 extrnl_error_sum[volume_dict[vol]] = 0
@@ -555,7 +566,7 @@ def internal_extrnal_graphs(request,date_list,packet_sum_data):
     extr_err_acc_perc = []
     for key, value in extr_err_accuracy.iteritems():
         extr_err_acc_name.append(key)
-        extr_err_acc_perc.append(value)
+        extr_err_acc_perc.append(value[0])
     err_type_keys = []
     err_type_avod = []
     err_type_concept = []
@@ -571,26 +582,31 @@ def internal_extrnal_graphs(request,date_list,packet_sum_data):
     result['error_types']['err_type_keys'] = err_type_keys
     result['error_types']['err_type_avod'] = err_type_avod
     result['error_types']['err_type_concept'] = err_type_concept
-    result['extr_err_accuracy'] = extr_err_accuracy
+    result['extr_err_accuracy'] = {}
+    result['extr_err_accuracy']['packets_percntage'] = graph_data_alignment(extr_err_accuracy,name_key='data')
     result['extr_err_accuracy']['extr_err_name'] = extr_err_acc_name
     result['extr_err_accuracy']['extr_err_perc'] = extr_err_acc_perc
-    result['extrn_error_count'] = extrnl_error_sum
+    if 'DFES' in extrnl_error_sum:
+        del extrnl_error_sum['DFES']
+    result['extrn_error_count'] = graph_data_alignment(extrnl_error_sum,name_key='y')
     #print result
     return result
+
 
 
 def from_to(request):
     from_date = datetime.datetime.strptime(request.GET['from'],'%Y-%m-%d').date()
     to_date = datetime.datetime.strptime(request.GET['to'],'%Y-%m-%d').date()
-    project = request.GET['project']
-    center = request.GET['center']
+    project = request.GET['project'].split('-')[0].strip()
+    center = request.GET['center'].split('-')[0].strip()
     date_list = []
     no_of_days = to_date-from_date
     no_of_days = int(re.findall('\d+',str(no_of_days))[0])
     for i in range(0,no_of_days+1):
         date_list.append(str(from_date+timedelta(days=i)))
-    prj_id = Project.objects.filter(name='Probe').values_list('id',flat=True)
-    result_data = product_total_graph(request,date_list,prj_id)
+    prj_id = Project.objects.filter(name=project).values_list('id',flat=True)
+    #cen_name = Center.objects.filter(name='Hubli').values_list('id',flat=True)
+    result_data = product_total_graph(request,date_list,prj_id,center)
     packet_sum_data = result_data['volumes_data']['volume_values']
     error_graphs_data = {}
     error_graphs_data = internal_extrnal_graphs(request,date_list,packet_sum_data)

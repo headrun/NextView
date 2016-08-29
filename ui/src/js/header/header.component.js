@@ -27,7 +27,9 @@
                 if (this.user.role == "Customer") {
                     $('#fileupload').hide();
                 }
-
+                if (this.user.role == "Team Lead") {
+                    $('#select_dropdown').hide();
+                }
                this.collapsed = false;
 
                this.toggleCollapse = function () {

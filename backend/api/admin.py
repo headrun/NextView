@@ -33,6 +33,7 @@ admin.site.register(RawTable,RawtableAdmin)
 
 class ErrorAdmin(admin.ModelAdmin):
     list_display = ['volume_type','audited_errors','error_value']
+    list_filter = ('volume_type','audited_errors')
 admin.site.register(Error,ErrorAdmin)
 
 class ExternalerrorsAdmin(admin.ModelAdmin):
