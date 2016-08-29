@@ -96,10 +96,7 @@ class Error(models.Model):
 
     def __unicode__(self):
         return self.employee_id
-<<<<<<< HEAD
-=======
 
->>>>>>> 1b1be63c830ca57877d92bdc71c58533eb590e81
 
 class Externalerrors(models.Model):
     volume_type = models.CharField(max_length=255, default='')
@@ -107,10 +104,7 @@ class Externalerrors(models.Model):
     error_value = models.IntegerField(max_length=255, default=0)
     date = models.DateField()
     employee_id = models.CharField(max_length=255, default='')
-<<<<<<< HEAD
-=======
     agent_reply = models.CharField(max_length=255, default='')
->>>>>>> 1b1be63c830ca57877d92bdc71c58533eb590e81
 
     class Meta:
         db_table = u'external_errors'
@@ -119,10 +113,7 @@ class Externalerrors(models.Model):
     def __unicode__(self):
         return self.employee_id
 
-<<<<<<< HEAD
-=======
 
->>>>>>> 1b1be63c830ca57877d92bdc71c58533eb590e81
 class Authoringtable(models.Model):
     project = models.ForeignKey(Project, null=True)
     sheet_name = models.CharField(max_length=255, default='')
@@ -132,8 +123,4 @@ class Authoringtable(models.Model):
     class Meta:
         db_table = u'authoring_table'
     def __unicode__(self):
-<<<<<<< HEAD
         return self.table_schema
-=======
-        return self.table_schema
->>>>>>> 1b1be63c830ca57877d92bdc71c58533eb590e81

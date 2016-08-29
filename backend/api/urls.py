@@ -3,15 +3,11 @@ from django.contrib import admin
 
 urlpatterns = [ 
     # Examples:
-    url(r'^board','api.views.dashboard_insert', name="dashboard_insert"),
+    #url(r'^board','api.views.dashboard_insert', name="dashboard_insert"),
     url(r'^error_board','api.views.error_insert', name="error_insert"),
     #url(r'^upload/','api.views.upload', name="upload"),
     url(r'^upload/','api.views.upload', name="upload"),
-<<<<<<< HEAD
-    url(r'^by_volume/', 'api.views.volume', name="volume"),
-=======
     #url(r'^by_volume/', 'api.views.volume', name="volume"),
->>>>>>> 1b1be63c830ca57877d92bdc71c58533eb590e81
     url(r'^user_data/', 'api.views.user_data', name="user_data"),
     url(r'^from_to/', 'api.views.from_to', name="from_to"),
     url(r'^project/', 'api.views.project', name="project"),

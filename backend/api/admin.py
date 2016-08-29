@@ -36,20 +36,13 @@ class ErrorAdmin(admin.ModelAdmin):
 admin.site.register(Error,ErrorAdmin)
 
 class ExternalerrorsAdmin(admin.ModelAdmin):
-<<<<<<< HEAD
-    list_display = ['volume_type', 'error_type', 'error_value']
-=======
     list_display = ['volume_type', 'error_type', 'error_value','agent_reply','date','employee_id']
     list_filter = ('volume_type', 'date','agent_reply')
->>>>>>> 1b1be63c830ca57877d92bdc71c58533eb590e81
 admin.site.register(Externalerrors,ExternalerrorsAdmin)
 
 class AuthoringtableAdmin(admin.ModelAdmin):
     list_display = ['sheet_name','table_schema','sheet_field','project']
-<<<<<<< HEAD
-=======
     list_filter = ['sheet_name']
->>>>>>> 1b1be63c830ca57877d92bdc71c58533eb590e81
 admin.site.register(Authoringtable,AuthoringtableAdmin)
 
 from django.contrib.auth.forms import UserCreationForm

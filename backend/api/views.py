@@ -17,11 +17,7 @@ from datetime import timedelta
 from datetime import date
 import re
 
-<<<<<<< HEAD
-def dashboard_insert(request):
-=======
 """def dashboard_insert(request):
->>>>>>> 1b1be63c830ca57877d92bdc71c58533eb590e81
     week_dates_list = []
     start_date = date.today() - timedelta(days=7)
     for i in range(0,7):
@@ -124,10 +120,6 @@ def get_order_of_headers(open_sheet, Default_Headers, mandatory_fileds=[]):
         indexes.update({val: ind_sheet})
     return is_mandatory_available, sheet_indexes, indexes
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 1b1be63c830ca57877d92bdc71c58533eb590e81
 def validate_sheet(open_sheet, request, SOH_XL_HEADERS, SOH_XL_MAN_HEADERS):
     sheet_headers = []
     if open_sheet.nrows > 0:
@@ -290,8 +282,6 @@ def redis_insert_three(prj_obj):
         conn.hmset(key, value)
 
 def upload(request):
-<<<<<<< HEAD
-=======
     """if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES['myfile'])
         if form.is_valid:
@@ -299,7 +289,6 @@ def upload(request):
             var = "general"
             #import pdb;pdb.set_trace()
             newdoc.save()"""
->>>>>>> 1b1be63c830ca57877d92bdc71c58533eb590e81
     teamleader_obj_name = TeamLead.objects.filter(name_id=request.user.id)[0]
     teamleader_obj = TeamLead.objects.filter(name_id=request.user.id).values_list('project_id')[0][0]
     prj_obj = Project.objects.filter(id=teamleader_obj)[0]
@@ -311,176 +300,8 @@ def upload(request):
     else:
         try:
             open_book = open_workbook(filename=None, file_contents=fname.read())
-            #open_sheet = open_book.sheet_by_index(0)
         except:
             return HttpResponse("Invalid File")
-<<<<<<< HEAD
-        excel_sheet_names = open_book.sheet_names()
-        sheet_index_dict = {}
-        if 'Production' in excel_sheet_names:
-            sheet_index_dict['Production'] = open_book.sheet_names().index('Production')
-        if 'Internal' in excel_sheet_names:
-            sheet_index_dict['Internal'] = open_book.sheet_names().index('Internal')
-        if 'Error' in excel_sheet_names:
-            sheet_index_dict['Error'] = open_book.sheet_names().index('Error')
-        #import pdb;pdb.set_trace()
-        for key,value in sheet_index_dict.iteritems():
-            customer_data = {}
-            if key == 'Production':
-                SOH_XL_HEADERS = ['Date', 'ID', 'Done', 'Passed / Cancelled', 'Platform', 'Emp id', 'Week', 'Month',
-                                  'Year', 'Target', 'Productivity', 'WC', 'WorkPacket']
-                SOH_XL_MAN_HEADERS = ['Date', 'Done', 'Platform', 'Emp id', 'Target']
-                open_sheet = open_book.sheet_by_index(value)
-            if key =='Internal':
-                SOH_XL_HEADERS = ['Date', 'Id', 'Work Packet', 'Audited', 'Avoidable', 'Concept', 'Others',
-                                  'Total Error', 'Week', 'Month', 'Year']
-                SOH_XL_MAN_HEADERS = ['Date', 'Id', 'Work Packet', 'Audited', 'Total Error']
-                open_sheet = open_book.sheet_by_index(value)
-            if key=='Error' :
-                SOH_XL_HEADERS = ['Date', 'Id', 'Work Packet', 'Agent Reply', 'Avoidable', 'Concept', 'Others',
-                                  'Total Error', 'Week', 'Month', 'Year']
-                SOH_XL_MAN_HEADERS = ['Date', 'Id', 'Work Packet', 'Avoidable', 'Concept']
-                open_sheet = open_book.sheet_by_index(value)
-            sheet_headers = validate_sheet(open_sheet, request,SOH_XL_HEADERS,SOH_XL_MAN_HEADERS)
-            error_type = {}
-            for row_idx in range(1, open_sheet.nrows):
-                for column, col_idx in sheet_headers:
-                    cell_data = get_cell_data(open_sheet, row_idx, col_idx)
-                    if key == 'Production':
-                    #cell_data = get_cell_data(open_sheet, row_idx, col_idx)
-                        if column == 'done':
-                            customer_data['cmplt_target'] = ''.join(cell_data)
-                        if column == 'platform':
-                            customer_data['volume_type'] = ''.join(cell_data)
-                        if column == 'emp id':
-                            customer_data['emp_id'] = ''.join(cell_data)
-                        if column == 'target':
-                            customer_data['target'] = ''.join(cell_data)
-                        if column == 'date':
-                            cell_data = xlrd.xldate_as_tuple(int(cell_data.split('.')[0]), 0)
-                            cell_data ='%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
-                            customer_data['date'] = ''.join(cell_data)
-
-                    if key == 'Internal':
-                        if column == 'audited':
-                            customer_data['audited'] = ''.join(cell_data)
-                        if column == 'total error':
-                            customer_data['total_error'] = ''.join(cell_data)
-                        if column == 'work packet':
-                            customer_data['volume_type'] = ''.join(cell_data)
-                        if column == 'id':
-                            customer_data['employee_id'] = ''.join(cell_data)
-                        if column == 'date':
-                            cell_data = xlrd.xldate_as_tuple(int(cell_data.split('.')[0]), 0)
-                            cell_data = '%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
-                            customer_data['date'] = ''.join(cell_data)
-                    if key=='Error' :
-                        if column == 'avoidable':
-                            error_type['avoidable'] = ''.join(cell_data)
-                        if column == 'concept':
-                            error_type['concept'] = ''.join(cell_data)
-                        if column == 'work packet':
-                            customer_data['volume_type'] = ''.join(cell_data)
-                        if column == 'id':
-                            customer_data['employee_id'] = ''.join(cell_data)
-                        if column == 'date':
-                            cell_data = xlrd.xldate_as_tuple(int(cell_data.split('.')[0]), 0)
-                            cell_data = '%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
-                            customer_data['date'] = ''.join(cell_data)
-
-                volume_dict = {'DataDownload':'DD', 'CompanyCoordinates':'CC' , 'DetailFinancial':'DF','GroupCompanies':'GC'}
-                if customer_data['volume_type'] in volume_dict.keys():
-                    customer_data['volume_type'] = volume_dict[customer_data['volume_type']]
-                if key == 'Production':
-                    try :
-                        per_day_value = int(float(customer_data['cmplt_target']))
-                    except ValueError:
-                        per_day_value = 0
-                    new_can = RawTable(project=prj_obj, employee=customer_data['emp_id'],
-                                       volume_type=customer_data['volume_type'], per_hour=0,per_day=per_day_value,
-                                       date=customer_data['date'], norm=int(float(customer_data['target'])),team_lead=teamleader_obj_name,center = center_obj)
-                if key == 'Internal':
-                    new_can = Error(employee_id=customer_data['employee_id'],
-                                    volume_type=customer_data['volume_type'],
-                                    date=customer_data['date'], audited_errors=int(float(customer_data['audited'])),
-                                    error_value=int(float(customer_data['total_error'])), )
-
-                if key == 'Error':
-                    for key, value in error_type.iteritems():
-                        if value:
-                            new_can = Externalerrors(employee_id=customer_data['employee_id'],
-                                            volume_type=customer_data['volume_type'],
-                                            date=customer_data['date'], error_type=key, error_value=int(float(value)), )
-                            try :
-                                pass
-                                #new_can.save()
-                            except :
-                                var = 'Duplicate Sheet'
-                                return HttpResponse(var)
-
-                if key != 'Error':
-                    try:
-                        #print customer_data
-                        new_can.save()
-                    except:
-                        var = 'Duplicate Sheet'
-                        return HttpResponse(var)
-            if key == 'Production':
-                insert = redis_insert(prj_obj)
-            if key == 'Internal':
-                insert = redis_insert_two(prj_obj)
-    return HttpResponse(var)
-
-def error_upload(request):
-    customer_data = {}
-    teamleader_obj = TeamLead.objects.filter(name_id=request.user.id).values_list('project_id')[0][0]
-    prj_obj = Project.objects.filter(teamlead=teamleader_obj)[0]
-    fname = request.FILES['myfile']
-    var = fname.name.split('.')[-1].lower()
-    if var not in ['xls', 'xlsx', 'xlsb']:
-        return HttpResponse("Invalid File")
-    else:
-        try:
-            open_book = open_workbook(filename=None, file_contents=fname.read())
-            open_sheet = open_book.sheet_by_index(0)
-        except:
-            return HttpResponse("Invalid File")
-        sheet_headers = validate_sheet(open_sheet, request)
-        audited_errors={}
-        for row_idx in range(1, open_sheet.nrows):
-            for column, col_idx in sheet_headers:
-                cell_data = get_cell_data(open_sheet, row_idx, col_idx)
-                if column == 'audited':
-                    audited_errors['audited'] = ''.join(cell_data)
-                if column == 'total error':
-                    customer_data['total_error'] = ''.join(cell_data)
-                if column == 'work packet':
-                    customer_data['volume_type'] = ''.join(cell_data)
-                if column == 'id':
-                    customer_data['employee_id'] = ''.join(cell_data)
-                if column == 'date':
-                    cell_data = xlrd.xldate_as_tuple(int(cell_data.split('.')[0]), 0)
-                    cell_data ='%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
-                    customer_data['date'] = ''.join(cell_data)
-            print audited_errors
-            volume_dict = {'DataDownload': 'DD', 'CompanyCoordinates': 'CC', 'DetailFinancial': 'DF','GroupCompanies':'GC'}
-            if customer_data['volume_type'] in volume_dict.keys():
-                customer_data['volume_type'] = volume_dict[customer_data['volume_type']]
-            for key,value in audited_errors.iteritems():
-                #import pdb;pdb.set_trace()
-                if value :
-                    new_can = Error(employee_id=customer_data['employee_id'],
-                                       volume_type=customer_data['volume_type'],
-                                           date=customer_data['date'],audited_errors=int(float(value)),error_value=int(float(customer_data['total_error'])),)
-                    try:
-                        new_can.save()
-                    except:
-                        var = 'Duplicate Sheet'
-                        return HttpResponse(var)
-        insert = redis_insert_two(prj_obj)
-    return HttpResponse(var)
-=======
-        #import pdb;pdb.set_trace()
         excel_sheet_names = open_book.sheet_names()
         file_sheet_name = Authoringtable.objects.values_list('sheet_name',flat=True).distinct()
         file_sheet_names = [x.encode('UTF8') for x in file_sheet_name]
@@ -492,9 +313,9 @@ def error_upload(request):
             customer_data = {}
             open_sheet = open_book.sheet_by_index(value)
             SOH_XL_HEADERS = open_sheet.row_values(0)
-            main_headers = Authoringtable.objects.filter(sheet_name=sh_name).values_list('sheet_field',flat=True)
+            main_headers = Authoringtable.objects.filter(sheet_name=key).values_list('sheet_field',flat=True)
             sheet_main_headers = [x.encode('UTF8') for x in main_headers]
-            table_schema = Authoringtable.objects.filter(sheet_name=sh_name).values_list('table_schema',flat=True)
+            table_schema = Authoringtable.objects.filter(sheet_name=key).values_list('table_schema',flat=True)
             table_schema = [x.encode('UTF8') for x in table_schema]
             mapping_table={}
             for sh_filed,t_field in zip(sheet_main_headers,table_schema):
@@ -538,7 +359,6 @@ def error_upload(request):
                                         volume_type=customer_data['volume_type'],
                                         date=customer_data['date'], audited_errors=int(float(customer_data['audited'])),
                                         error_value=int(float(customer_data['total_error'])), )
->>>>>>> 1b1be63c830ca57877d92bdc71c58533eb590e81
 
                     if sh_name == 'Error':
                         #import pdb;pdb.set_trace()
@@ -597,20 +417,14 @@ def from_to(request):
     volumes_dict = {}
     date_values = {}
     volume_list = RawTable.objects.values_list('volume_type', flat=True).distinct()
-<<<<<<< HEAD
-=======
     extr_volumes_list = Externalerrors.objects.values_list('volume_type', flat=True).distinct()
->>>>>>> 1b1be63c830ca57877d92bdc71c58533eb590e81
     distinct_volumes = [x.encode('UTF8') for x in volume_list]
     #below variable for error graphs.
     vol_error_values = {}
     vol_audit_data = {}
-<<<<<<< HEAD
-=======
     #below variable for external errors
     extrnl_error_values = {}
     extrnl_err_type = {}
->>>>>>> 1b1be63c830ca57877d92bdc71c58533eb590e81
     for date_va in date_list:
         #below code for product,wpf graphs
         for vol_type in volume_list:
@@ -632,123 +446,11 @@ def from_to(request):
                 volumes_dict['date'] = date_list
                 result['data'] = volumes_dict
         # below code for error graphs
-<<<<<<< HEAD
-        key_pattern = '*{0}*error'.format(date_va)
-        audit_key_list = conn.keys(pattern=key_pattern)
-        #import pdb;pdb.set_trace()
-        for cur_key in audit_key_list:
-            var = conn.hgetall(cur_key)
-            for key, value in var.iteritems():
-                error_vol_type = cur_key.split('_')[1]
-                if key == 'total_errors':
-                    if vol_error_values.has_key(error_vol_type):
-                        vol_error_values[error_vol_type].append(int(value))
-                    else:
-                        vol_error_values[error_vol_type] = [int(value)]
-                else:
-                    if vol_audit_data.has_key(error_vol_type):
-                        vol_audit_data[error_vol_type].append(int(value))
-                    else:
-                        vol_audit_data[error_vol_type] = [int(value)]
-
-    #below code for productivity,wpf graph
-    volumes_data = result['data']['data']
-    volume_bar_data = {}
-    volume_bar_data['volume_type']= volumes_data.keys()
-    volume_keys_data ={}
-    for key,value in volumes_data.iteritems():
-        volume_keys_data[key]= sum(value)
-    volume_list = RawTable.objects.values_list('volume_type',flat=True).distinct()
-    distinct_volumes= [x.encode('UTF8') for x in volume_list]
-    for vol in distinct_volumes :
-        if vol not in volume_keys_data and "DetailFinancial" not in vol:
-            volume_keys_data[vol]=0
-    volume_list_data=[]
-    volume_dict = {'DataDownload':'DD', 'CompanyCoordinates':'CC' , 'DetailFinancial':'DF','GroupCompanies':'GC','FES':'FES' ,
-                               'Legal & CDR':'Legal' ,'DetailFinancial with FES ':'DF/FES','Charges':'Charges',
-                               'Compliance':'Compliance' ,'LLP':'LLP','Manual Download' : 'MD'}
-
-
-    for key,value in volume_keys_data.iteritems() :
-        new_list=[]
-        if 'DetailFinancial' not in key:
-            if volume_dict.has_key(key):
-                new_list.append(volume_dict[key])
-            else:
-                new_list.append(key)
-            new_list.append(value)
-            volume_list_data.append(new_list)
-    volume_bar_data['volume_new_data']=volume_list_data
-    volume_bar_data['volume_values'] = volume_keys_data
-    result['volumes_data'] = volume_bar_data
-    #below code for error graphs
-    error_dist_vol = Error.objects.values_list('volume_type', flat=True).distinct()
-    error_volume_data = {}
-    error_graph_data = []
-    for key, value in vol_error_values.iteritems():
-        error_graph = []
-        if volume_dict.has_key(key):
-            key = volume_dict[key]
-            error_volume_data[key] = sum(value)
-        else:
-            error_volume_data[key] = sum(value)
-        error_graph.append(key)
-        error_graph.append(sum(value))
-        error_graph_data.append(error_graph)
-    volume_list = RawTable.objects.values_list('volume_type', flat=True).distinct()
-    distinct_volumes = [x.encode('UTF8') for x in volume_list]
-    for vol in distinct_volumes:
-        if vol not in error_volume_data.keys() and "DetailFinancial" not in vol:
-            if volume_dict.has_key(vol):
-                error_volume_data[volume_dict[vol]] = 0
-            else:
-                error_volume_data[vol] = 0
-    error_audit_data = {}
-    for key, value in vol_audit_data.iteritems():
-        error_audit_data[key] = sum(value)
-    error_accuracy = {}
-    for volume in error_dist_vol:
-        if (volume in error_volume_data.keys()) and (volume in error_audit_data.keys()):
-            percentage = (float(error_volume_data[volume]) / error_audit_data[volume]) * 100
-            percentage = float('%.2f' % round(percentage, 2))
-            error_accuracy[volume] = percentage
-    #import pdb;pdb.set_trace()
-    for vol in volume_list:
-        if vol not in error_accuracy.keys() and "DetailFinancial" not in vol:
-            if volume_dict.has_key(vol):
-                error_accuracy[volume_dict[vol]]=0
-            else:
-                error_accuracy[vol]=0
-    total_graph_data = {}
-    #result['error_count'] = error_graph_data
-    result['error_count'] = error_volume_data
-    result['accuracy_graph'] = error_accuracy
-    print result
-    return HttpResponse(result)
-
-    """from_date = datetime.datetime.strptime(request.GET['from'],'%Y-%m-%d').date()
-    to_date = datetime.datetime.strptime(request.GET['to'],'%Y-%m-%d').date()
-    date_list = []
-    no_of_days = to_date-from_date
-    no_of_days = int(re.findall('\d+',str(no_of_days))[0])
-    for i in range(0,no_of_days+1):
-        date_list.append(str(from_date+timedelta(days=i)))
-    conn = redis.Redis(host="localhost", port=6379, db=0)
-    result = {}
-    volumes_dict = {}
-    date_values = {}
-    for date_va in date_list:
-        date_pattern = '*{0}'.format(date_va)
-        key_list = conn.keys(pattern=date_pattern)
-        #import pdb;pdb.set_trace()
-        for cur_key in key_list:
-=======
 
         key_pattern = '*{0}*_error'.format(date_va)
         audit_key_list = conn.keys(pattern=key_pattern)
         #import pdb;pdb.set_trace()
         for cur_key in audit_key_list:
->>>>>>> 1b1be63c830ca57877d92bdc71c58533eb590e81
             var = conn.hgetall(cur_key)
             for key, value in var.iteritems():
                 error_vol_type = cur_key.split('_')[1]
@@ -972,77 +674,6 @@ def yesterdays_data(request):
             volume_keys_data[vol]=0
     volume_bar_data['volume_values'] = volume_keys_data
     result['volumes_data'] = volume_bar_data
-<<<<<<< HEAD
-    print result
-    return HttpResponse(result)"""
-
-def chart_data(request):
-    #import pdb;pdb.set_trace()
-    to_date = datetime.datetime.strptime(request.GET['date'], '%Y-%m-%d').date()
-    work_packet = str(request.GET['packet'])
-    packet_dict = {}
-    emp_name = RawTable.objects.filter(date=to_date,volume_type=work_packet).values_list('employee',flat=True)
-    packet_values = RawTable.objects.filter(date=to_date,volume_type=work_packet).values_list('per_day',flat=True)
-    emp_names= [x.encode('UTF8') for x in emp_name]
-    work_packet_values = [int(x) for x in packet_values]
-    #import pdb;pdb.set_trace()
-
-    final_data=[]
-    packet_dict['emp_names']=emp_names
-    packet_dict['work_packet_values'] = work_packet_values
-    for emp,packet in zip(emp_names,work_packet_values):
-        emp_packet = {}
-        emp_packet['emp']=emp
-        emp_packet['packet_value']= packet
-        final_data.append(emp_packet)
-    return HttpResponse(final_data)
-
-def yesterdays_data(request):
-    yesterday = date.today() - timedelta(1)
-    print yesterday
-    date_list = []
-    date_list.append(str(yesterday))
-    conn = redis.Redis(host="localhost", port=6379, db=0)
-    #below varaibles for productivity,wpf graphs
-    result = {}
-    volumes_dict = {}
-    date_values = {}
-    volume_list = RawTable.objects.values_list('volume_type', flat=True).distinct()
-    distinct_volumes = [x.encode('UTF8') for x in volume_list]
-    for date_va in date_list:
-        #below code for product,wpf graphs
-        for vol_type in volume_list:
-            date_pattern = '*{0}_{1}'.format(vol_type,date_va)
-            key_list = conn.keys(pattern=date_pattern)
-            if not key_list:
-                if date_values.has_key(vol_type):
-                    date_values[vol_type].append(0)
-                else:
-                    date_values[vol_type] = [0]
-            for cur_key in key_list:
-                var = conn.hgetall(cur_key)
-                for key,value in var.iteritems():
-                    if date_values.has_key(key):
-                        date_values[key].append(int(value))
-                    else:
-                        date_values[key]=[int(value)]
-                volumes_dict['data'] = date_values
-                volumes_dict['date'] = date_list
-                result['data'] = volumes_dict
-    #below code for productivity,wpf graph
-    volumes_data = result['data']['data']
-    volume_bar_data = {}
-    volume_bar_data['volume_type']= volumes_data.keys()
-    volume_keys_data ={}
-    for key,value in volumes_data.iteritems():
-        volume_keys_data[key]= sum(value)
-    for vol in distinct_volumes:
-        if vol not in volume_keys_data and "DetailFinancial" not in vol:
-            volume_keys_data[vol]=0
-    volume_bar_data['volume_values'] = volume_keys_data
-    result['volumes_data'] = volume_bar_data
-=======
->>>>>>> 1b1be63c830ca57877d92bdc71c58533eb590e81
     print result
     return HttpResponse(result)
 
