@@ -27,24 +27,32 @@ class NextwealthmanagerAdmin(admin.ModelAdmin):
 admin.site.register(Nextwealthmanager,NextwealthmanagerAdmin)
 
 class RawtableAdmin(admin.ModelAdmin):
-    list_display = ['employee','volume_type','per_day','per_hour','norm','date','created_at','modified_at']
-    list_filter = ('volume_type', 'date','project')
+    list_display = ['work_packet','sub_project','sub_packet','per_day','employee_id','norm','date','created_at','modified_at']
+    list_filter = ('work_packet', 'date','project','center')
 admin.site.register(RawTable,RawtableAdmin)
 
-class ErrorAdmin(admin.ModelAdmin):
-    list_display = ['volume_type','audited_errors','error_value']
-    list_filter = ('volume_type','audited_errors')
-admin.site.register(Error,ErrorAdmin)
+class InternalerrorsAdmin(admin.ModelAdmin):
+    list_display = ['sub_project','work_packet','sub_packet','audited_errors','total_errors','date','employee_id']
+    list_filter = ('sub_project','work_packet','sub_packet','project','center')
+admin.site.register(Internalerrors,InternalerrorsAdmin)
 
 class ExternalerrorsAdmin(admin.ModelAdmin):
-    list_display = ['volume_type', 'error_type', 'error_value','agent_reply','date','employee_id']
-    list_filter = ('volume_type', 'date','agent_reply')
+    list_display = ['sub_project','work_packet','sub_packet','audited_errors','total_errors','date','employee_id']
+    list_filter = ('sub_project','work_packet','sub_packet','project','center')
 admin.site.register(Externalerrors,ExternalerrorsAdmin)
 
 class AuthoringtableAdmin(admin.ModelAdmin):
-    list_display = ['sheet_name','table_schema','sheet_field','project']
-    list_filter = ['sheet_name','project']
+    list_display = ['sheet_name','table_schema','sheet_field','project','center']
+    list_filter = ['sheet_name','project','center']
 admin.site.register(Authoringtable,AuthoringtableAdmin)
+
+class TargetsAdmin(admin.ModelAdmin):
+    list_display = ['work_packet','from_date','to_date','target']
+admin.site.register(Targets,TargetsAdmin)
+
+class WorktrackAdmin(admin.ModelAdmin):
+    list_display = ['work_packet', 'opening', 'received', 'completed']
+admin.site.register(Worktrack,WorktrackAdmin)
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User

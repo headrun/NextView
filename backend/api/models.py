@@ -16,6 +16,7 @@ class Project(models.Model):
     name    = models.CharField(max_length=255)
     code    = models.IntegerField(max_length=255, unique=True)
     center  = models.ForeignKey(Center, null=True)
+    layout  = models.CharField(max_length=255, default='')
 
     class Meta:
         db_table = u'project'
@@ -66,12 +67,14 @@ class Nextwealthmanager(models.Model):
 
 class RawTable(models.Model):
     team_lead   = models.ForeignKey(TeamLead, null=True)
-    employee    = models.CharField(max_length=255, default='')
-    volume_type = models.CharField(max_length=255, default='')
+    employee_id = models.CharField(max_length=255, blank=True)
+    sub_project = models.CharField(max_length=255, blank=True)
+    work_packet = models.CharField(max_length=255)
+    sub_packet  = models.CharField(max_length=255, blank=True)
     per_hour    = models.IntegerField(max_length=255, default=0)
     per_day     = models.IntegerField(max_length=255, default=0)
-    date        = models.DateTimeField()
-    norm        = models.IntegerField(max_length=255, default=0)
+    date = models.DateField()
+    norm        = models.IntegerField(max_length=255, blank=True)
     created_at  = models.DateTimeField(auto_now_add=True, null=True)
     modified_at = models.DateTimeField(auto_now=True,null=True)
     center      = models.ForeignKey(Center, null=True)
@@ -79,36 +82,44 @@ class RawTable(models.Model):
 
     class Meta:
         db_table = u'raw_table'
-        #unique_together = (("date","employee"),)
 
-class Error(models.Model):
-    volume_type = models.CharField(max_length=255, default='')
-    #error_type = models.CharField(max_length=255, default='')
-    audited_errors = models.IntegerField(max_length=255,default=0)
-    error_value = models.IntegerField(max_length=255,default=0,verbose_name='total_errors')
+
+
+class Internalerrors(models.Model):
+    sub_project = models.CharField(max_length=255, blank=True)
+    work_packet = models.CharField(max_length=255)
+    sub_packet = models.CharField(max_length=255, blank=True)
+    error_name = models.CharField(max_length=255, blank=True)
+    audited_errors = models.IntegerField(max_length=255,blank=True,default=0)
+    total_errors = models.IntegerField(max_length=255,default=0,verbose_name='total_errors')
     date = models.DateField()
-    employee_id = models.CharField(max_length=255,default='')
+    employee_id = models.CharField(max_length=255,blank=True)
+    center      = models.ForeignKey(Center, null=True)
+    project     = models.ForeignKey(Project, null=True)
 
     class Meta:
-        db_table = u'api_error'
-        #db_table = u'api_error'
-        #unique_together = (("audited_errors","error_value"),)
+        db_table = u'internal_error'
+        #unique_together = ("audited_errors","error_value","date","employee_id","volume_type")
 
     def __unicode__(self):
         return self.employee_id
 
 
 class Externalerrors(models.Model):
-    volume_type = models.CharField(max_length=255, default='')
-    error_type = models.CharField(max_length=255, default='')
-    error_value = models.IntegerField(max_length=255, default=0)
+    sub_project = models.CharField(max_length=255, blank=True)
+    work_packet = models.CharField(max_length=255)
+    sub_packet = models.CharField(max_length=255, blank=True)
+    error_name = models.CharField(max_length=255, blank=True)
+    audited_errors = models.IntegerField(max_length=255, blank=True, default=0)
+    total_errors = models.IntegerField(max_length=255, default=0, verbose_name='total_errors')
     date = models.DateField()
-    employee_id = models.CharField(max_length=255, default='')
-    agent_reply = models.CharField(max_length=255, default='')
+    employee_id = models.CharField(max_length=255, blank=True)
+    center = models.ForeignKey(Center, null=True)
+    project = models.ForeignKey(Project, null=True)
 
     class Meta:
-        db_table = u'external_errors'
-        #unique_together = (("error_type", "error_value"),)
+        db_table = u'external_error'
+        #unique_together = ("audited_errors","error_value","date","employee_id","volume_type")
 
     def __unicode__(self):
         return self.employee_id
@@ -119,7 +130,7 @@ class Authoringtable(models.Model):
     sheet_name = models.CharField(max_length=255, default='')
     table_schema = models.CharField(max_length=255, default='')
     sheet_field = models.CharField(max_length=255, default='')
-
+    center = models.ForeignKey(Center, null=True)
     class Meta:
         db_table = u'authoring_table'
     def __unicode__(self):
@@ -136,3 +147,38 @@ class Document(models.Model):
 
     def __unicode__(self):
         return self.description
+
+class Targets(models.Model):
+    from_date = models.DateField()
+    to_date   = models.DateField()
+    sub_project = models.CharField(max_length=255, blank=True)
+    work_packet = models.CharField(max_length=255)
+    sub_packet  = models.CharField(max_length=255, blank=True)
+    target      = models.IntegerField(max_length=125)
+    center = models.ForeignKey(Center, null=True)
+    project = models.ForeignKey(Project, null=True)
+
+    class Meta:
+        db_table = u'target_table'
+
+    def __unicode__(self):
+        return self.work_packet
+
+class Worktrack(models.Model):
+    date = models.DateField()
+    sub_project = models.CharField(max_length=255, blank=True)
+    work_packet = models.CharField(max_length=255)
+    sub_packet = models.CharField(max_length=255, blank=True)
+    opening    = models.IntegerField(max_length=125)
+    received   = models.IntegerField(max_length=125)
+    non_workable_count = models.IntegerField(max_length=125,blank=True,default=0)
+    completed   = models.IntegerField(max_length=125)
+    closing_balance  = models.IntegerField(max_length=125)
+    center = models.ForeignKey(Center, null=True)
+    project = models.ForeignKey(Project, null=True)
+
+    class Meta:
+        db_table = u'worktrack_table'
+
+    def __unicode__(self):
+        return self.work_packet
