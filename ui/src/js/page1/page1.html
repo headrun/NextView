@@ -1,4 +1,5 @@
 <style>
+
    .button {
       background-color: #3396C9;
       color: white;
@@ -14,59 +15,130 @@
         margin-left:0px;
         margin-right:0px;
     }
-  .widget-content {
+
+    .widget-content {
         border-radius: 0.3em;
     }
 
-    #custom-search-input{
-    border-radius: 4px;
-    background-color: #fff;
-    width:300px;
-}
 
-#custom-search-input input{
-    border: 0;
-    box-shadow: none;
-}
+/* .btn {
+   font-size: 15px;
+   background-color:black;
+   border-color:white;
+} */
 
-.form-control {
-padding: 0 0 0 0;
-height: 30px;
-}
-#custom-search-input button{
-
-    background: none;
-    box-shadow: none;
-    border: 0;
-    color: #666666;
-    border-left: solid 1px #ccc;
-}
-
-#custom-search-input button:hover{
-    border: 0;
-    box-shadow: none;
-    border-left: solid 1px #ccc;
-}
-
-#custom-search-input .glyphicon-search{
-    font-size: 20px;
-}
-.btn {
-font-size: 15px;
-background-color:black;
-border-color:white;
-}
 .widget-title span {
     color: white;
 }
+
+table {
+
+    margin : 0 auto;
+    border: 1 px solid #323232;
+ }
+
+.date {
+     float: right;
+     font-size: 28px;
+     padding-top: 5px;
+     cursor: pointer;
+}
+.select {
+
+      float: right;
+      color:#0a0909;
+      margin:6px;
+      cursor:pointer;
+}
+.form-control {
+    width: initial;
+    height: 30px;
+}
+
+
+.pos {
+
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: inherit;
+ }
+#wrapper{
+    margin-left:auto;
+    margin-right:auto;
+    height:auto;
+    width:auto;
+}
+#inner1{
+    float:right;
+}
+#inner2{
+    float:right;
+    clear:right;
+    margin-right: 5px;
+    margin-top:-17px;
+}
+
 </style>
 
 <body>
-    <h2 class="pull-left brand_style">{{$ctrl.location}}{{$ctrl.project}}Dashboard</h2>
-    <button type="button" class="btn btn-primary btn-xs" ng-click="$ctrl.check()" style="float: right;margin-top:6px;">Submit</button>
-    <input value="{{$ctrl.first}} to {{$ctrl.last}}" id="select" size="19" style="float: right;color:#0a0909;margin:6px;">
-
     <div class="row">
+    <div id="wrapper">
+        <div><h3 class="pull-left brand_style">{{$ctrl.location}}{{$ctrl.project}}Dashboard</h3></div>
+             <div id="inner1" class="form-group">
+                 <input class="form-control select" value="{{$ctrl.first}} to {{$ctrl.last}}" id="select" size="19">
+                 <i class="fa fa-calendar date" aria-hidden="true"></i>
+             </div>
+             <div  class="input-group"id="inner2">
+                 <ul class="nav nav-pills">
+                     <span class="input-group-addon" style="background-color:#fff;">
+                         <li id="day"><a style="color:black; cursor:pointer;" href="" ng-click="$ctrl.dateType('day')">Day</a></li>
+                     </span>
+                     <span class="input-group-addon" style="background-color:#fff;">
+                         <li id="week"><a style="color:black; cursor:pointer;" href="" ng-click="$ctrl.dateType('week')">Week</a></li>
+                     </span>
+                     <span class="input-group-addon" style="background-color:#fff;">
+                         <li id="month"><a style="color:black; cursor:pointer;" href="" ng-click="$ctrl.dateType('month')">Month</a></li>
+                     </span>
+
+                 </ul>
+             </div>
+
+        </div>
+
+    </div>
+    <div class="row" ng-repeat="i in $ctrl.useful_layout">
+        <div ng-repeat="j in i" class="col-sm-{{j.col}} widget">
+            <div class="widget-content">
+                <div class="widget-title clearfix" title="Sample Widg">
+                    <span class="pull-left">{{j.title}}</span>
+                </div>
+                <div class="widget-body">
+                    <highcharts options="j.opt"></highcharts>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--<div ng-repeat="j in i" class="col-md-{{j.col}} widget all">
+            <div class="widget-content">
+                <div class="widget-title clearfix" title="Sample Widg">
+                    <span class="pull-left">{{j.title}}</span>
+                </div>
+                <div class="widget-body">
+                    <highcharts options="j.opt"></highcharts>
+                </div>
+            </div>
+        </div>-->
+            <!--<div class="widget-content">
+                <div class="widget-title clearfix" title="Sample Widg">
+                    <span class="pull-left">{{i.title}}</span>
+                </div>
+                <div class="widget-body">
+                    <highcharts options="i.opt"></highcharts>
+                </div>
+            </div>
+        </div>-->
+    <!--<div class="row">
             <div class="widget col-md-12 col-xs-12 all" >
                 <div class="widget-content">
 
@@ -81,20 +153,7 @@ border-color:white;
                     </div>
                 </div>
             </div>
-            <!--<div class="widget col-md-6 col-xs-12 all" >
-                <div class="widget-content">
-
-                    <div class="widget-title clearfix"
-                         title="Sample Widg">
-                        <span class="pull-left">Workpacket Wise Performance</span>
-                    </div>
-
-                    <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions2"></highcharts>
-                    </div>
-                </div>
-            </div>-->
-        </div>
+    </div>
     <div class="row">
             <div class="widget col-md-3 col-xs-6 all"  >
 
@@ -130,7 +189,7 @@ border-color:white;
 
                     <div class="widget-title clearfix"
                          title="Sample Widg">
-                        <span class="pull-left">Internal Error Accuracy Graph</span>
+                        <span class="pull-left">Internal Accuracy Graph</span>
                     </div>
 
                     <div class="widget-body">
@@ -144,7 +203,7 @@ border-color:white;
                 <div class="widget-content">
                     <div class="widget-title clearfix"
                          title="Sample Widg">
-                        <span class="pull-left">External Error Accuracy Graph</span>
+                        <span class="pull-left">External Accuracy Graph</span>
                     </div>
                     <div class="widget-body">
                         <highcharts options="$ctrl.chartOptions6"></highcharts>
@@ -165,19 +224,17 @@ border-color:white;
                     </div>
                 </div>
             </div>
-    </div>
+    </div>-->
 <!--</div>-->
 
-<div class="modal fade" id="myModal" role="dialog">
+<!--<div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog">
-      <!-- Modal content-->
       <div class="modal-content">
          <div class="modal-header">
              <button type="button" class="close" data-dismiss="modal">&times;</button>
              <h4 class="modal-title">PRODUCTIVITY CHART</h4>
          </div>
          <div class="modal-body">
-             <!--<p>hey{{$ctrl.names}}</p>-->
                  <table style="color:white; padding:5px;border:1px solid white;" border = 1px solid white; >
                  <tr ng-repeat= "x in $ctrl.names">
 
@@ -186,9 +243,7 @@ border-color:white;
 
                  </tr>
              </table>
-           <!--<h1 id="hello" style="color:black;">Hello Hello</h1>
-           <p id="temp" style="color:black;"></p>-->
-         </div>
+           </div>
          <div class="modal-footer">
            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
          </div>
@@ -198,7 +253,6 @@ border-color:white;
 
 <div class="modal fade" id="workpacket_per" role="dialog">
     <div class="modal-dialog">
-      <!-- Modal content-->
       <div class="modal-content">
          <div class="modal-header">
              <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -218,7 +272,6 @@ border-color:white;
 
 <div class="modal fade" id="percent_graph" role="dialog">
     <div class="modal-dialog">
-      <!-- Modal content-->
       <div class="modal-content">
          <div class="modal-header">
              <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -238,7 +291,6 @@ border-color:white;
 
 <div class="modal fade" id="pwe_myModal" role="dialog">
     <div class="modal-dialog">
-      <!-- Modal content-->
       <div class="modal-content">
          <div class="modal-header">
              <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -253,7 +305,7 @@ border-color:white;
          </div>
        </div>
     </div>
-  </div>
+  </div>-->
 
 </body>
 <script>

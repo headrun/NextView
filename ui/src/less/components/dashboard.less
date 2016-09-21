@@ -38,9 +38,13 @@ dashboard {
 
     height: 100%;
     position: relative;
-    top: 0;
+    top: -10px;
     left: 0;
-    padding-top: @gutter; 
+    padding-left: @gutter;
+    padding-right: @gutter;
+    padding-bottom: @gutter;
+   /* padding-top: @gutter; */
+   /* margin-top: -10px; */
 
     div.widget {
 
@@ -70,9 +74,12 @@ dashboard {
           width: 100%;
           padding: @gutter/2 30px @gutter/2 @gutter;
           background-color: @widget-title-bg;
-          .text-overflow;
           color: @widget-bg;
-        }
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+
+          }
 
         div.widget-body {
 
