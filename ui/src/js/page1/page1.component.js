@@ -37,21 +37,27 @@
                             'id': 1,
                             'col': 12,
                             'api': '',
-                            'opt': self.chartOptions
+                            'opt': self.chartOptions,
+                            'widget': 1,
+                            'packet_hierarchy': 1
                         },
                         "internal_error_accuracy": {
                             'title': 'Internal Accuracy Graph',
                             'id': 2,
                             'col': 6,
                             'api': '',
-                            'opt': self.chartOptions4
+                            'opt': self.chartOptions4,
+                            'widget': 0,
+                            'packet_hierarchy': 0,
                         },
                         "external_error_accuracy": {
                             'title': 'External Accuracy Graph',
                             'id': 3,
                             'col': 6,
                             'api': '',
-                            'opt': self.chartOptions6
+                            'opt': self.chartOptions6,
+                            'widget': 0,
+                            'packet_hierarchy': 0,
                         }
                     };
                     var final_layout_list = [];
@@ -93,9 +99,13 @@
                     /*var from_to_data = from_to + 'from=' + lastDate + '&to=' + firstDate + '&project=' + self.project
                          + '&center=' + self.location;*/
 
-                     var from_to_data = from_to + 'from=' + '2016-7-21' + '&to=' + '2016-7-27' + '&project=' + self.project
+                     var from_to_data = from_to + 'from=' + '2016-9-1' + '&to=' + '2016-9-15' + '&project=' + self.project
                          + '&center=' + self.location + '&type=' + self.day_type;
                     $http({method:"GET", url:from_to_data}).success(function(result){
+                        var sub_project_level = result.result.sub_project_level;
+                        var sub_packet_level = result.result.sub_packet_level;
+                        var work_packet_level = result.result.work_packet_level;
+                        self.packet_hierarchy_list.push(sub_project_level,sub_packet_level,work_packet_level);
                         self.packet_count = result.result.productivity_data.length;
                             self.high_data_gener = [];
                             var final_data_gener = result.result;
@@ -154,19 +164,22 @@
                     data: self.high_data_gener[0].internal_accuracy_graph
              }]
              });
+                            angular.extend(self.chartOptions4.yAxis,{
+                                min:result.result.int_min_value,
+                                max:result.result.int_max_value
+                            })
 
-
-                                         angular.extend(self.chartOptions6.yAxis.title,{
+                            angular.extend(self.chartOptions6.yAxis.title,{
                                 text: 'In Percentage'
                             });
                             angular.extend(self.chartOptions6.plotOptions.series.point.events,{
-                select: function(e) {
+                                select: function(e) {
                         console.log(e);
                         $("#perc_hello").html(e.target.name);
                         $("#perc_temp").html(e.target.y);
                         $('#percent_graph').modal('show');
                         }
-              });
+                            });
                             angular.extend(self.chartOptions6,{
               series: [{
                  name: 'accuracy',
@@ -174,17 +187,10 @@
                     data: self.high_data_gener[0].external_accuracy_graph
              }]
              });
-
-                            /*angular.extend(self.chartOptions6,{
-        xAxis: {
-            categories: self.high_data_gener[0].extr_err_accuracy.extr_err_name
-        },
-        series: [{
-            name: 'Accuracy',
-            data: self.high_data_gener[0].extr_err_accuracy.extr_err_perc
-        },]
-
-              });*/
+                            angular.extend(self.chartOptions6.yAxis,{
+                                min:result.result.ext_min_value,
+                                max:result.result.ext_max_value
+                            })
                          });
                 }
              })
@@ -297,16 +303,6 @@
                         data: self.high_data_gener[0].internal_error_count
                     }]
              });
-                            /*angular.extend(self.chartOptions6,{
-        xAxis: {
-            categories: self.high_data_gener[0].extr_err_accuracy.extr_err_name
-        },
-        series: [{
-            name: 'Accuracy',
-            data: self.high_data_gener[0].extr_err_accuracy.extr_err_perc
-        },]
-
-              });*/
                          });
                     }
                 });
@@ -314,12 +310,8 @@
              this.$onDestroy = function () {
                return unWatch && unWatch();
              }
-             /*$http({method:"GET", url:def_display}).success(function(result){
-                cosole.log('Def');
-             });*/
              var from_to_data = from_to + 'from=' + lastDate + '&to=' + firstDate + '&project=' + self.project
                          + '&center=' + self.location;
-
 
                 self.first = firstDate;
                 self.last = lastDate;
@@ -335,6 +327,55 @@
                 var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                          + '&center=' + self.location + '&type=' + self.day_type;
                 console.log(from_to_data);
+                $http({method:"GET", url:from_to_data}).success(function(result){
+                            self.high_data_gener = [];
+                            var final_data_gener = result.result;
+                            self.high_data_gener.push(final_data_gener);
+                            angular.extend(self.chartOptions, {
+               xAxis: {
+                 categories: self.high_data_gener[0].data.date,
+                 title: {
+                  text: '',
+                 }
+               },
+               plotOptions: {
+                series : {
+                    allowPointSelect: true,
+                    point: {
+                        events:{
+                            select: function(e) {
+                            console.log(e.target.series.name);
+                            var productivity_graph ='/api/chart_data/?'
+                            $http.get( productivity_graph+ 'packet=' + e.target.series.name + '&date=' + e.target.category).success(
+                            function(data, status)
+                                {
+                                    $('#myModal').modal('show');
+                                    var names_list =  data.result;
+                                    self.names = names_list;
+                                    console.log(self.names);
+                                }).error(function(error){ console.log("error")});
+
+                        }
+                    }
+                    }
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+               series: self.high_data_gener[0].productivity_data
+             });
+                         });
+            }
+
+            self.click = function(){
+                var dateEntered = document.getElementById('select').value
+                var from = dateEntered.split('to')[0].replace(' ','');
+                var to = dateEntered.split('to')[1].replace(' ','');
+                var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                         + '&center=' + self.location + '&type=' + self.day_type;
                 $http({method:"GET", url:from_to_data}).success(function(result){
                             self.high_data_gener = [];
                             var final_data_gener = result.result;
@@ -393,9 +434,15 @@
                     data: self.high_data_gener[0].internal_accuracy_graph
              }]
              });
+
+
                                          angular.extend(self.chartOptions6.yAxis.title,{
                                 text: 'In Percentage'
                             });
+                            angular.extend(self.chartOptions4.yAxis,{
+                                min:result.result.int_min_value,
+                                max:result.result.int_max_value
+                            })
                             angular.extend(self.chartOptions6.plotOptions.series.point.events,{
                 select: function(e) {
                         console.log(e);
@@ -411,18 +458,70 @@
                     data: self.high_data_gener[0].external_accuracy_graph
              }]
              });
+                            angular.extend(self.chartOptions6.yAxis,{
+                                min:result.result.ext_min_value,
+                                max:result.result.ext_max_value
+                            })
 
-                            /*angular.extend(self.chartOptions6,{
-        xAxis: {
-            categories: self.high_data_gener[0].extr_err_accuracy.extr_err_name
-        },
-        series: [{
-            name: 'Accuracy',
-            data: self.high_data_gener[0].extr_err_accuracy.extr_err_perc
-        },]
-
-              });*/
                          });
+            }
+            self.update_one = function(index,selected_name){
+            var sub_pro = self.sel_pack[0];
+            var sub_pac = self.sel_pack[1];
+            var wor_pac = self.sel_pack[2];
+            var final_work =  '&sub_project=' + sub_pro + '&sub_packet=' + sub_pac + '&work_packet=' + wor_pac
+            var dateEntered = document.getElementById('select').value
+            var from = dateEntered.split('to')[0].replace(' ','');
+            var to = dateEntered.split('to')[1].replace(' ','');
+            var placeholder = ''
+            var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                         + '&center=' + self.location + '&type=' + self.day_type + final_work;
+            $http({method:"GET", url:from_to_data}).success(function(result){
+                        /*var sub_project_level = result.result.sub_project_level;
+                        var sub_packet_level = result.result.sub_packet_level;
+                        var work_packet_level = result.result.work_packet_level;
+                        self.packet_hierarchy_list.push(sub_project_level,sub_packet_level,work_packet_level);
+                        self.packet_count = result.result.productivity_data.length;
+                            self.high_data_gener = [];
+                            var final_data_gener = result.result;
+                            self.high_data_gener.push(final_data_gener);
+                            angular.extend(self.chartOptions, {
+               xAxis: {
+                 categories: self.high_data_gener[0].data.date,
+                 title: {
+                  text: '',
+                 }
+               },
+               plotOptions: {
+                series : {
+                    allowPointSelect: true,
+                    point: {
+                        events:{
+                            select: function(e) {
+                            console.log(e.target.series.name);
+                            var productivity_graph ='/api/chart_data/?'
+                            $http.get( productivity_graph+ 'packet=' + e.target.series.name + '&date=' + e.target.category).success(
+                            function(data, status)
+                                {
+                                    $('#myModal').modal('show');
+                                    var names_list =  data.result;
+                                    self.names = names_list;
+                                    console.log(self.names);
+                                }).error(function(error){ console.log("error")});
+
+                        }
+                    }
+                    }
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+               series: self.high_data_gener[0].productivity_data
+             });*/
+                            });
             }
 
             self.chartOptions = {
@@ -463,6 +562,8 @@
                 type: 'category'
             },
             yAxis: {
+                min:'',
+                max:'',
                 gridLineColor: 'a2a2a2',
                 title: {
                     text: 'In Percentage'
@@ -494,6 +595,8 @@
                 type: 'category'
             },
             yAxis: {
+                min:'',
+                max:'',
                 gridLineColor: 'a2a2a2',
                 title: {
                     text: 'In Percentage'
@@ -510,36 +613,6 @@
             },
 
             };
-            /*self.chartOptions6 = {
-                        title: {
-            text: '',
-            x: -20 //center
-        },
-        subtitle: {
-            text: '',
-            x: -20
-        },
-        yAxis: {
-            title: {
-                text: ''
-            },
-            gridLineColor: 'a2a2a2',
-            plotLines: [{
-                value: 0,
-                width: 1,
-                color: '#808080'
-            }]
-        },
-        tooltip: {
-            valueSuffix: '°C'
-        },
-        legend: {
-            layout: 'vertical',
-            align: 'right',
-            verticalAlign: 'middle',
-            borderWidth: 0
-        },
-            };*/
             self.hideLoading();
             self.names;
             self.names_2;
@@ -550,8 +623,10 @@
             self.packet_count = '';
             self.list_object = '';
             self.layout_list = '';
+            self.packet_hierarchy_list = [];
             self.day_type = 'day';
             self.useful_layout = [];
+            self.sel_pack = [];
             }],
 
             "bindings": {

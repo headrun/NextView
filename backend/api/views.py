@@ -795,6 +795,11 @@ def day_week_month(request,dwm_dict,prj_id,center,work_packets):
             result_dict['productivity_data'] = graph_data_alignment(result_dict['prod_days_data'],name_key='data')
         packet_sum_data = result_dict['volumes_data']['volume_values']
         error_graphs_data = internal_extrnal_graphs(request, dwm_dict['day'], prj_id, center, packet_sum_data)
+        int_value_range= error_graphs_data['internal_accuracy_graph']
+        int_min_value = int(round(min(int_value_range.values()) - 2))
+        int_max_value = int(round(max(int_value_range.values()) + 2))
+        final_dict['int_min_value'] = int_min_value
+        final_dict['int_max_value'] = int_max_value
         all_external_error_accuracy={}
         if error_graphs_data.has_key('internal_accuracy_graph'):
             final_dict['internal_accuracy_graph'] = graph_data_alignment(error_graphs_data['internal_accuracy_graph'], name_key='y')
@@ -805,6 +810,26 @@ def day_week_month(request,dwm_dict,prj_id,center,work_packets):
         if error_graphs_data.has_key('external_accuracy_graph'):
             final_dict['external_accuracy_graph'] = graph_data_alignment(error_graphs_data['external_accuracy_graph'], name_key='y')
         final_dict.update(result_dict)
+        sub_pro_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_project').distinct()
+        sub_project_level = [i[0] for i in sub_pro_level]
+        if len(sub_project_level) <= 1 and sub_project_level[0] == u'' :
+            sub_project_level = ''
+        work_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet').distinct()
+        work_packet_level = [j[0] for j in work_pac_level]
+        if len(work_packet_level) <= 1 and work_packet_level[0] == u'':
+            work_packet_level = ''
+        sub_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_packet').distinct()
+        sub_packet_level = [k[0] for k in sub_pac_level]
+        if len(sub_packet_level) <= 1 and sub_packet_level[0] == u'':
+            sub_packet_level = ''
+        final_dict['sub_project_level'] = sub_project_level
+        final_dict['work_packet_level'] = work_packet_level
+        final_dict['sub_packet_level'] = sub_packet_level
+        """ext_value_range = error_graphs_data['extr_err_accuracy']['extr_err_perc']
+        ext_min_value = int(round(min(ext_value_range) - 2))
+        ext_max_value = int(round(max(ext_value_range) + 2))
+        final_dict['ext_min_value'] = ext_min_value
+        final_dict['ext_max_value'] = ext_max_value"""
         #final_dict.update(error_graphs_data)
         print result_dict
         return final_dict

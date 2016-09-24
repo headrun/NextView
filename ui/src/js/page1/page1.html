@@ -87,23 +87,8 @@ table {
         <div><h3 class="pull-left brand_style">{{$ctrl.location}}{{$ctrl.project}}Dashboard</h3></div>
              <div id="inner1" class="form-group">
                  <input class="form-control select" value="{{$ctrl.first}} to {{$ctrl.last}}" id="select" size="19">
-                 <i class="fa fa-calendar date" aria-hidden="true"></i>
+                 <i ng-click="$ctrl.click()"class="fa fa-calendar date" aria-hidden="true"></i>
              </div>
-             <div  class="input-group"id="inner2">
-                 <ul class="nav nav-pills">
-                     <span class="input-group-addon" style="background-color:#fff;">
-                         <li id="day"><a style="color:black; cursor:pointer;" href="" ng-click="$ctrl.dateType('day')">Day</a></li>
-                     </span>
-                     <span class="input-group-addon" style="background-color:#fff;">
-                         <li id="week"><a style="color:black; cursor:pointer;" href="" ng-click="$ctrl.dateType('week')">Week</a></li>
-                     </span>
-                     <span class="input-group-addon" style="background-color:#fff;">
-                         <li id="month"><a style="color:black; cursor:pointer;" href="" ng-click="$ctrl.dateType('month')">Month</a></li>
-                     </span>
-
-                 </ul>
-             </div>
-
         </div>
 
     </div>
@@ -114,6 +99,26 @@ table {
                     <span class="pull-left">{{j.title}}</span>
                 </div>
                 <div class="widget-body">
+                    <div ng-if="j.packet_hierarchy == 1">
+                        <div ng-repeat="k in $ctrl.packet_hierarchy_list track by $index">
+                            <div ng-if="k">
+                                <select id="{{$index}}" style="color:black;" ng-options="packet for packet in k" ng-model="$ctrl.sel_pack[$index]" ng-change="$ctrl.update_one($index,$ctrl.sel_pack[$index])"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-if="j.widget == '1' "class="input-group"id="inner2">
+                    <ul class="nav nav-pills">
+                        <span class="input-group-addon" style="background-color:#fff;">
+                            <li id="day" ng-click="$ctrl.dateType('day')" style="color:black; cursor:pointer;">Day</li>
+                        </span>
+                        <span class="input-group-addon" style="background-color:#fff;">
+                            <li id="week" ng-click="$ctrl.dateType('week')" style="color:black;cursor:pointer;">Week</li>
+                        </span>
+                        <span class="input-group-addon" style="background-color:#fff;">
+                            <li id="month" ng-click="$ctrl.dateType('month')" style="color:black;cursor:pointer;">Month</li>
+                        </span>
+                    </ul>
+                    </div>
                     <highcharts options="j.opt"></highcharts>
                 </div>
             </div>
