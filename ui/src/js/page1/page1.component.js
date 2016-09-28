@@ -38,8 +38,7 @@
                             'col': 12,
                             'api': '',
                             'opt': self.chartOptions,
-                            'widget': 1,
-                            'packet_hierarchy': 1
+                            'widget': 1
                         },
                         "internal_error_accuracy": {
                             'title': 'Internal Accuracy Graph',
@@ -47,8 +46,7 @@
                             'col': 6,
                             'api': '',
                             'opt': self.chartOptions4,
-                            'widget': 0,
-                            'packet_hierarchy': 0,
+                            'widget': 0
                         },
                         "external_error_accuracy": {
                             'title': 'External Accuracy Graph',
@@ -56,9 +54,50 @@
                             'col': 6,
                             'api': '',
                             'opt': self.chartOptions6,
-                            'widget': 0,
-                            'packet_hierarchy': 0,
-                        }
+                            'widget': 0
+                        },
+                        "internal_error_accuracy_pie":{
+                            'title': 'Internal Accuracy Graph [PIE]',
+                            'id': 4,
+                            'col': 6,
+                            'api': '',
+                            'opt': self.chartOptions5,
+                            'widget': 0
+                        },
+                        "external_error_accuracy_pie":{
+                            'title': 'External Accuracy Graph [PIE]',
+                            'id': 5,
+                            'col': 6,
+                            'api': '',
+                            'opt': self.chartOptions5_2,
+                            'widget': 0
+                        },
+                        "internal_accuracy_timeline": {
+                            'title': 'Internal Accuracy Timeline',
+                            'id': 6,
+                            'col': 12,
+                            'api': '',
+                            'opt': self.chartOptions9,
+                            'widget': 0
+                        },
+                        "external_accuracy_timeline": {
+                            'title': 'External Accuracy Timeline',
+                            'id': 7,
+                            'col': 12,
+                            'api': '',
+                            'opt': self.chartOptions9_2,
+                            'widget': 0
+                        },
+                        "productivity_bar_graph": {
+                            'title': 'Productivity Bar Chart',
+                            'id': 8,
+                            'col': 12,
+                            'api': '',
+                            'opt': self.chartOptions10,
+                            'widget': 1
+                        },
+
+
                     };
                     var final_layout_list = [];
                     for (var single in self.layout_list){
@@ -99,12 +138,13 @@
                     /*var from_to_data = from_to + 'from=' + lastDate + '&to=' + firstDate + '&project=' + self.project
                          + '&center=' + self.location;*/
 
-                     var from_to_data = from_to + 'from=' + '2016-9-1' + '&to=' + '2016-9-15' + '&project=' + self.project
+                     var from_to_data = from_to + 'from=' + '2016-9-1' + '&to=' + '2016-9-8' + '&project=' + self.project
                          + '&center=' + self.location + '&type=' + self.day_type;
                     $http({method:"GET", url:from_to_data}).success(function(result){
                         var sub_project_level = result.result.sub_project_level;
                         var sub_packet_level = result.result.sub_packet_level;
                         var work_packet_level = result.result.work_packet_level;
+                        self.top_employee_details =  result.result.top_employee_details
                         self.packet_hierarchy_list.push(sub_project_level,sub_packet_level,work_packet_level);
                         self.packet_count = result.result.productivity_data.length;
                             self.high_data_gener = [];
@@ -146,6 +186,44 @@
                },
                series: self.high_data_gener[0].productivity_data
              });
+                            angular.extend(self.chartOptions9_2, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date,
+                                title: {
+                                    text: '',
+                                }
+                            },
+                            series: self.high_data_gener[0].external_time_line
+                            });
+                            angular.extend(self.chartOptions9, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date,
+                                title: {
+                                    text: '',
+                                }
+                            },
+                            series: self.high_data_gener[0].internal_time_line
+                            });
+                            angular.extend(self.chartOptions10, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date
+                            },
+                            series: self.high_data_gener[0].productivity_data
+                            });
+                            angular.extend(self.chartOptions5,{
+                                series: [{
+                                    name: 'Brands',
+                                    colorByPoint: true,
+                                    data: self.high_data_gener[0].internal_accuracy_graph
+                                }]
+                            });
+                            angular.extend(self.chartOptions5_2,{
+                                series: [{
+                                    name: 'Brands',
+                                    colorByPoint: true,
+                                    data: self.high_data_gener[0].external_accuracy_graph
+                                }]
+                            });
                             angular.extend(self.chartOptions4.yAxis.title,{
                                 text: 'In Percentage'
                             });
@@ -168,7 +246,6 @@
                                 min:result.result.int_min_value,
                                 max:result.result.int_max_value
                             })
-
                             angular.extend(self.chartOptions6.yAxis.title,{
                                 text: 'In Percentage'
                             });
@@ -253,24 +330,6 @@
                },
                series: self.high_data_gener[0].productivity_data
              });
-                            angular.extend(self.chartOptions3,{
-              series: [{
-            colorByPoint: true,
-            name: 'error count',
-            data: self.high_data_gener[0].volumes_data.volume_new_data,
-            dataLabels: {
-                enabled: true,
-                rotation: -90,
-                color: '#FFFFFF',
-                align: 'right',
-                y: 10, // 10 pixels down from the top
-                style: {
-                    fontSize: '13px',
-                    fontFamily: 'Verdana, sans-serif'
-                }
-            }
-        }]
-              });
                             angular.extend(self.chartOptions4.yAxis.title,{
                                 text: 'In Percentage'
                             });
@@ -288,20 +347,6 @@
                  colorByPoint: true,
                     data: self.high_data_gener[0].internal_accuracy_graph
              }]
-             });
-                            angular.extend(self.chartOptions5_2,{
-                series: [{
-                        name: 'Brands',
-                        colorByPoint: true,
-                        data: self.high_data_gener[0].extrn_error_count
-                    }]
-             });
-                            angular.extend(self.chartOptions5,{
-                series: [{
-                        name: 'Brands',
-                        colorByPoint: true,
-                        data: self.high_data_gener[0].internal_error_count
-                    }]
              });
                          });
                     }
@@ -474,9 +519,11 @@
             var from = dateEntered.split('to')[0].replace(' ','');
             var to = dateEntered.split('to')[1].replace(' ','');
             var placeholder = ''
-            var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+            var from_to_data = from_to + 'from=' + '2016-08-1' + '&to=' + '2016-08-10' + '&project=' + self.project
                          + '&center=' + self.location + '&type=' + self.day_type + final_work;
+
             $http({method:"GET", url:from_to_data}).success(function(result){
+
                         /*var sub_project_level = result.result.sub_project_level;
                         var sub_packet_level = result.result.sub_packet_level;
                         var work_packet_level = result.result.work_packet_level;
@@ -547,6 +594,71 @@
                 enabled: false
                },
             };
+            self.chartOptions10 = {
+            chart: {
+                type: 'column',
+                backgroundColor: "transparent"
+             },
+            title: {
+                text: ''
+            },
+            subtitle: {
+                text: ''
+            },
+            yAxis: {
+                gridLineColor: 'a2a2a2',
+                min: 0,
+                title: {
+                    text: ''
+                }
+            },
+            };
+            self.chartOptions9 = {
+                chart : {
+                 backgroundColor: "transparent"
+                },
+                               yAxis: {
+                gridLineColor: 'a2a2a2',
+                min: 0,
+                title: {
+                 text: 'per day achieved',
+                 align: 'high'
+                },
+                labels: {
+                 overflow: 'justify'
+                }
+               },
+
+               tooltip: {
+                valueSuffix: ''
+               },
+               credits: {
+                enabled: false
+               },
+            };
+            self.chartOptions9_2 = {
+                chart : {
+                 backgroundColor: "transparent"
+                },
+                               yAxis: {
+                gridLineColor: 'a2a2a2',
+                min: 0,
+                title: {
+                 text: 'per day achieved',
+                 align: 'high'
+                },
+                labels: {
+                 overflow: 'justify'
+                }
+               },
+
+               tooltip: {
+                valueSuffix: ''
+               },
+               credits: {
+                enabled: false
+               },
+            };
             self.chartOptions4 = {
             chart: {
                 type: 'column',
@@ -580,6 +692,62 @@
             },
 
             };
+            self.chartOptions5 = {
+                chart: {
+                    backgroundColor: "transparent",
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie'
+                  },
+                title: {
+                    text: ''
+                  },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                  },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y} ',
+                            style: {
+                                color:(Highcharts.theme && Highcharts.theme.background2) || '#EEE'
+                               }
+                            }
+                        }
+                    },
+                };
+            self.chartOptions5_2 = {
+                chart: {
+                    backgroundColor: "transparent",
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie'
+                  },
+                title: {
+                    text: ''
+                  },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                  },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y} ',
+                            style: {
+                                color:(Highcharts.theme && Highcharts.theme.background2) || '#EEE'
+                               }
+                            }
+                        }
+                    },
+                };
             self.chartOptions6 = {
             chart: {
                 type: 'column',
@@ -627,6 +795,7 @@
             self.day_type = 'day';
             self.useful_layout = [];
             self.sel_pack = [];
+            self.top_employee_details = '';
             }],
 
             "bindings": {

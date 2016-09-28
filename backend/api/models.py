@@ -17,6 +17,8 @@ class Project(models.Model):
     code    = models.IntegerField(max_length=255, unique=True)
     center  = models.ForeignKey(Center, null=True)
     layout  = models.CharField(max_length=255, default='')
+    project_db_handlings_choices = (('update','Update'),('aggregate','Aggregate'),('ignore','Ignore'),)
+    project_db_handling = models.CharField(max_length=30,choices=project_db_handlings_choices,default='ignore',) 
 
     class Meta:
         db_table = u'project'
@@ -131,6 +133,10 @@ class Authoringtable(models.Model):
     table_schema = models.CharField(max_length=255, default='')
     sheet_field = models.CharField(max_length=255, default='')
     center = models.ForeignKey(Center, null=True)
+    table_type_choices = (('raw_table', 'Raw_table'), ('external_error', 'External_error'), ('internal_error', 'Internal_error'),('target', 'targets'), ('other', 'Other'),('internal_external','Error'))
+    table_type = models.CharField(max_length=30, choices=table_type_choices, default='other', )
+
+
     class Meta:
         db_table = u'authoring_table'
     def __unicode__(self):

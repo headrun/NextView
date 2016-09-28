@@ -32,7 +32,7 @@ class RawtableAdmin(admin.ModelAdmin):
 admin.site.register(RawTable,RawtableAdmin)
 
 class InternalerrorsAdmin(admin.ModelAdmin):
-    list_display = ['sub_project','work_packet','sub_packet','audited_errors','total_errors','date','employee_id']
+    list_display = ['work_packet','sub_project','sub_packet','audited_errors','total_errors','date','employee_id']
     list_filter = ('sub_project','work_packet','sub_packet','project','center')
 admin.site.register(Internalerrors,InternalerrorsAdmin)
 
@@ -42,7 +42,7 @@ class ExternalerrorsAdmin(admin.ModelAdmin):
 admin.site.register(Externalerrors,ExternalerrorsAdmin)
 
 class AuthoringtableAdmin(admin.ModelAdmin):
-    list_display = ['sheet_name','table_schema','sheet_field','project','center']
+    list_display = ['sheet_name','table_schema','sheet_field','project','center','table_type']
     list_filter = ['sheet_name','project','center']
 admin.site.register(Authoringtable,AuthoringtableAdmin)
 
