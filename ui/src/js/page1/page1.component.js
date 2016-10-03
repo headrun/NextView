@@ -26,6 +26,7 @@
              var la_y = someDate.getFullYear();
              var lastDate = la_y + '-' + la_mm + '-' + la_dd;
              var project = 'api/project/';
+             var drop_down_link = '/api/dropdown_data/';
 
              $http({method:"GET", url:project}).success(function(result){
                 if(result.result.role === 'customer'){
@@ -135,18 +136,257 @@
                     self.useful_layout.push(first_row,second_row);
                     self.location = pro_cen_nam.split('-')[0].replace(' ','') + ' - '
                     self.project = pro_cen_nam.split('-')[1].replace(' ','') + ' - '
-                    /*var from_to_data = from_to + 'from=' + lastDate + '&to=' + firstDate + '&project=' + self.project
-                         + '&center=' + self.location;*/
-
-                     var from_to_data = from_to + 'from=' + '2016-9-1' + '&to=' + '2016-9-8' + '&project=' + self.project
-                         + '&center=' + self.location + '&type=' + self.day_type;
+                    if (self.project == 'DellBilling - '){
+                        var from_to_data = from_to + 'from=' + '2016-7-8' + '&to=' + '2016-7-18' + '&project=' + self.project
+                            + '&center=' + self.location + '&type=' + self.day_type;
+                    }
+                    else {
+                        var from_to_data = from_to + 'from=' + lastDate + '&to=' + firstDate + '&project=' + self.project
+                            + '&center=' + self.location + '&type=' + self.day_type;
+                    }
+                    /*var from_to_data = from_to + 'from=' + '2016-7-8' + '&to=' + '2016-7-18' + '&project=' + self.project
+                         + '&center=' + self.location + '&type=' + self.day_type;*/
                     $http({method:"GET", url:from_to_data}).success(function(result){
                         var sub_project_level = result.result.sub_project_level;
                         var sub_packet_level = result.result.sub_packet_level;
                         var work_packet_level = result.result.work_packet_level;
-                        self.top_employee_details =  result.result.top_employee_details
-                        self.packet_hierarchy_list.push(sub_project_level,sub_packet_level,work_packet_level);
-                        self.packet_count = result.result.productivity_data.length;
+                        self.top_employee_details =  result.result.top_five_employee_details
+                        self.drop_list =  result.result.drop_value
+                        //self.packet_hierarchy_list.push(sub_project_level,sub_packet_level,work_packet_level);
+                        //self.packet_hierarchy_list = result.result.level;
+                        self.sub_pro_sel = document.getElementById("0");
+                        self.wor_pac_sel = document.getElementById("1");
+                        self.sub_pac_sel = document.getElementById("2");
+                            if (result.result.fin.sub_project) {
+                                console.log('sub_projet_exist');
+                            }
+                            else {
+                                $('#2').hide();
+                                if (result.result.fin.work_packet) {
+                                    console.log('work_packet_exist');
+                                }
+                                if (result.result.fin.sub_packet) {
+                                    console.log('sub_packet_exist');
+                                }
+                                else {
+                                    $('#1').hide();
+                                }
+                            }
+                        for (var sub_pro in self.drop_list) {
+                            self.sub_pro_sel.options[self.sub_pro_sel.options.length] = new Option(sub_pro, sub_pro);
+                        }
+                        self.sub_pro_sel.onchange = function () {
+                            self.wor_pac_sel.length = 1;
+                            self.sub_pac_sel.length = 1;
+                            if (this.selectedIndex < 1) {
+                                self.wor_pac_sel.options[0].text = "All"
+                                self.sub_pac_sel.options[0].text = "All"
+                                return;
+                            }
+                            self.wor_pac_sel.options[0].text = "All"
+                            for (var wor_pac in self.drop_list[this.value]) {
+                                self.wor_pac_sel.options[self.wor_pac_sel.options.length] = new Option(wor_pac, wor_pac);
+                            }
+                            if (self.wor_pac_sel.options.length==2) {
+                                self.wor_pac_sel.selectedIndex=1;
+                                self.wor_pac_sel.onchange();
+                            }
+                        }
+                        self.sub_pro_sel.onchange();
+                        self.wor_pac_sel.onchange = function () {
+                            self.sub_pac_sel.length = 1;
+                            if (this.selectedIndex < 1) {
+                                self.sub_pac_sel.options[0].text = "All"
+                                return;
+                            }
+                            self.sub_pac_sel.options[0].text = "All"
+
+                            var sub_pac = self.drop_list[self.sub_pro_sel.value][this.value];
+                            for (var i = 0; i < sub_pac.length; i++) {
+                                self.sub_pac_sel.options[self.sub_pac_sel.options.length] = new Option(sub_pac[i], sub_pac[i]);
+                            }
+                            if (self.sub_pac_sel.options.length==2) {
+                                self.sub_pac_sel.selectedIndex=1;
+                                self.sub_pac_sel.onchange();
+                            }
+                            }
+                            self.drop_work_pack = 'All';
+                            self.drop_sub_proj = 'All';
+                            self.drop_sub_pack = 'All';
+                            if (result.result.fin.sub_project) {
+                                $('#0').on('change', function(){
+                                    console.log('sub_project_exists');
+                                });
+                            }
+                            else {
+                                if ((result.result.fin.work_packet) && (result.result.fin.sub_packet)){
+                                    $('#0').on('change', function(){
+                                        self.drop_work_pack = this.value;
+                                        self.drop_sub_proj = 'undefined';
+                                        self.drop_sub_pack = self.sub_pac_sel.value;
+                            var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack + '&work_packet=' + self.drop_work_pack
+                            var dateEntered = document.getElementById('select').value
+                            var from = dateEntered.split('to')[0].replace(' ','');
+                            var to = dateEntered.split('to')[1].replace(' ','');
+                            var placeholder = '' 
+                            if (self.project =='DellBilling - '){
+                                var from_to_data = from_to + 'from=' + '2016-07-08' + '&to=' + '2016-07-18' + '&project=' + self.project
+                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                            }
+                            else {
+                                var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                                }
+                            /*var from_to_data = from_to + 'from=' + '2016-08-01' + '&to=' + '2016-08-10' + '&project=' + self.project
+                                         + '&center=' + self.location + '&type=' + self.day_type + final_work;*/
+                            $http({method:"GET", url:from_to_data}).success(function(result){
+                                                       self.high_data_gener = [];
+                            var final_data_gener = result.result;
+                            self.high_data_gener.push(final_data_gener);
+                            angular.extend(self.chartOptions, {
+               xAxis: {
+                 categories: self.high_data_gener[0].data.date,
+                 title: {
+                  text: '',
+                 }
+               },
+               plotOptions: {
+                series : {
+                    allowPointSelect: true,
+                    point: {
+                        events:{
+                            select: function(e) {
+                            console.log(e.target.series.name);
+                            var productivity_graph ='/api/chart_data/?'
+                            $http.get( productivity_graph+ 'packet=' + e.target.series.name + '&date=' + e.target.category).success(
+                            function(data, status)
+                                {
+                                    $('#myModal').modal('show');
+                                    var names_list =  data.result;
+                                    self.names = names_list;
+                                    console.log(self.names);
+                                }).error(function(error){ console.log("error")});
+
+                        }
+                    }
+                    }
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+               series: self.high_data_gener[0].productivity_data
+             });
+                            angular.extend(self.chartOptions9_2, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date,
+                                title: {
+                                    text: '',
+                                }
+                            },
+                            series: self.high_data_gener[0].external_time_line
+                            });
+                            angular.extend(self.chartOptions9, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date,
+                                title: {
+                                    text: '',
+                                }
+                            },
+                            series: self.high_data_gener[0].internal_time_line
+                            });
+                            angular.extend(self.chartOptions10, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date
+                            },
+                            series: self.high_data_gener[0].productivity_data
+                            });
+                            angular.extend(self.chartOptions4.yAxis.title,{
+                                text: 'In Percentage'
+                            });
+                            angular.extend(self.chartOptions4.plotOptions.series.point.events,{
+                select: function(e) {
+                        console.log(e);
+                        $("#perc_hello").html(e.target.name);
+                        $("#perc_temp").html(e.target.y);
+                        $('#percent_graph').modal('show');
+                        }
+              });
+                            angular.extend(self.chartOptions4,{
+              series: [{
+                 name: 'accuracy',
+                 colorByPoint: true,
+                    data: self.high_data_gener[0].internal_accuracy_graph
+             }]
+             });
+                            angular.extend(self.chartOptions4.yAxis,{
+                                min:result.result.int_min_value,
+                                max:result.result.int_max_value
+                            })
+                            angular.extend(self.chartOptions5,{
+                                series: [{
+                                    name: '',
+                                    colorByPoint: true,
+                                    data: self.high_data_gener[0].internal_accuracy_graph
+                                }]
+                            });
+                            angular.extend(self.chartOptions5_2,{
+                                series: [{
+                                    name: '',
+                                    colorByPoint: true,
+                                    data: self.high_data_gener[0].external_accuracy_graph
+                                }]
+                            });
+                            angular.extend(self.chartOptions6.yAxis.title,{
+                                text: 'In Percentage'
+                            });
+                            angular.extend(self.chartOptions6.plotOptions.series.point.events,{
+                                select: function(e) {
+                        console.log(e);
+                        $("#perc_hello").html(e.target.name);
+                        $("#perc_temp").html(e.target.y);
+                        $('#percent_graph').modal('show');
+                        }
+                            });
+                            angular.extend(self.chartOptions6,{
+              series: [{
+                 name: 'accuracy',
+                 colorByPoint: true,
+                    data: self.high_data_gener[0].external_accuracy_graph
+             }]
+             });
+                            angular.extend(self.chartOptions6.yAxis,{
+                                min:result.result.ext_min_value,
+                                max:result.result.ext_max_value
+                            });
+ 
+                            });
+                                    });
+                                }
+                                else{
+                                    if (result.result.fin.work_packet){
+                                        $('#0').on('change', function(){
+                                            self.drop_work_pack = this.value;
+                                            self.drop_sub_proj = 'undefined';
+                                            self.drop_sub_pack = 'undefined';
+                            var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack + '&work_packet=' + self.drop_work_pack
+                            var dateEntered = document.getElementById('select').value
+                            var from = dateEntered.split('to')[0].replace(' ','');
+                            var to = dateEntered.split('to')[1].replace(' ','');
+                            var placeholder = '' 
+                            if (self.project =='DellBilling - '){
+                                var from_to_data = from_to + 'from=' + '2016-07-08' + '&to=' + '2016-07-18' + '&project=' + self.project
+                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                            }
+                            else {
+                                var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                                }    
+                            /*var from_to_data = from_to + 'from=' + '2016-08-01' + '&to=' + '2016-08-10' + '&project=' + self.project
+                                         + '&center=' + self.location + '&type=' + self.day_type + final_work;*/
+                            $http({method:"GET", url:from_to_data}).success(function(result){
                             self.high_data_gener = [];
                             var final_data_gener = result.result;
                             self.high_data_gener.push(final_data_gener);
@@ -210,19 +450,154 @@
                             },
                             series: self.high_data_gener[0].productivity_data
                             });
+                            angular.extend(self.chartOptions4.yAxis.title,{
+                                text: 'In Percentage'
+                            });
+                            angular.extend(self.chartOptions4.plotOptions.series.point.events,{
+                select: function(e) {
+                        console.log(e);
+                        $("#perc_hello").html(e.target.name);
+                        $("#perc_temp").html(e.target.y);
+                        $('#percent_graph').modal('show');
+                        }
+              });
+                            angular.extend(self.chartOptions4,{
+              series: [{
+                 name: 'accuracy',
+                 colorByPoint: true,
+                    data: self.high_data_gener[0].internal_accuracy_graph
+             }]
+             });
+                            angular.extend(self.chartOptions4.yAxis,{
+                                min:result.result.int_min_value,
+                                max:result.result.int_max_value
+                            })
                             angular.extend(self.chartOptions5,{
                                 series: [{
-                                    name: 'Brands',
+                                    name: '',
                                     colorByPoint: true,
                                     data: self.high_data_gener[0].internal_accuracy_graph
                                 }]
                             });
                             angular.extend(self.chartOptions5_2,{
                                 series: [{
-                                    name: 'Brands',
+                                    name: '',
                                     colorByPoint: true,
                                     data: self.high_data_gener[0].external_accuracy_graph
                                 }]
+                            });
+                            angular.extend(self.chartOptions6.yAxis.title,{
+                                text: 'In Percentage'
+                            });
+                            angular.extend(self.chartOptions6.plotOptions.series.point.events,{
+                                select: function(e) {
+                        console.log(e);
+                        $("#perc_hello").html(e.target.name);
+                        $("#perc_temp").html(e.target.y);
+                        $('#percent_graph').modal('show');
+                        }
+                            });
+                            angular.extend(self.chartOptions6,{
+              series: [{
+                 name: 'accuracy',
+                 colorByPoint: true,
+                    data: self.high_data_gener[0].external_accuracy_graph
+             }]
+             });
+                            angular.extend(self.chartOptions6.yAxis,{
+                                min:result.result.ext_min_value,
+                                max:result.result.ext_max_value
+                            });
+
+});
+
+
+                                    })
+                                }
+                                }
+                                if (result.result.fin.sub_packet) {
+                                    $('#1').on('change', function(){
+                                        self.drop_sub_pack = this.value;
+                                        self.drop_sub_proj = 'undefined';
+                                        self.drop_work_pack;
+            var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack + '&work_packet=' + self.drop_work_pack
+            var dateEntered = document.getElementById('select').value
+            var from = dateEntered.split('to')[0].replace(' ','');
+            var to = dateEntered.split('to')[1].replace(' ','');
+            var placeholder = '' 
+            if (self.project =='DellBilling - '){
+                var from_to_data = from_to + 'from=' + '2016-07-08' + '&to=' + '2016-07-18' + '&project=' + self.project
+                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+            }
+            else {
+                var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                }
+            /*var from_to_data = from_to + 'from=' + '2016-08-01' + '&to=' + '2016-08-10' + '&project=' + self.project
+                         + '&center=' + self.location + '&type=' + self.day_type + final_work;*/
+            $http({method:"GET", url:from_to_data}).success(function(result){
+                            self.high_data_gener = [];
+                            var final_data_gener = result.result;
+                            self.high_data_gener.push(final_data_gener);
+                            angular.extend(self.chartOptions, {
+               xAxis: {
+                 categories: self.high_data_gener[0].data.date,
+                 title: {
+                  text: '',
+                 }
+               },
+               plotOptions: {
+                series : {
+                    allowPointSelect: true,
+                    point: {
+                        events:{
+                            select: function(e) {
+                            console.log(e.target.series.name);
+                            var productivity_graph ='/api/chart_data/?'
+                            $http.get( productivity_graph+ 'packet=' + e.target.series.name + '&date=' + e.target.category).success(
+                            function(data, status)
+                                {
+                                    $('#myModal').modal('show');
+                                    var names_list =  data.result;
+                                    self.names = names_list;
+                                    console.log(self.names);
+                                }).error(function(error){ console.log("error")});
+
+                        }
+                    }
+                    }
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+               series: self.high_data_gener[0].productivity_data
+             });
+                            angular.extend(self.chartOptions9_2, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date,
+                                title: {
+                                    text: '',
+                                }
+                            },
+                            series: self.high_data_gener[0].external_time_line
+                            });
+                            angular.extend(self.chartOptions9, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date,
+                                title: {
+                                    text: '',
+                                }
+                            },
+                            series: self.high_data_gener[0].internal_time_line
+                            });
+                            angular.extend(self.chartOptions10, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date
+                            },
+                            series: self.high_data_gener[0].productivity_data
                             });
                             angular.extend(self.chartOptions4.yAxis.title,{
                                 text: 'In Percentage'
@@ -246,6 +621,163 @@
                                 min:result.result.int_min_value,
                                 max:result.result.int_max_value
                             })
+                            angular.extend(self.chartOptions5,{
+                                series: [{
+                                    name: '',
+                                    colorByPoint: true,
+                                    data: self.high_data_gener[0].internal_accuracy_graph
+                                }]
+                            });
+                            angular.extend(self.chartOptions5_2,{
+                                series: [{
+                                    name: '',
+                                    colorByPoint: true,
+                                    data: self.high_data_gener[0].external_accuracy_graph
+                                }]
+                            });
+                            angular.extend(self.chartOptions6.yAxis.title,{
+                                text: 'In Percentage'
+                            });
+                            angular.extend(self.chartOptions6.plotOptions.series.point.events,{
+                                select: function(e) {
+                        console.log(e);
+                        $("#perc_hello").html(e.target.name);
+                        $("#perc_temp").html(e.target.y);
+                        $('#percent_graph').modal('show');
+                        }
+                            });
+                            angular.extend(self.chartOptions6,{
+              series: [{
+                 name: 'accuracy',
+                 colorByPoint: true,
+                    data: self.high_data_gener[0].external_accuracy_graph
+             }]
+             });
+                            angular.extend(self.chartOptions6.yAxis,{
+                                min:result.result.ext_min_value,
+                                max:result.result.ext_max_value
+                            });
+
+});
+
+                                    });
+                                }
+                                else {
+                                    self.drop_sub_pack = 'undefined';
+                                    console.log('sub_packet_not_exist');
+                                }
+                            }
+                        /*('#1').on('change', function(){
+                            debugger;
+                        });
+                        ('#0').on('change', function(){
+                            debugger;
+                        });
+                        ('#2').on('change', function(){
+                            debugger;
+                        });*/
+                        self.packet_count = result.result.productivity_data.length;
+                            self.high_data_gener = [];
+                            var final_data_gener = result.result;
+                            self.high_data_gener.push(final_data_gener);
+                            angular.extend(self.chartOptions, {
+               xAxis: {
+                 categories: self.high_data_gener[0].data.date,
+                 title: {
+                  text: '',
+                 }
+               },
+               plotOptions: {
+                series : {
+                    allowPointSelect: true,
+                    point: {
+                        events:{
+                            select: function(e) {
+                            console.log(e.target.series.name);
+                            var productivity_graph ='/api/chart_data/?'
+                            $http.get( productivity_graph+ 'packet=' + e.target.series.name + '&date=' + e.target.category).success(
+                            function(data, status)
+                                {
+                                    $('#myModal').modal('show');
+                                    var names_list =  data.result;
+                                    self.names = names_list;
+                                    console.log(self.names);
+                                }).error(function(error){ console.log("error")});
+
+                        }
+                    }
+                    }
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+               series: self.high_data_gener[0].productivity_data
+             });
+                            angular.extend(self.chartOptions9_2, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date,
+                                title: {
+                                    text: '',
+                                }
+                            },
+                            series: self.high_data_gener[0].external_time_line
+                            });
+
+                            angular.extend(self.chartOptions9, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date,
+                                title: {
+                                    text: '',
+                                }
+                            },
+                            series: self.high_data_gener[0].internal_time_line
+                            });
+
+                            angular.extend(self.chartOptions10, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date
+                            },
+                            series: self.high_data_gener[0].productivity_data
+                            });
+                            angular.extend(self.chartOptions4.yAxis.title,{
+                                text: 'In Percentage'
+                            });
+                            angular.extend(self.chartOptions4.plotOptions.series.point.events,{
+                select: function(e) {
+                        console.log(e);
+                        $("#perc_hello").html(e.target.name);
+                        $("#perc_temp").html(e.target.y);
+                        $('#percent_graph').modal('show');
+                        }
+              });
+                            angular.extend(self.chartOptions4,{
+              series: [{
+                 name: 'accuracy',
+                 colorByPoint: true,
+                    data: self.high_data_gener[0].internal_accuracy_graph
+             }]
+             });
+                            angular.extend(self.chartOptions4.yAxis,{
+                                min:result.result.int_min_value,
+                                max:result.result.int_max_value
+                            })
+                            angular.extend(self.chartOptions5,{
+                                series: [{
+                                    name: '',
+                                    colorByPoint: true,
+                                    data: self.high_data_gener[0].internal_accuracy_graph
+                                }]
+                            });
+                            angular.extend(self.chartOptions5_2,{
+                                series: [{
+                                    name: '',
+                                    colorByPoint: true,
+                                    data: self.high_data_gener[0].external_accuracy_graph
+                                }]
+                            });
                             angular.extend(self.chartOptions6.yAxis.title,{
                                 text: 'In Percentage'
                             });
@@ -358,13 +890,14 @@
              var from_to_data = from_to + 'from=' + lastDate + '&to=' + firstDate + '&project=' + self.project
                          + '&center=' + self.location;
 
-                self.first = firstDate;
-                self.last = lastDate;
+                self.last = firstDate;
+                self.first = lastDate;
 
 
 
-            self.dateType = function(key){
+            self.dateType = function(key,all_data){
                 self.day_type = key;
+                self.render_data = all_data;
                 self.high_data = [];
                 var dateEntered = document.getElementById('select').value
                 var from = dateEntered.split('to')[0].replace(' ','');
@@ -376,7 +909,7 @@
                             self.high_data_gener = [];
                             var final_data_gener = result.result;
                             self.high_data_gener.push(final_data_gener);
-                            angular.extend(self.chartOptions, {
+                            angular.extend(self.render_data, {
                xAxis: {
                  categories: self.high_data_gener[0].data.date,
                  title: {
@@ -425,6 +958,7 @@
                             self.high_data_gener = [];
                             var final_data_gener = result.result;
                             self.high_data_gener.push(final_data_gener);
+                            self.top_employee_details =  result.result.top_five_employee_details;
                             angular.extend(self.chartOptions, {
                xAxis: {
                  categories: self.high_data_gener[0].data.date,
@@ -461,6 +995,44 @@
                },
                series: self.high_data_gener[0].productivity_data
              });
+angular.extend(self.chartOptions9_2, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date,
+                                title: {
+                                    text: '',
+                                }
+                            },
+                            series: self.high_data_gener[0].external_time_line
+                            });
+                            angular.extend(self.chartOptions9, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date,
+                                title: {
+                                    text: '',
+                                }
+                            },
+                            series: self.high_data_gener[0].internal_time_line
+                            });
+                            angular.extend(self.chartOptions10, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date
+                            },
+                            series: self.high_data_gener[0].productivity_data
+                            });
+                            angular.extend(self.chartOptions5,{
+                                series: [{
+                                    name: '',
+                                    colorByPoint: true,
+                                    data: self.high_data_gener[0].internal_accuracy_graph
+                                }]
+                            });
+                            angular.extend(self.chartOptions5_2,{
+                                series: [{
+                                    name: '',
+                                    colorByPoint: true,
+                                    data: self.high_data_gener[0].external_accuracy_graph
+                                }]
+                            });
                             angular.extend(self.chartOptions4.yAxis.title,{
                                 text: 'In Percentage'
                             });
@@ -519,20 +1091,21 @@
             var from = dateEntered.split('to')[0].replace(' ','');
             var to = dateEntered.split('to')[1].replace(' ','');
             var placeholder = ''
-            var from_to_data = from_to + 'from=' + '2016-08-1' + '&to=' + '2016-08-10' + '&project=' + self.project
-                         + '&center=' + self.location + '&type=' + self.day_type + final_work;
-
+            if (self.project =='DellBilling - '){
+                var from_to_data = from_to + 'from=' + '2016-07-08' + '&to=' + '2016-07-18' + '&project=' + self.project
+                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+            }
+            else {
+                var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                }
+            /*var from_to_data = from_to + 'from=' + '2016-08-01' + '&to=' + '2016-08-10' + '&project=' + self.project
+                         + '&center=' + self.location + '&type=' + self.day_type + final_work;*/
             $http({method:"GET", url:from_to_data}).success(function(result){
-
-                        /*var sub_project_level = result.result.sub_project_level;
-                        var sub_packet_level = result.result.sub_packet_level;
-                        var work_packet_level = result.result.work_packet_level;
-                        self.packet_hierarchy_list.push(sub_project_level,sub_packet_level,work_packet_level);
-                        self.packet_count = result.result.productivity_data.length;
-                            self.high_data_gener = [];
-                            var final_data_gener = result.result;
-                            self.high_data_gener.push(final_data_gener);
-                            angular.extend(self.chartOptions, {
+                self.high_data_gener = [];
+                var final_data_gener = result.result;
+                self.high_data_gener.push(final_data_gener);
+angular.extend(self.chartOptions, {
                xAxis: {
                  categories: self.high_data_gener[0].data.date,
                  title: {
@@ -567,9 +1140,96 @@
                 }
                },
                series: self.high_data_gener[0].productivity_data
-             });*/
+             });
+                            angular.extend(self.chartOptions9_2, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date,
+                                title: {
+                                    text: '',
+                                }
+                            },
+                            series: self.high_data_gener[0].external_time_line
+                            });
+                            angular.extend(self.chartOptions9, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date,
+                                title: {
+                                    text: '',
+                                }
+                            },
+                            series: self.high_data_gener[0].internal_time_line
+                            });
+                            angular.extend(self.chartOptions10, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date
+                            },
+                            series: self.high_data_gener[0].productivity_data
+                            });
+                            angular.extend(self.chartOptions4.yAxis.title,{
+                                text: 'In Percentage'
+                            });
+                            angular.extend(self.chartOptions4.plotOptions.series.point.events,{
+                select: function(e) {
+                        console.log(e);
+                        $("#perc_hello").html(e.target.name);
+                        $("#perc_temp").html(e.target.y);
+                        $('#percent_graph').modal('show');
+                        }
+              });
+                            angular.extend(self.chartOptions4,{
+              series: [{
+                 name: 'accuracy',
+                 colorByPoint: true,
+                    data: self.high_data_gener[0].internal_accuracy_graph
+             }]
+             });
+                            angular.extend(self.chartOptions4.yAxis,{
+                                min:result.result.int_min_value,
+                                max:result.result.int_max_value
+                            })
+                            angular.extend(self.chartOptions5,{
+                                series: [{
+                                    name: '',
+                                    colorByPoint: true,
+                                    data: self.high_data_gener[0].internal_accuracy_graph
+                                }]
+                            });
+                            angular.extend(self.chartOptions5_2,{
+                                series: [{
+                                    name: '',
+                                    colorByPoint: true,
+                                    data: self.high_data_gener[0].external_accuracy_graph
+                                }]
+                            });
+                            angular.extend(self.chartOptions6.yAxis.title,{
+                                text: 'In Percentage'
+                            });
+                            angular.extend(self.chartOptions6.plotOptions.series.point.events,{
+                                select: function(e) {
+                        console.log(e);
+                        $("#perc_hello").html(e.target.name);
+                        $("#perc_temp").html(e.target.y);
+                        $('#percent_graph').modal('show');
+                        }
+                            });
+                            angular.extend(self.chartOptions6,{
+              series: [{
+                 name: 'accuracy',
+                 colorByPoint: true,
+                    data: self.high_data_gener[0].external_accuracy_graph
+             }]
+             });
+                            angular.extend(self.chartOptions6.yAxis,{
+                                min:result.result.ext_min_value,
+                                max:result.result.ext_max_value
+                            });
                             });
             }
+
+             $http({method:"GET", url:drop_down_link}).success(function(result){
+                angular.extend(self.packet_hierarchy_list, result.result.level);
+                //angular.extend(self.drop_list, result.result.drop_value);
+             })
 
             self.chartOptions = {
                 chart : {
@@ -795,6 +1455,7 @@
             self.day_type = 'day';
             self.useful_layout = [];
             self.sel_pack = [];
+            self.drop_list = [];
             self.top_employee_details = '';
             }],
 

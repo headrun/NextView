@@ -109,11 +109,26 @@ def project(request):
             dict['cen_pro'][cant_name] = var
         return HttpResponse(dict)
     if 'customer' in user_group:
+        final_details = {}
         details = {}
         select_list = []
         layout_list = []
         center_list = Customer.objects.filter(name_id=request.user.id).values_list('center')
         project_list = Customer.objects.filter(name_id=request.user.id).values_list('project')
+        """
+        sub_pro_level = RawTable.objects.filter(project=project_list[0][0], center=center_list[0][0]).values_list('sub_project').distinct()
+        work_pac_level = RawTable.objects.filter(project=project_list[0][0], center=center_list[0][0]).values_list('work_packet').distinct()
+        sub_pac_level = RawTable.objects.filter(project=project_list[0][0], center=center_list[0][0]).values_list('sub_packet').distinct() 
+        final_details['sub_project']=0
+        final_details['work_packet']=0
+        final_details['sub_packet']=0
+        if sub_pro_level[0][0] != '':
+            final_details['sub_project']=1
+        if work_pac_level[0][0] != '':
+            final_details['work_packet']=1
+        if sub_pac_level[0][0] != '':
+            final_details['sub_packet']=1
+        """
         if (len(center_list) & len(project_list)) == 1:
             select_list.append('none')
         if len(center_list) < 2:
@@ -133,6 +148,7 @@ def project(request):
         details['list'] = select_list
         details['role'] = 'customer'
         details['lay'] = layout_list
+        details['final'] = final_details
         return HttpResponse(details)
 
 
@@ -320,6 +336,11 @@ def redis_insert_old(prj_obj,center_obj,dates_list,key_type):
 
 
 
+def dropdown_data(request):
+    final_dict = {}
+    final_dict['level'] = [1,2,3]
+    return HttpResponse(final_dict)
+
 def raw_table_query_insertion(customer_data,prj_obj,center_obj,teamleader_obj_name,per_day_value,db_check):
     print customer_data
     prod_date_list = customer_data['date']
@@ -442,9 +463,12 @@ def upload(request):
         for sh_name in file_sheet_names:
             if sh_name in excel_sheet_names:
                 sheet_index_dict[sh_name] = open_book.sheet_names().index(sh_name)
+        """
         project_type = Project.objects.filter(name=prj_obj.name,center=center_obj).values_list('project_type',flat=True)
         if len(project_type)>0:
             project_type = str(project_type[0])
+        """
+
         db_check = str(Project.objects.filter(name=prj_obj.name,center=center_obj).values_list('project_db_handling',flat=True)[0])
         sheet_count = Authoringtable.objects.filter(project=prj_obj, center=center_obj).values_list('sheet_name',flat=True).distinct()
         for key,value in sheet_index_dict.iteritems():
@@ -712,17 +736,23 @@ def level_hierarchy_key(level_structure_key,vol_type):
                 final_work_packet = vol_type['sub_packet']
     return  final_work_packet
 
-def query_set_generation(prj_id,center_obj,level_structure_key):
+def query_set_generation(prj_id,center_obj,level_structure_key,date_list):
     query_set = {}
     query_set['project'] = prj_id
     query_set['center'] = center_obj
+    if date_list:
+        query_set['date__range'] = [date_list[0], date_list[-1]]
     if level_structure_key.has_key('sub_project'):
-        query_set['sub_project'] = level_structure_key['sub_project']
+        if level_structure_key['sub_project'] != "All":
+            query_set['sub_project'] = level_structure_key['sub_project']
     if level_structure_key.has_key('work_packet'):
-        query_set['work_packet'] = level_structure_key['work_packet']
+        if level_structure_key['work_packet'] != "All":
+            query_set['work_packet'] = level_structure_key['work_packet']
     if level_structure_key.has_key('sub_packet'):
-        query_set['sub_packet'] = level_structure_key['sub_packet']
+        if level_structure_key['sub_packet'] != "All":
+            query_set['sub_packet'] = level_structure_key['sub_packet']
     return query_set
+
 
 def product_total_graph(date_list,prj_id,center_obj,work_packets,level_structure_key):
     work = work_packets
@@ -733,13 +763,17 @@ def product_total_graph(date_list,prj_id,center_obj,work_packets,level_structure
     #volume_list = RawTable.objects.filter(project=prj_id,center=center_obj).values_list('volume_type', flat=True).distinct()
     prj_name = Project.objects.filter(id=prj_id).values_list('name',flat=True)
     center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
-    query_set = query_set_generation(prj_id,center_obj,level_structure_key)
+    query_set = query_set_generation(prj_id,center_obj,level_structure_key,date_list)
     for date_va in date_list:
         #below code for product,wpf graphs
         if level_structure_key.has_key('work_packet') and len(level_structure_key) ==1:
-            volume_list = RawTable.objects.filter(**query_set).values('sub_project','work_packet').distinct()
-        else:
+            if level_structure_key['work_packet'] == "All":
+                volume_list = RawTable.objects.filter(**query_set).values('sub_project','work_packet').distinct()
+            else:
+                volume_list = RawTable.objects.filter(**query_set).values('sub_project', 'work_packet','sub_packet').distinct()
+        if level_structure_key.has_key('work_packet') and level_structure_key.has_key('sub_packet'):
             volume_list = RawTable.objects.filter(**query_set).values('sub_project','work_packet','sub_packet').distinct()
+
         count =0
         for vol_type in volume_list:
             final_work_packet = level_hierarchy_key(level_structure_key,vol_type)
@@ -769,7 +803,12 @@ def product_total_graph(date_list,prj_id,center_obj,work_packets,level_structure
 
     print volumes_dict
     #below code is to generate productivity chcart format
-    volumes_data = result['data']['data']
+    try:
+        volumes_data = result['data']['data']
+    except:
+        result['data']={}
+        result['data']['data'] = {}
+        volumes_data = result['data']['data']
     if None in volumes_data.keys():
         del volumes_data[None]
     #productivity_series_list = graph_data_alignment_other(volumes_data,work,name_key='data')
@@ -806,7 +845,7 @@ def product_total_graph(date_list,prj_id,center_obj,work_packets,level_structure
 def internal_extrnal_graphs_same_formula(request,date_list,prj_id,center_obj,level_structure_key,err_type):
     prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
     center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
-    query_set = query_set_generation(prj_id, center_obj, level_structure_key)
+    query_set = query_set_generation(prj_id, center_obj, level_structure_key,date_list)
     if err_type =='Internal' :
         extr_volumes_list = Internalerrors.objects.filter(**query_set).values('sub_project','work_packet','sub_packet').distinct()
         err_key_type = 'error'
@@ -925,7 +964,7 @@ def internal_extrnal_graphs_same_formula(request,date_list,prj_id,center_obj,lev
 def externalerror_graph(request,date_list,prj_id,center_obj,packet_sum_data,level_structure_key):
     prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
     center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
-    query_set = query_set_generation(prj_id, center_obj, level_structure_key)
+    query_set = query_set_generation(prj_id, center_obj, level_structure_key,date_list)
     extr_volumes_list = Externalerrors.objects.filter(**query_set).values('sub_project','work_packet','sub_packet').distinct()
     extr_volumes_list_new = []
     conn = redis.Redis(host="localhost", port=6379, db=0)
@@ -1083,9 +1122,12 @@ def internal_extrnal_graphs(request,date_list,prj_id,center_obj,packet_sum_data,
 def day_week_month(request,dwm_dict,prj_id,center,work_packets,level_structure_key):
     if dwm_dict.has_key('day'):
         final_dict = {}
+        final_details = {}
         result_dict = product_total_graph(dwm_dict['day'],prj_id,center,work_packets,level_structure_key)
         if len(result_dict['prod_days_data'])>0:
             result_dict['productivity_data'] = graph_data_alignment(result_dict['prod_days_data'],name_key='data')
+        else:
+            result_dict['productivity_data'] = []
         packet_sum_data = result_dict['volumes_data']['volume_values']
         error_graphs_data = internal_extrnal_graphs(request, dwm_dict['day'], prj_id, center, packet_sum_data,level_structure_key)
         #final_dict['internal_time_line'] = error_graphs_data['internal_time_line']
@@ -1132,9 +1174,44 @@ def day_week_month(request,dwm_dict,prj_id,center,work_packets,level_structure_k
             sub_packet_level.append('all')
         if len(sub_packet_level) <= 1 and sub_packet_level[0] == u'':
             sub_packet_level = ''
+        sub_pro_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_project').distinct()
+        work_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet').distinct()
+        sub_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_packet').distinct() 
+        final_details['sub_project']=0
+        final_details['work_packet']=0
+        final_details['sub_packet']=0
+        if sub_pro_level[0][0] != '':
+            final_details['sub_project']=1
+        if work_pac_level[0][0] != '':
+            final_details['work_packet']=1
+        if sub_pac_level[0][0] != '':
+            final_details['sub_packet']=1
+
         final_dict['sub_project_level'] = sub_project_level
         final_dict['work_packet_level'] = work_packet_level
         final_dict['sub_packet_level'] = sub_packet_level
+        if final_details['sub_project']:
+            print 'sub_project_existe'
+        elif final_details['work_packet']:
+            if final_details['sub_packet']:
+                first = RawTable.objects.filter(project=prj_id).values_list('work_packet').distinct()
+                big_dict = {}
+                total = {}
+                for i in first:
+                    list_val = RawTable.objects.filter(project=14,work_packet=i[0]).values_list('sub_packet').distinct()
+                    for j in list_val:
+                        total[j[0]] = []
+                    big_dict[i[0]] = total
+                    total = {}
+            else:
+                big_dict = {}
+                work_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet').distinct()
+                for i in work_pac_level:
+                    big_dict[i[0]]={}
+        #final_dict['drop_value'] = {u'Charge': {u'Copay': [], u'Charge': [], u'DemoCheck': [], u'Demo': []}, u'Payment': {u'Payment': []}}
+        final_dict['level'] = [1,2]
+        final_dict['fin']= final_details
+        final_dict['drop_value'] = big_dict
         ext_min_value,ext_max_value = 0,0
         if error_graphs_data.has_key('extr_err_accuracy'):
             ext_value_range = error_graphs_data['extr_err_accuracy']['extr_err_perc']
@@ -1359,6 +1436,78 @@ def fte_calculation(request,dwm_dict,prj_id,center_obj):
     import pdb;pdb.set_trace()
     pass
 
+def fte_calculation(request,dwm_dict,prj_id,center_obj,date_list):
+    query_set = {} 
+    query_set['project'] = prj_id
+    query_set['center'] = center_obj
+    #date_list = []
+    prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
+    center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
+    work_packets = Targets.objects.filter(**query_set).values('sub_project','work_packet','sub_packet','target').distinct()
+    packets_target = {} 
+    for wp_dict in work_packets:
+        packets_target[wp_dict['sub_packet']] = int(wp_dict['target'])
+    distinct_wp = Targets.objects.filter(**query_set).values_list('work_packet',flat=True).distinct()
+    wp_subpackets = {} 
+    conn = redis.Redis(host="localhost", port=6379, db=0)
+    for wrk_pkt in distinct_wp:
+        query_set['work_packet'] = wrk_pkt
+        distinct_sub_pkt = Targets.objects.filter(**query_set).values_list('sub_packet',flat=True).distinct()
+        wp_subpackets[wrk_pkt] = distinct_sub_pkt
+    raw_query_set ={}
+    raw_query_set['project'] = prj_id
+    raw_query_set['center'] = center_obj
+    date_values ={}
+    volumes_dict = {} 
+    result ={}
+    for date_va in date_list:
+        for wp_key,wp_name in wp_subpackets.iteritems():
+            for sub_packet in wp_name:
+                final_work_packet = wp_key+'_'+sub_packet
+                date_pattern = '{0}_{1}_{2}_{3}'.format(prj_name[0], str(center_name[0]), str(final_work_packet),date_va)
+                key_list = conn.keys(pattern=date_pattern)
+                if not key_list:
+                    if date_values.has_key(final_work_packet):
+                        date_values[final_work_packet].append(0)
+                    else:
+                        date_values[final_work_packet] = [0]
+                for cur_key in key_list:
+                    var = conn.hgetall(cur_key)
+                    for key, value in var.iteritems():
+                        if value == 'None':
+                            value = 0
+                        if date_values.has_key(key):
+                            fte_sum  = float(value)/packets_target[sub_packet]
+                            final_fte = float('%.2f' % round(fte_sum, 2))
+                            date_values[key].append(final_fte)
+                        else:
+                            fte_sum = float(value) / packets_target[sub_packet]
+                            final_fte = float('%.2f' % round(fte_sum, 2))
+                            date_values[key] = [final_fte]
+
+                    volumes_dict['data'] = date_values
+                    volumes_dict['date'] = date_list
+                    result['data'] = volumes_dict
+
+    final_fte = {}
+    count = 0
+    for date_va in date_list:
+        for wp_key, wp_name in wp_subpackets.iteritems():
+            local_sum = 0
+            for sub_packet in wp_name:
+                final_work_packet = wp_key + '_' + sub_packet
+                local_sum = local_sum + result['data']['data'][final_work_packet][count]
+                print final_work_packet ,result['data']['data'][final_work_packet][count]
+            if final_fte.has_key(wp_key):
+                final_fte_sum = float('%.2f' % round(local_sum, 2))
+                final_fte[wp_key].append(final_fte_sum)
+            else:
+                final_fte_sum = float('%.2f' % round(local_sum, 2))
+                final_fte[wp_key] = [final_fte_sum]
+        count =count+1
+    return graph_data_alignment(final_fte,name_key='data')
+
+
 def top_five_emp(center,prj_id,dwm_dict):
     dict_to_render = []
     all_packets_list = RawTable.objects.filter(project=prj_id,center=center).values_list('work_packet').distinct()[1:]
@@ -1397,18 +1546,39 @@ def from_to(request):
     except:
         sub_packet = ''
     level_structure_key ={}
-    if work_packet== 'all' :
+    """if work_packet== 'all' :
         work_packet = 'undefined'
     if sub_project== 'all':
         sub_project ='undefined'
     if sub_packet == 'all':
-        sub_packet = 'undefined'
+        sub_packet = 'undefined'"""
     if (work_packet) and (work_packet !='undefined'): level_structure_key['work_packet']=work_packet
     if (sub_project) and (sub_project !='undefined'): level_structure_key['sub_project'] = sub_project
     if (sub_packet) and (sub_packet !='undefined'): level_structure_key['sub_packet'] = sub_packet
 
     project = request.GET['project'].split('-')[0].strip()
     center_id = request.GET['center'].split('-')[0].strip()
+    count = 0
+    all_count = [count + 1 for key in level_structure_key.values() if key == "All"]
+    if len(all_count) > 1:
+        level_structure_key = {}
+
+
+    center = Center.objects.filter(name=center_id).values_list('id', flat=True)
+    prj_id = Project.objects.filter(name=project).values_list('id', flat=True)
+    if not level_structure_key:
+        sub_pro_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_project',flat=True).distinct()
+        if len(sub_pro_level)> 1:
+            level_structure_key['sub_project'] = "All"
+        if not level_structure_key:
+            work_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet',flat=True).distinct()
+            if len(work_pac_level)>1:
+                level_structure_key['work_packet'] = "All"
+        if not level_structure_key:
+            sub_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_packet',flat=True).distinct()
+            if len(sub_pac_level)>1:
+                level_structure_key['sub_packet'] = "All"
+
     #center = request.GET['center'].split('-')[0].strip()
     #project = 'Probe'
     #center_id = 'Salem'
@@ -1513,27 +1683,20 @@ def from_to(request):
     #return HttpResponse(fte_calc_data)
     #below varaibles for productivity,wpf graphs
 
-
-
-
 def chart_data(request):
+    pro_id = Customer.objects.filter(name_id=request.user.id).values_list('project','center')[0][0]
+    cen_id = Customer.objects.filter(name_id=request.user.id).values_list('project','center')[0][1]
     to_date = datetime.datetime.strptime(request.GET['date'], '%Y-%m-%d').date()
     work_packet = str(request.GET['packet'])
-    packet_dict = {}
-    emp_name = RawTable.objects.filter(date=to_date,volume_type=work_packet).values_list('employee',flat=True)
-    packet_values = RawTable.objects.filter(date=to_date,volume_type=work_packet).values_list('per_day',flat=True)
-    emp_names= [x.encode('UTF8') for x in emp_name]
-    work_packet_values = [int(x) for x in packet_values]
-
-    final_data=[]
-    packet_dict['emp_names']=emp_names
-    packet_dict['work_packet_values'] = work_packet_values
-    for emp,packet in zip(emp_names,work_packet_values):
-        emp_packet = {}
-        emp_packet['emp']=emp
-        emp_packet['packet_value']= packet
-        final_data.append(emp_packet)
-    return HttpResponse(final_data)
+    if '_' in work_packet:
+        work_packet,sub_packet = work_packet.split('_')
+        detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date,work_packet=work_packet,sub_packet=sub_packet).values_list('employee_id','per_day')
+    else:
+        detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date,work_packet=work_packet).values_list('employee_id','per_day')
+    packet_dict = []
+    for i in detail_list:
+        packet_dict.append({'name':i[0],'done':i[1]})
+    return HttpResponse(packet_dict)
 
 def yesterdays_data(request):
     yesterday = date.today() - timedelta(1)

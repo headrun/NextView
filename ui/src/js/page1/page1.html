@@ -106,27 +106,44 @@ table {
    margin-left:-2px;
    margin-bottom:12px;
 }
-.name {
+.row_name {
    font-size: 15px;
    margin-right: 0px;
    background-color: #373737;
    color: #dadada;
 }
-
+.line {
+   border:1px solid #3c3c3c;
+   margin-left:-2px;
+   margin-bottom:12px;
+   width:70%;
+   margin-left: auto;
+   margin-right: auto;
+}
 </style>
-
 <body>
     <div class="row">
     <div id="wrapper">
         <div><h3 class="pull-left brand_style">{{$ctrl.location}}{{$ctrl.project}}Dashboard</h3></div>
-             <div id="inner1" class="form-group">
+             <div id="inner1" class="form-group" style="margin-bottom:initial;">
                  <input class="form-control select" value="{{$ctrl.first}} to {{$ctrl.last}}" id="select" size="19">
                  <i ng-click="$ctrl.click()"class="fa fa-calendar date" aria-hidden="true"></i>
              </div>
+             <!--<div ng-repeat="k in $ctrl.packet_hierarchy_list track by $index">
+                 <form>
+                    <div class="form-group" ng-if="k" style="float:left;padding-left:1%;padding-top:5px;margin-bottom:0px;">
+                        <select class="form-control input-sm"id="{{$index}}" style="color:black;background-color:white;height:25px;" ng-options="packet for packet in k" ng-model="$ctrl.sel_pack[$index]" ng-change="$ctrl.update_one($index,$ctrl.sel_pack[$index])"></select>
+                    </div>
+                 </form>
+             </div>-->
              <div ng-repeat="k in $ctrl.packet_hierarchy_list track by $index">
-                 <div ng-if="k" style="float:left;padding-left:1%;">
-                     <select id="{{$index}}" style="color:black;" ng-options="packet for packet in k" ng-model="$ctrl.sel_pack[$index]" ng-change="$ctrl.update_one($index,$ctrl.sel_pack[$index])"></select>
-                 </div>
+                <form>
+                    <div class="form-group" style="float:left;padding-left:1%;padding-top:5px;margin-bottom:0px;">
+                        <select class="form-control input-sm" id="{{$index}}">
+                            <option>All</option>
+                        </select>
+                    </div>
+                </form>
              </div>
         </div>
 
@@ -141,13 +158,13 @@ table {
                     <div ng-if="j.widget == '1' "class="input-group"id="inner2">
                     <ul class="nav nav-pills">
                         <span class="input-group-addon" style="background-color:#fff;">
-                            <li id="day" ng-click="$ctrl.dateType('day')" style="color:black; cursor:pointer;">Day</li>
+                            <li id="day" ng-click="$ctrl.dateType('day',j.opt)" style="color:black; cursor:pointer;">Day</li>
                         </span>
                         <span class="input-group-addon" style="background-color:#fff;">
-                            <li id="week" ng-click="$ctrl.dateType('week')" style="color:black;cursor:pointer;">Week</li>
+                            <li id="week" ng-click="$ctrl.dateType('week',j.opt)" style="color:black;cursor:pointer;">Week</li>
                         </span>
                         <span class="input-group-addon" style="background-color:#fff;">
-                            <li id="month" ng-click="$ctrl.dateType('month')" style="color:black;cursor:pointer;">Month</li>
+                            <li id="month" ng-click="$ctrl.dateType('month',j.opt)" style="color:black;cursor:pointer;">Month</li>
                         </span>
                     </ul>
                     </div>
@@ -158,11 +175,15 @@ table {
     </div>
 
     <div class="row" style="margin-right:16px;">
-        <div class="col-md-6 graph">
-            <h4>Top Employee's Performance</h4>
-            <table class="table table-bordered line">
+        <div class="col-md-8 graph">
+                <div class="widget-title clearfix" title="Sample Widg">
+                    <h4>Employee Performance Details</h4>
+                </div>
+
+        <!--<h2>Top 5 Employee Performance</h2>-->
+                <table class="table table-bordered line">
                         <thead>
-                            <tr class="name">
+                            <tr class="row_name">
                                 <th>Employee Name</th>
                                 <th>Productivity</th>
                                 <th>Packet</th>
@@ -182,115 +203,8 @@ table {
                 </table>
         </div>
     </div>
-    <!--<div ng-repeat="j in i" class="col-md-{{j.col}} widget all">
-            <div class="widget-content">
-                <div class="widget-title clearfix" title="Sample Widg">
-                    <span class="pull-left">{{j.title}}</span>
-                </div>
-                <div class="widget-body">
-                    <highcharts options="j.opt"></highcharts>
-                </div>
-            </div>
-        </div>-->
-            <!--<div class="widget-content">
-                <div class="widget-title clearfix" title="Sample Widg">
-                    <span class="pull-left">{{i.title}}</span>
-                </div>
-                <div class="widget-body">
-                    <highcharts options="i.opt"></highcharts>
-                </div>
-            </div>
-        </div>-->
-    <!--<div class="row">
-            <div class="widget col-md-12 col-xs-12 all" >
-                <div class="widget-content">
 
-
-    <div class="widget-title clearfix"
-         title="Sample Widg">
-      <span class="pull-left">Productivity Chart</span>
-    </div>
-
-                    <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions"></highcharts>
-                    </div>
-                </div>
-            </div>
-    </div>
-    <div class="row">
-            <div class="widget col-md-3 col-xs-6 all"  >
-
-                <div class="widget-content">
-
-                    <div class="widget-title clearfix"
-                         title="Sample Widg">
-                        <span class="pull-left">Packetwise internal error count</span>
-                    </div>
-
-                    <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions5"></highcharts>
-                    </div>
-                </div>
-            </div>
-            <div class="widget col-md-3 col-xs-6 all"  >
-
-                <div class="widget-content">
-
-                    <div class="widget-title clearfix"
-                         title="Sample Widg">
-                        <span class="pull-left">Packetwise external error count</span>
-                    </div>
-
-                    <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions5_2"></highcharts>
-                    </div>
-                </div>
-            </div>
-            <div class="widget col-md-6 col-xs-12 all"  >
-
-                <div class="widget-content">
-
-                    <div class="widget-title clearfix"
-                         title="Sample Widg">
-                        <span class="pull-left">Internal Accuracy Graph</span>
-                    </div>
-
-                    <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions4"></highcharts>
-                    </div>
-                </div>
-            </div>
-    </div>
-    <div class="row">
-        <div class="widget col-md-6 col-xs-12 all"  >
-                <div class="widget-content">
-                    <div class="widget-title clearfix"
-                         title="Sample Widg">
-                        <span class="pull-left">External Accuracy Graph</span>
-                    </div>
-                    <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions6"></highcharts>
-                    </div>
-                </div>
-        </div>
-        <div class="widget col-md-6 col-xs-12 all"  >
-
-                <div class="widget-content">
-
-                    <div class="widget-title clearfix"
-                         title="Sample Widg">
-                        <span class="pull-left">Workpacket Wise Performance</span>
-                    </div>
-
-                    <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions3"></highcharts>
-                    </div>
-                </div>
-            </div>
-    </div>-->
-<!--</div>-->
-
-<!--<div class="modal fade" id="myModal" role="dialog">
+<div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog">
       <div class="modal-content">
          <div class="modal-header">
@@ -298,32 +212,24 @@ table {
              <h4 class="modal-title">PRODUCTIVITY CHART</h4>
          </div>
          <div class="modal-body">
-                 <table style="color:white; padding:5px;border:1px solid white;" border = 1px solid white; >
-                 <tr ng-repeat= "x in $ctrl.names">
-
-                    <td style="padding:5px;" >{{x.emp}}</td>
-                     <td style="padding:5px;" >{{x.packet_value}}</td>
-
-                 </tr>
-             </table>
-           </div>
-         <div class="modal-footer">
-           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-         </div>
-       </div>
-    </div>
-  </div>
-
-<div class="modal fade" id="workpacket_per" role="dialog">
-    <div class="modal-dialog">
-      <div class="modal-content">
-         <div class="modal-header">
-             <button type="button" class="close" data-dismiss="modal">&times;</button>
-             <h4 class="modal-title" >WORKPACKET WISE PERFORMANCE</h4>
-         </div>
-         <div class="modal-body">
-           <h1 id="wpp_hello" style="color:black;">Hello Hello</h1>
-           <p id="wpp_temp" style="color:black;"></p>
+            <div class="row" style="margin-right:16px;">
+                <div class="graph">
+                     <table class="table table-bordered line">
+                          <thead>
+                              <tr class="row_name">
+                                 <th>Employee Name</th>
+                                 <th>Done</th>
+                              </tr>
+                          </thead>
+                          <tbody style="max-height:160px;overflow-y:scroll;display:block;margin-right:-60px;">
+                             <tr ng-repeat= "x in $ctrl.names">
+                                 <td style="padding-right:220px;">{{x.name}}</td>
+                                 <td>{{x.done}}</td>
+                             </tr>
+                          </tbody>
+                      </table>
+                </div>
+            </div>
          </div>
          <div class="modal-footer">
            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -331,45 +237,6 @@ table {
        </div>
     </div>
   </div>
-
-
-<div class="modal fade" id="percent_graph" role="dialog">
-    <div class="modal-dialog">
-      <div class="modal-content">
-         <div class="modal-header">
-             <button type="button" class="close" data-dismiss="modal">&times;</button>
-             <h4 class="modal-title" >Internal Accuracy</h4>
-         </div>
-         <div class="modal-body">
-           <h1 id="perc_hello" >Hello Hello</h1>
-           <p id="perc_temp" ></p>
-         </div>
-         <div class="modal-footer">
-           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-         </div>
-       </div>
-    </div>
-  </div>
-
-
-<div class="modal fade" id="pwe_myModal" role="dialog">
-    <div class="modal-dialog">
-      <div class="modal-content">
-         <div class="modal-header">
-             <button type="button" class="close" data-dismiss="modal">&times;</button>
-             <h4 class="modal-title" >Workpacket Wise Performance</h4>
-         </div>
-         <div class="modal-body">
-           <h1 id="pwe_hello" >Hello Hello</h1>
-           <p id="pwe_temp" ></p>
-         </div>
-         <div class="modal-footer">
-           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-         </div>
-       </div>
-    </div>
-  </div>-->
-
 </body>
 <script>
    configObject = {
