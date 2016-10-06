@@ -16,7 +16,7 @@ class Project(models.Model):
     name    = models.CharField(max_length=255)
     code    = models.IntegerField(max_length=255, unique=True)
     center  = models.ForeignKey(Center, null=True)
-    layout  = models.CharField(max_length=255, default='')
+    layout  = models.CharField(max_length=855, default='')
     project_db_handlings_choices = (('update','Update'),('aggregate','Aggregate'),('ignore','Ignore'),)
     project_db_handling = models.CharField(max_length=30,choices=project_db_handlings_choices,default='ignore',) 
 
