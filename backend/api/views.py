@@ -74,10 +74,38 @@ def get_cell_data(open_sheet, row_idx, col_idx):
 def project(request):
     user_group = request.user.groups.values_list('name', flat=True)[0]
     dict = {}
+
     if 'team_lead' in user_group:
-        prj_id = TeamLead.objects.filter(name_id=request.user.id).values_list('project')[0][0]
-        project = str(Project.objects.filter(id=prj_id)[0])
-        return HttpResponse(project)
+        final_details = {}
+        details = {}
+        select_list = []
+        layout_list = []
+        center_list = TeamLead.objects.filter(name_id=request.user.id).values_list('center')
+        project_list = TeamLead.objects.filter(name_id=request.user.id).values_list('project')
+        if (len(center_list) & len(project_list)) == 1:
+            select_list.append('none')
+        if len(center_list) < 2:
+            center_name = str(Center.objects.filter(id=center_list[0][0])[0])
+            for project in project_list:
+                project_name = str(Project.objects.filter(id=project[0])[0])
+                lay_list = json.loads(str(Project.objects.filter(id=project[0]).values_list('layout')[0][0]))
+                vari = center_name + ' - ' + project_name
+                layout_list.append({vari:lay_list})
+                select_list.append(vari)
+        elif len(center_list) >= 2:
+            for center in center_list:
+                center_name = str(Center.objects.filter(id=center[0])[0])
+                for project in project_list:
+                    project_name = str(Project.objects.filter(id=project[0])[0])
+                    select_list.append(center_name + ' - ' + project_name)
+        details['list'] = select_list
+        details['role'] = 'team_lead'
+        details['lay'] = layout_list
+        details['final'] = final_details
+        new_dates = latest_dates(request, project_list)
+        details['dates'] = new_dates
+        return HttpResponse(details)
+
     if 'center_manager' in user_group:
         center = Centermanager.objects.filter(name_id=request.user.id).values_list('center', flat=True)[0]
         center_name = Center.objects.filter(id=center).values_list('name', flat=True)[0]
@@ -834,6 +862,29 @@ def product_total_graph(date_list,prj_id,center_obj,work_packets,level_structure
     #productivity_series_list = graph_data_alignment_other(volumes_data,work,name_key='data')
     #productivity_series_list = graph_data_alignment(volumes_data,name_key='data')
     result['prod_days_data'] = volumes_data
+    if 'All' not in level_structure_key.values():
+        query_set = query_set_generation(prj_id, center_obj, level_structure_key, [])
+        packet_target = Targets.objects.filter(**query_set).values('sub_project', 'work_packet', 'sub_packet', 'target').distinct()
+        target_line = []
+        if packet_target:
+            for date_va in date_list:
+                target_line.append(int(packet_target[0]['target']))
+            result['prod_days_data']['target_line'] = target_line
+
+    if 'All' not in level_structure_key.values():
+        query_set = query_set_generation(prj_id, center_obj, level_structure_key, [])
+        packet_targets = Targets.objects.filter(**query_set).values('sub_project', 'work_packet', 'sub_packet', 'target','from_date','to_date').distinct()
+        target_line = []
+        for target_dates in packet_targets:
+            date_range = num_of_days(target_dates['to_date'],target_dates['from_date'])
+            target_dates['date_range'] = date_range
+        if packet_targets:
+            for date_va in date_list:
+                for target_data in packet_targets:
+                    if date_va in target_data['date_range']:
+                        target_line.append(int(target_data['target']))
+            result['prod_days_data']['target_line'] = target_line 
+
     volume_bar_data = {}
     volume_bar_data['volume_type']= volumes_data.keys()
     volume_keys_data ={}
@@ -1589,6 +1640,8 @@ def from_to(request):
     #type='day'
     try:
         work_packet = request.GET.get('work_packet')
+        if ' and ' in work_packet:
+            work_packet = work_packet.replace(' and ', ' & ')
     except:
         work_packet = []
     try:
@@ -1795,6 +1848,8 @@ def chart_data(request):
     else:
         to_date = datetime.datetime.strptime(request.GET['date'], '%Y-%m-%d').date()
     work_packet = str(request.GET['packet'])
+    if ' and ' in work_packet:
+        work_packet = work_packet.replace(' and ',' & ')
     final_dict = ''
     if chart_type == 'Internal' or chart_type == 'External':
         final_dict = internal_chart_data(pro_id,cen_id,to_date,work_packet,chart_type)
@@ -1806,7 +1861,7 @@ def chart_data(request):
 
 def utilization_data(center,prj_id,dwm_dict):
     da_list = {}
-    da_list['total_fte'] = []
+    da_list['total_utilization'] = []
     date_list = dwm_dict['days']
     for date in date_list:
         first = RawTable.objects.filter(project=prj_id, center=center, date=date).values_list('employee_id').distinct()
@@ -1817,7 +1872,7 @@ def utilization_data(center,prj_id,dwm_dict):
             count_value = float(second_val/first_len)
         except:
             count_value = 0
-        da_list['total_fte'].append(count_value)
+        da_list['total_utilization'].append(count_value)
     return  graph_data_alignment(da_list,name_key='data')
 
 def utilization_work_packet(center,prj_id,dwm_dict):

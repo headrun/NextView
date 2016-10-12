@@ -19,6 +19,7 @@
                     this.user.role = "Customer";
                 }
                 if (this.user.roles.indexOf("center_manager") >= 0) {
+                    $('#fileupload').hide();
                     this.user.role = "Center Manager";
                 }
                 if (this.user.roles.indexOf("nextwealth_manager") >= 0) {
@@ -86,8 +87,7 @@
                     self.mapping_list = map_list;
                 }
 
-
-                /*if (result.result['role'] == "center_manager")
+                if (result.result['role'] == "center_manager")
                     {
                     var center = result.result['center'];
                     self.center = center;
@@ -95,7 +95,7 @@
                     self.proj_list = proj_list;
                     self.project_name = center + ' - ' + proj_list[0];
                     }
-                else if (result.result['role'] == "nextwealth_manager"){
+                /*else if (result.result['role'] == "nextwealth_manager"){
                     self.centers = result.result.cen_pro;
                     console.log(self.centers);
                     //var keys = Object.keys(result.result);
@@ -142,6 +142,8 @@
              }
            ],
            "bindings": {
+             "hideLoading": "&",
+             "showLoading": "&",
              "tabsOrder"  : "<",
              "tabs"       : "<",
              "activeTab"  : "<",
