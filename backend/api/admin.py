@@ -31,15 +31,34 @@ class RawtableAdmin(admin.ModelAdmin):
     list_filter = ('work_packet', 'date','project','center')
 admin.site.register(RawTable,RawtableAdmin)
 
+
+class RawtableAuthoringAdmin(admin.ModelAdmin):
+    list_display = ['work_packet','sub_project','sub_packet','per_day','employee_id','norm','date','project','center']
+    list_filter = ('project',)
+admin.site.register(RawtableAuthoring,RawtableAuthoringAdmin)
+
+
 class InternalerrorsAdmin(admin.ModelAdmin):
     list_display = ['work_packet','sub_project','sub_packet','audited_errors','total_errors','date','employee_id']
     list_filter = ('sub_project','work_packet','sub_packet','project','center')
 admin.site.register(Internalerrors,InternalerrorsAdmin)
 
+class InternalerrorsAuthoringAdmin(admin.ModelAdmin):
+    list_display = ['work_packet','sub_project','sub_packet','audited_errors','total_errors','date','employee_id','project','center','sheet_name']
+    list_filter = ('project',)
+admin.site.register(InternalerrorsAuthoring,InternalerrorsAuthoringAdmin)
+
+
 class ExternalerrorsAdmin(admin.ModelAdmin):
     list_display = ['sub_project','work_packet','sub_packet','audited_errors','total_errors','date','employee_id']
     list_filter = ('sub_project','work_packet','sub_packet','project','center')
 admin.site.register(Externalerrors,ExternalerrorsAdmin)
+
+class ExternalerrorsAuthoringAdmin(admin.ModelAdmin):
+    list_display = ['work_packet', 'sub_project', 'sub_packet', 'audited_errors', 'total_errors', 'date', 'employee_id','project', 'center', 'sheet_name']
+    list_filter = ('project',)
+admin.site.register(ExternalerrorsAuthoring,ExternalerrorsAuthoringAdmin)
+
 
 class AuthoringtableAdmin(admin.ModelAdmin):
     list_display = ['sheet_name','table_schema','sheet_field','project','center','table_type']
@@ -47,12 +66,22 @@ class AuthoringtableAdmin(admin.ModelAdmin):
 admin.site.register(Authoringtable,AuthoringtableAdmin)
 
 class TargetsAdmin(admin.ModelAdmin):
-    list_display = ['work_packet','from_date','to_date','target']
+    list_display = ['work_packet','sub_packet','from_date','to_date','target']
 admin.site.register(Targets,TargetsAdmin)
+
+
+class TargetsAuthoringAdmin(admin.ModelAdmin):
+    list_display = ['work_packet','sub_project','sub_packet']
+admin.site.register(TargetsAuthoring,TargetsAuthoringAdmin)
 
 class WorktrackAdmin(admin.ModelAdmin):
     list_display = ['work_packet', 'opening', 'received', 'completed']
 admin.site.register(Worktrack,WorktrackAdmin)
+
+class WorktrackAuthoringAdmin(admin.ModelAdmin):
+    list_display = ['work_packet','sub_project','sub_packet']
+admin.site.register(WorktrackAuthoring,WorktrackAuthoringAdmin)
+
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User

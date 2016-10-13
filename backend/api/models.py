@@ -16,7 +16,7 @@ class Project(models.Model):
     name    = models.CharField(max_length=255)
     code    = models.IntegerField(max_length=255, unique=True)
     center  = models.ForeignKey(Center, null=True)
-    layout  = models.CharField(max_length=855, default='')
+    layout  = models.CharField(max_length=512, default='')
     project_db_handlings_choices = (('update','Update'),('aggregate','Aggregate'),('ignore','Ignore'),)
     project_db_handling = models.CharField(max_length=30,choices=project_db_handlings_choices,default='ignore',) 
 
@@ -86,6 +86,25 @@ class RawTable(models.Model):
         db_table = u'raw_table'
 
 
+class RawtableAuthoring(models.Model):
+    employee_id = models.CharField(max_length=255, blank=True)
+    sub_project = models.CharField(max_length=255, blank=True)
+    work_packet = models.CharField(max_length=255)
+    sub_packet  = models.CharField(max_length=255, blank=True)
+    per_hour    = models.CharField(max_length=255, blank=True)
+    per_day     = models.CharField(max_length=255, blank=True)
+    date = models.CharField(max_length=255)
+    norm        = models.CharField(max_length=255, blank=True)
+    center      = models.ForeignKey(Center, null=True)
+    project     = models.ForeignKey(Project, null=True)
+    sheet_name = models.CharField(max_length=255, default='')
+    ignorable_fileds = models.CharField(max_length=255, blank=True,default='')
+
+    class Meta:
+        db_table = u'rawtable_authoring'
+
+
+
 
 class Internalerrors(models.Model):
     sub_project = models.CharField(max_length=255, blank=True)
@@ -107,6 +126,26 @@ class Internalerrors(models.Model):
         return self.employee_id
 
 
+class InternalerrorsAuthoring(models.Model):
+    sub_project = models.CharField(max_length=255, blank=True)
+    work_packet = models.CharField(max_length=255)
+    sub_packet = models.CharField(max_length=255, blank=True)
+    error_name = models.CharField(max_length=255, blank=True)
+    audited_errors = models.CharField(max_length=255,blank=True,verbose_name='Audited_errors')
+    total_errors = models.CharField(max_length=255,default=0,verbose_name='total_errors')
+    date = models.CharField(max_length=255)
+    employee_id = models.CharField(max_length=255,blank=True)
+    center      = models.ForeignKey(Center, null=True)
+    project     = models.ForeignKey(Project, null=True)
+    sheet_name = models.CharField(max_length=255, default='')
+
+    class Meta:
+        db_table = u'internalerrors_authoring'
+        #unique_together = ("audited_errors","error_value","date","employee_id","volume_type")
+
+    def __unicode__(self):
+        return self.work_packet
+
 class Externalerrors(models.Model):
     sub_project = models.CharField(max_length=255, blank=True)
     work_packet = models.CharField(max_length=255)
@@ -125,6 +164,27 @@ class Externalerrors(models.Model):
 
     def __unicode__(self):
         return self.employee_id
+
+
+class ExternalerrorsAuthoring(models.Model):
+    sub_project = models.CharField(max_length=255, blank=True)
+    work_packet = models.CharField(max_length=255)
+    sub_packet = models.CharField(max_length=255, blank=True)
+    error_name = models.CharField(max_length=255, blank=True)
+    audited_errors = models.CharField(max_length=255,blank=True,verbose_name='Audited_errors')
+    total_errors = models.CharField(max_length=255,default=0,verbose_name='total_errors')
+    date = models.CharField(max_length=255)
+    employee_id = models.CharField(max_length=255,blank=True)
+    center      = models.ForeignKey(Center, null=True)
+    project     = models.ForeignKey(Project, null=True)
+    sheet_name = models.CharField(max_length=255, default='')
+
+    class Meta:
+        db_table = u'externalerrors_authoring'
+        #unique_together = ("audited_errors","error_value","date","employee_id","volume_type")
+
+    def __unicode__(self):
+        return self.work_packet
 
 
 class Authoringtable(models.Model):
@@ -170,6 +230,24 @@ class Targets(models.Model):
     def __unicode__(self):
         return self.work_packet
 
+class TargetsAuthoring(models.Model):
+    from_date = models.CharField(max_length=255)
+    to_date   = models.CharField(max_length=255)
+    sub_project = models.CharField(max_length=255, blank=True)
+    work_packet = models.CharField(max_length=255)
+    sub_packet  = models.CharField(max_length=255, blank=True)
+    target      = models.CharField(max_length=125)
+    center = models.ForeignKey(Center, null=True)
+    project = models.ForeignKey(Project, null=True)
+    sheet_name = models.CharField(max_length=255, default='')
+    class Meta:
+        db_table = u'targets_authoring'
+
+    def __unicode__(self):
+        return self.work_packet
+
+
+
 class Worktrack(models.Model):
     date = models.DateField()
     sub_project = models.CharField(max_length=255, blank=True)
@@ -188,3 +266,24 @@ class Worktrack(models.Model):
 
     def __unicode__(self):
         return self.work_packet
+
+class WorktrackAuthoring(models.Model):
+    date = models.DateField()
+    sub_project = models.CharField(max_length=255, blank=True)
+    work_packet = models.CharField(max_length=255)
+    sub_packet = models.CharField(max_length=255, blank=True)
+    opening    = models.CharField(max_length=125)
+    received   = models.CharField(max_length=125)
+    non_workable_count = models.CharField(max_length=125,blank=True)
+    completed   = models.CharField(max_length=125)
+    closing_balance  = models.CharField(max_length=125)
+    center = models.ForeignKey(Center, null=True)
+    project = models.ForeignKey(Project, null=True)
+    sheet_name = models.CharField(max_length=255, default='')
+
+    class Meta:
+        db_table = u'worktrack_authornig'
+
+    def __unicode__(self):
+        return self.work_packet
+

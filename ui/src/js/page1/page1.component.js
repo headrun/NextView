@@ -30,6 +30,9 @@
 
              $http({method:"GET", url:project}).success(function(result){
 
+                    if(result.result.role === 'team_lead'){
+                        self.hideLoading();
+                    }
                 if((result.result.role === 'customer') || (result.result.role === 'team_lead')){ 
                     var pro_cen_nam = result.result.list[1]
                     self.first = result.result.dates.from_date;
@@ -300,10 +303,61 @@
                             self.drop_work_pack = 'All';
                             self.drop_sub_proj = 'All';
                             self.drop_sub_pack = 'All';
-                            if (result.result.fin.sub_project) {
+                            if ((result.result.fin.sub_project) && (result.result.fin.work_packet)){
                                 $('#0').on('change', function(){
-                                    console.log('sub_project_exists');
+                                    self.showLoading();
+                                    self.drop_sub_proj = this.value;
+                                    self.drop_work_pack = self.wor_pac_sel.value;
+                                    self.drop_sub_pack = self.sub_pac_sel.value;
+                            var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack +
+                                '&work_packet=' + self.drop_work_pack
+                            var dateEntered = document.getElementById('select').value
+                            var from = dateEntered.split('to')[0].replace(' ','');
+                            var to = dateEntered.split('to')[1].replace(' ','');
+                            var placeholder = ''
+                            var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                            $http({method:"GET", url:from_to_data}).success(function(result){
+                                self.hideLoading();
+                                self.chart_render(result,self.project,self.location);
+                            });
                                 });
+                                $('#1').on('change', function(){
+                                    self.showLoading();
+                                    self.drop_sub_proj = self.sub_pro_sel.value
+                                    self.drop_work_pack = this.value;
+                                    self.drop_sub_pack = self.sub_pac_sel.value;
+                            var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack +
+                                '&work_packet=' + self.drop_work_pack
+                            var dateEntered = document.getElementById('select').value
+                            var from = dateEntered.split('to')[0].replace(' ','');
+                            var to = dateEntered.split('to')[1].replace(' ','');
+                            var placeholder = ''
+                            var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                            $http({method:"GET", url:from_to_data}).success(function(result){
+                                self.hideLoading();
+                                self.chart_render(result,self.project,self.location);
+                            });
+                                });
+                                    $('#2').on('change', function(){
+                                        self.showLoading();
+                                        self.drop_work_pack = self.wor_pac_sel.value;
+                                        self.drop_sub_proj = self.sub_pro_sel.value;
+                                        self.drop_sub_pack = this.value;
+                            var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack + '&work_packet=' + self.drop_work_pack
+                            var dateEntered = document.getElementById('select').value
+                            var from = dateEntered.split('to')[0].replace(' ','');
+                            var to = dateEntered.split('to')[1].replace(' ','');
+                            var placeholder = ''
+                            var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                            $http({method:"GET", url:from_to_data}).success(function(result){
+                                self.hideLoading();
+                                self.chart_render(result,self.project,self.location);
+                            });
+                                    });
+
                             }
                             else {
                                 if ((result.result.fin.work_packet) && (result.result.fin.sub_packet)){

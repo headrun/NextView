@@ -192,9 +192,13 @@ def latest_dates(request,prj_id):
     if len(prj_id) == 1:
         latest_date = RawTable.objects.filter(project=prj_id).all().aggregate(Max('date'))
         to_date = latest_date['date__max']
-        from_date = to_date - timedelta(7)
-        result['from_date'] = str(from_date)
-        result['to_date'] = str(to_date)
+        if to_date:
+            from_date = to_date - timedelta(7)
+            result['from_date'] = str(from_date)
+            result['to_date'] = str(to_date)
+        else:
+            result['from_date'] = '2016-07-01'
+            result['to_date'] = '2016-07-08'
     else:
         result['from_date'] = '2016-07-01'
         result['to_date'] = '2016-07-08'
@@ -295,13 +299,13 @@ def redis_insert(prj_obj,center_obj,dates_list,key_type):
 
     level_dict ={}
     if len(level_herarchy)  == 3:
-        level_dict['level3'] = ['sub_projecct','work_packet','sub_packet']
-        level_dict['level2'] = ['sub_projecct','work_packet']
-        level_dict['level1'] = ['sub_projecct']
+        level_dict['level3'] = ['sub_project','work_packet','sub_packet']
+        level_dict['level2'] = ['sub_project','work_packet']
+        level_dict['level1'] = ['sub_project']
     if len(level_herarchy)  == 2:
         if 'sub_project' in level_herarchy:
             level_dict['level2'] = ['sub_project','work_packet']
-            level_dict['level1'] = ['sub_projecct']
+            level_dict['level1'] = ['sub_project']
         else :
             level_dict['level2'] = ['work_packet','sub_packet']
             level_dict['level1'] = ['work_packet']
@@ -389,23 +393,23 @@ def dropdown_data(request):
     final_dict['level'] = [1,2,3]
     return HttpResponse(final_dict)
 
+
 def raw_table_query_insertion(customer_data,prj_obj,center_obj,teamleader_obj_name,per_day_value,db_check):
-    print customer_data
     prod_date_list = customer_data['date']
     new_can = 0
     check_query = RawTable.objects.filter(project=prj_obj, sub_project=customer_data.get('sub_project', ''),
                                           work_packet=customer_data['work_packet'],
                                           sub_packet=customer_data.get('sub_packet', ''),
-                                          employee_id=customer_data.get('emp_id', ''), date=customer_data['date'],
+                                          employee_id=customer_data.get('employee_id', ''), date=customer_data['date'],
                                           center=center_obj).values('per_day','id')
     if len(check_query) == 0:
         new_can = RawTable(project=prj_obj, sub_project=customer_data.get('sub_project', ''),
                            work_packet=customer_data['work_packet'],
                            sub_packet=customer_data.get('sub_packet', ''),
-                           employee_id=customer_data.get('emp_id', ''),
+                           employee_id=customer_data.get('employee_id', ''),
                            per_hour=0,
                            per_day=per_day_value, date=customer_data['date'],
-                           norm=int(float(customer_data['target'])),
+                           norm=int(float(customer_data.get('target',0))),
                            team_lead=teamleader_obj_name, center=center_obj)
         if new_can:
             try:
@@ -423,15 +427,28 @@ def raw_table_query_insertion(customer_data,prj_obj,center_obj,teamleader_obj_na
 
     return prod_date_list
 
-def internalerror_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, audited_count,total_errors, db_check):
+def internalerror_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, db_check):
     internal_date_list = customer_data['date']
     check_query = Internalerrors.objects.filter(project=prj_obj, sub_project=customer_data.get('sub_project', ''),
                                           work_packet=customer_data['work_packet'],
                                           sub_packet=customer_data.get('sub_packet', ''),
-                                          employee_id=customer_data.get('emp_id', ''),date=customer_data['date'],
+                                          employee_id=customer_data.get('employee_id', ''),date=customer_data['date'],
                                           center=center_obj).values('audited_errors','total_errors', 'id')
+
+    try:
+        total_errors = int(float(customer_data['total_errors']))
+    except:
+        total_errors = 0
+    try:
+        if customer_data.get('audited_errors', ''):
+            audited_count = int(float(customer_data.get('audited_errors', '')))
+        else:
+            audited_count = 0
+    except:
+        audited_count = 0
+
     if len(check_query) == 0:
-        new_can = Internalerrors(employee_id=customer_data.get('emp_id', ''),
+        new_can = Internalerrors(employee_id=customer_data.get('employee_id', ''),
                                  sub_project=customer_data.get('sub_project', ''),
                                  work_packet=customer_data['work_packet'],
                                  sub_packet=customer_data.get('sub_packet', ''), date=customer_data['date'],
@@ -454,16 +471,27 @@ def internalerror_query_insertion(customer_data, prj_obj, center_obj,teamleader_
             new_can_upd = Internalerrors.objects.filter(id=int(check_query[0]['id'])).update(audited_errors=audited_count,total_errors=total_errors)
     return internal_date_list
 
-def externalerror_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, audited_count,total_errors, db_check):
+def externalerror_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, db_check):
     external_date_list = customer_data['date']
     new_can = 0
     check_query = Externalerrors.objects.filter(project=prj_obj, sub_project=customer_data.get('sub_project', ''),
                                           work_packet=customer_data['work_packet'],
                                           sub_packet=customer_data.get('sub_packet', ''),
-                                          employee_id=customer_data.get('emp_id', ''),date=customer_data['date'],
+                                          employee_id=customer_data.get('employee_id', ''),date=customer_data['date'],
                                           center=center_obj).values('audited_errors','total_errors', 'id')
+    try:
+        total_errors = int(float(customer_data['total_errors']))
+    except:
+        total_errors = 0
+    try:
+        if customer_data.get('audited_errors', ''):
+            audited_count = int(float(customer_data.get('audited_errors', '')))
+        else:
+            audited_count = 0
+    except:
+        audited_count = 0
     if len(check_query) == 0:
-        new_can = Externalerrors(employee_id=customer_data.get('emp_id', ''),
+        new_can = Externalerrors(employee_id=customer_data.get('employee_id', ''),
                                  sub_project=customer_data.get('sub_project', ''),
                                  work_packet=customer_data['work_packet'],
                                  sub_packet=customer_data.get('sub_packet', ''), date=customer_data['date'],
@@ -477,7 +505,7 @@ def externalerror_query_insertion(customer_data, prj_obj, center_obj,teamleader_
             except:
                 print "error in external_table_query"
     if len(check_query) > 0:
-        print customer_data
+        #import pdb;pdb.set_trace()
         if db_check == 'aggregate':
             audited_count = audited_count + int(check_query[0]['audited_errors'])
             total_errors = total_errors + int(check_query[0]['total_errors'])
@@ -486,6 +514,12 @@ def externalerror_query_insertion(customer_data, prj_obj, center_obj,teamleader_
             new_can_update = Externalerrors.objects.filter(id=int(check_query[0]['id'])).update(audited_errors=audited_count,total_errors=total_errors)
 
     return external_date_list
+
+
+
+
+
+
 
 
 def upload(request):
@@ -704,6 +738,315 @@ def sheet_upload_one(prj_obj,center_obj,teamleader_obj,key,one_sheet_data):
             new_can.save()
 
 
+
+def upload_new(request):
+    teamleader_obj_name = TeamLead.objects.filter(name_id=request.user.id)[0]
+    teamleader_obj = TeamLead.objects.filter(name_id=request.user.id).values_list('project_id','center_id')[0]
+    prj_obj = Project.objects.filter(id=teamleader_obj[0])[0]
+    prj_name= prj_obj.name
+    center_obj = Center.objects.filter(id=teamleader_obj[1])[0]
+    fname = request.FILES['myfile']
+    var = fname.name.split('.')[-1].lower()
+    if var not in ['xls', 'xlsx', 'xlsb']:
+        return HttpResponse("Invalid File")
+    else:
+        try:
+            open_book = open_workbook(filename=None, file_contents=fname.read())
+            #open_sheet = open_book.sheet_by_index(0)
+        except:
+            return HttpResponse("Invalid File")
+
+        excel_sheet_names = open_book.sheet_names()
+        file_sheet_names = Authoringtable.objects.filter(project=prj_obj,center=center_obj).values_list('sheet_name',flat=True).distinct()
+        sheet_names = {}
+        raw_table_sheet = RawtableAuthoring.objects.filter(project=prj_obj,center=center_obj).values_list('sheet_name',flat=True).distinct()
+        internal_error_sheet = InternalerrorsAuthoring.objects.filter(project=prj_obj,center=center_obj).values_list('sheet_name',flat=True).distinct()
+        external_error_sheet = ExternalerrorsAuthoring.objects.filter(project=prj_obj,center=center_obj).values_list('sheet_name',flat=True).distinct()
+        target_sheet = TargetsAuthoring.objects.filter(project=prj_obj,center=center_obj).values_list('sheet_name',flat=True).distinct()
+        worktrack_sheet = WorktrackAuthoring.objects.filter(project=prj_obj,center=center_obj).values_list('sheet_name',flat=True).distinct()
+        if raw_table_sheet:
+            sheet_names['raw_table_sheet'] = raw_table_sheet[0]
+        if internal_error_sheet:
+            sheet_names['internal_error_sheet'] = internal_error_sheet[0]
+        if external_error_sheet:
+            sheet_names['external_error_sheet'] = external_error_sheet[0]
+        if target_sheet:
+            sheet_names['target_sheet'] = target_sheet[0]
+        if worktrack_sheet:
+            sheet_names['worktrack_sheet'] = worktrack_sheet[0]
+        file_sheet_names = sheet_names.values()
+        sheet_index_dict = {}
+        for sh_name in file_sheet_names:
+            if sh_name in excel_sheet_names:
+                sheet_index_dict[sh_name] = open_book.sheet_names().index(sh_name)
+
+        raw_table_mapping = {}
+        internal_error_mapping = {}
+        external_error_mapping = {}
+        worktrack_mapping = {}
+        ignorablable_fields = []
+        other_fileds = []
+        mapping_ignores = ['project_id','center_id','_state','sheet_name','id']
+
+        raw_table_map_query = RawtableAuthoring.objects.filter(project=prj_obj,center=center_obj)[0].__dict__
+        for map_key,map_value in raw_table_map_query.iteritems():
+            if map_value != '' and map_key not in mapping_ignores:
+                if map_key == 'ignorable_fileds':
+                    ignorablable_fields = map_value.split('#<>#')
+                else:
+                    raw_table_mapping[map_key]= map_value.lower()
+                    if '#<>#' in map_value:
+                        required_filed = map_value.split('#<>#')
+                        if len(required_filed) >= 2 and required_filed != '':
+                            other_fileds.append(required_filed[1])
+
+        internal_error_map_query  = InternalerrorsAuthoring.objects.filter(project=prj_obj,center=center_obj)[0].__dict__
+        for map_key,map_value in internal_error_map_query.iteritems():
+            if map_value != '' and map_key not in mapping_ignores:
+                internal_error_mapping[map_key]= map_value.lower()
+                if '#<>#' in map_value:
+                    required_filed = map_value.split('#<>#')
+                    if len(required_filed) >= 2 and required_filed != '':
+                        other_fileds.append(required_filed[1])
+        external_error_map_query = ExternalerrorsAuthoring.objects.filter(project=prj_obj,center=center_obj)[0].__dict__
+        for map_key,map_value in external_error_map_query.iteritems():
+            if map_value != '' and map_key not in mapping_ignores:
+                external_error_mapping[map_key]= map_value.lower()
+                if '#<>#' in map_value:
+                    required_filed = map_value.split('#<>#')
+                    if len(required_filed) >= 2 and required_filed != '':
+                        other_fileds.append(required_filed[1])
+        other_fileds = filter(None,other_fileds)
+        """worktrack_map_query = WorktrackAuthoring.objects.filter(project=prj_obj, center=center_obj)[0].__dict__
+        for map_key,map_value in worktrack_map_query.iteritems():
+            if map_value != '' and map_key not in mapping_ignores:
+                worktrack_mapping[map_key]= map_value.lower()"""
+        db_check = str(Project.objects.filter(name=prj_obj.name,center=center_obj).values_list('project_db_handling',flat=True)[0])
+        #sheet_count = Authoringtable.objects.filter(project=prj_obj, center=center_obj).values_list('sheet_name',flat=True).distinct()
+        raw_table_dataset,internal_error_dataset,external_error_dataset = {},{},{}
+        for key,value in sheet_index_dict.iteritems():
+            one_sheet_data = {}
+            prod_date_list,internal_date_list,external_date_list=[],[],[]
+            open_sheet = open_book.sheet_by_index(value)
+            SOH_XL_HEADERS = open_sheet.row_values(0)
+            main_headers = []
+            mapping_table ={}
+            SOH_XL_MAN_HEADERS = [x.title() for x in main_headers]
+            sheet_headers = validate_sheet(open_sheet,request,SOH_XL_HEADERS,SOH_XL_MAN_HEADERS)
+            for row_idx in range(1, open_sheet.nrows):
+                customer_data = {}
+                for column, col_idx in sheet_headers:
+                    cell_data = get_cell_data(open_sheet, row_idx, col_idx)
+                    #column_name = mapping_table.get(column, '')
+                    if column in ["date", "from date","to date","audited date"]:
+                        cell_data = xlrd.xldate_as_tuple(int(cell_data.split('.')[0]), 0)
+                        cell_data = '%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
+                        customer_data[column] = ''.join(cell_data)
+                    elif column != "date" :
+                        customer_data[column] = ''.join(cell_data)
+                    #elif column !="date" and column in mapping_table.keys():
+                        #customer_data[column] = ''.join(cell_data)
+
+                if customer_data.has_key('date'):
+                    if not raw_table_dataset.has_key(customer_data['date']):
+                        raw_table_dataset[str(customer_data['date'])]={}
+                    if not internal_error_dataset.has_key(customer_data['date']):
+                        internal_error_dataset[str(customer_data['date'])]={}
+                    if not external_error_dataset.has_key(customer_data['date']):
+                        external_error_dataset[str(customer_data['date'])]={}
+                    date_name = 'date'
+                else:
+                    if not internal_error_dataset.has_key(customer_data['audited date']):
+                        internal_error_dataset[str(customer_data['audited date'])]={}
+                    if not external_error_dataset.has_key(customer_data['audited date']):
+                        external_error_dataset[str(customer_data['audited date'])]={}
+                    date_name = 'audited date'
+
+                if key == sheet_names['raw_table_sheet']:
+                    local_raw_data = {}
+                    for raw_key,raw_value in raw_table_mapping.iteritems():
+                        if '#<>#' in raw_value:
+                            checking_values=raw_value.split('#<>#')
+                            if customer_data.has_key(checking_values[0].lower()):
+                                if customer_data[checking_values[0].lower()] in ignorablable_fields:
+                                    local_raw_data[raw_key] = 'not_applicable'
+                                else:
+                                    if (checking_values[1] == '') and (customer_data[checking_values[0]] not in other_fileds):
+                                        local_raw_data[raw_key] = customer_data[checking_values[2].lower()]
+                                    elif customer_data[checking_values[0].lower()] == checking_values[1]:
+                                        local_raw_data[raw_key] = customer_data[checking_values[2].lower()]
+                                    else:
+                                        local_raw_data[raw_key] = 'not_applicable'
+                        elif ('#<>#' not in raw_value) and (raw_value in customer_data.keys()):
+                            local_raw_data[raw_key] = customer_data[raw_value]
+
+                    emp_key = '{0}_{1}_{2}_{3}'.format(local_raw_data.get('sub_project', 'NA'),
+                                                       local_raw_data.get('work_packet', 'NA'),
+                                                       local_raw_data.get('sub_packet', 'NA'),
+                                                       local_raw_data.get('employee_id', 'NA'))
+
+                    if 'not_applicable' not in local_raw_data.values():
+                        if raw_table_dataset.has_key(str(customer_data[date_name])):
+                            if raw_table_dataset[str(customer_data[date_name])].has_key(emp_key):
+                                for pdct_key,pdct_value in local_raw_data.iteritems():
+                                    if pdct_key not in raw_table_dataset[str(customer_data[date_name])][emp_key].keys():
+                                        raw_table_dataset[str(customer_data[date_name])][emp_key][pdct_key] = pdct_value
+                                    else:
+                                        if (pdct_key == 'per_day') :
+                                            try:
+                                                pdct_value = int(float(pdct_value))
+                                            except:
+                                                pdct_value = 0
+                                            try:
+                                                dataset_value = int(float(raw_table_dataset[str(customer_data[date_name])][emp_key][pdct_key]))
+                                            except:
+                                                dataset_value =0
+                                            if db_check == 'aggregate':
+                                                raw_table_dataset[str(customer_data[date_name])][emp_key][pdct_key] = pdct_value + dataset_value
+                                            elif db_check == 'update':
+                                                raw_table_dataset[str(customer_data[date_name])][emp_key][pdct_key] = pdct_value
+                            else:
+                                raw_table_dataset[str(customer_data[date_name])][emp_key] = local_raw_data
+
+                    print local_raw_data
+
+                if key == sheet_names.get('internal_error_sheet',''):
+                    local_internalerror_data= {}
+                    for raw_key,raw_value in internal_error_mapping.iteritems():
+                        if '#<>#' in raw_value:
+                            checking_values = raw_value.split('#<>#')
+                            if customer_data.has_key(checking_values[0].lower()):
+                                if customer_data[checking_values[0].lower()].lower() == checking_values[1].lower():
+                                    local_internalerror_data[raw_key] = customer_data[checking_values[2].lower()]
+                                else:
+                                    local_internalerror_data[raw_key] = 'not_applicable'
+
+                        elif ('#<>#' not in raw_value) and (raw_value in customer_data.keys()):
+                            local_internalerror_data[raw_key] = customer_data[raw_value]
+
+                    emp_key ='{0}_{1}_{2}_{3}'.format(local_internalerror_data.get('sub_project', 'NA') , local_internalerror_data.get('work_packet','NA') , local_internalerror_data.get('sub_packet', 'NA') , local_internalerror_data.get('employee_id', 'NA'))
+                    if 'not_applicable' not in local_internalerror_data.values():
+                        if internal_error_dataset.has_key(str(customer_data[date_name])):
+                            if internal_error_dataset[str(customer_data[date_name])].has_key(emp_key):
+                                for intr_key,intr_value in local_internalerror_data.iteritems():
+                                    if intr_key not in internal_error_dataset[str(customer_data[date_name])][emp_key].keys():
+                                        internal_error_dataset[str(customer_data[date_name])][emp_key][intr_key] = intr_value
+                                    else:
+                                        if (intr_key == 'total_errors') or (intr_key == 'audited_errors'):
+                                            try:
+                                                intr_value = int(float(intr_value))
+                                            except:
+                                                intr_value = 0
+                                            try:
+                                                dataset_value = int(float(internal_error_dataset[str(customer_data[date_name])][emp_key][intr_key]))
+                                            except:
+                                                dataset_value =0
+                                            if db_check == 'aggregate':
+                                                internal_error_dataset[str(customer_data[date_name])][emp_key][intr_key] = intr_value + dataset_value
+                                            elif db_check == 'update':
+                                                internal_error_dataset[str(customer_data[date_name])][emp_key][intr_key] = intr_value
+                            else:
+                                internal_error_dataset[str(customer_data[date_name])][emp_key]=local_internalerror_data
+                    else:
+                        na_key = [key_value for key_value in local_internalerror_data.values() if key_value=='not_applicable']
+                        if (len(na_key) == 1) and (sheet_names.get('external_error_sheet','')== sheet_names.get('internal_error_sheet','')) and (sheet_names.get('external_error_sheet','')== sheet_names.get('raw_table_sheet','')):
+                            if internal_error_dataset[str(customer_data[date_name])].has_key(emp_key):
+                                for intr_key,intr_value in local_internalerror_data.iteritems():
+                                    if intr_key not in internal_error_dataset[str(customer_data[date_name])][emp_key].keys():
+                                        internal_error_dataset[str(customer_data[date_name])][emp_key][intr_key] = intr_value
+                            else:
+                                for intr_key, intr_value in local_internalerror_data.iteritems():
+                                    if intr_value == 'not_applicable':
+                                        delete_key = intr_key
+                                del local_internalerror_data[delete_key]
+                                if 'not_applicable' not in local_internalerror_data.values():
+                                    internal_error_dataset[str(customer_data[date_name])][emp_key] = local_internalerror_data
+                    print local_internalerror_data
+                if key == sheet_names.get('external_error_sheet',''):
+                    local_externalerror_data= {}
+                    for raw_key,raw_value in external_error_mapping.iteritems():
+                        if '#<>#' in raw_value:
+                            checking_values = raw_value.split('#<>#')
+                            if customer_data.has_key(checking_values[0].lower()):
+                                if customer_data[checking_values[0].lower()].lower() == checking_values[1].lower():
+                                    local_externalerror_data[raw_key] = customer_data[checking_values[2].lower()]
+                                else:
+                                    local_externalerror_data[raw_key] = 'not_applicable'
+
+                        elif ('#<>#' not in raw_value) and (raw_value in customer_data.keys()):
+                            local_externalerror_data[raw_key] = customer_data[raw_value]
+
+                    emp_key ='{0}_{1}_{2}_{3}'.format(local_externalerror_data.get('sub_project', 'NA') , local_externalerror_data.get('work_packet','NA') , local_externalerror_data.get('sub_packet', 'NA') , local_externalerror_data.get('employee_id', 'NA'))
+                    if 'not_applicable' not in local_externalerror_data.values():
+                        if external_error_dataset.has_key(str(customer_data[date_name])):
+                            if external_error_dataset[str(customer_data[date_name])].has_key(emp_key):
+                                for extr_key,extr_value in local_externalerror_data.iteritems():
+                                    if extr_key not in external_error_dataset[str(customer_data[date_name])][emp_key].keys():
+                                        external_error_dataset[str(customer_data[date_name])][emp_key][extr_key] = extr_value
+                                    else:
+                                        if (extr_key == 'total_errors') or (extr_key == 'audited_errors'):
+                                            try:
+                                                extr_value = int(float(extr_value))
+                                            except:
+                                                extr_value = 0
+                                            try:
+                                                dataset_value = int(float(external_error_dataset[str(customer_data[date_name])][emp_key][extr_key]))
+                                            except:
+                                                dataset_value =0
+                                            if db_check == 'aggregate':
+                                                external_error_dataset[str(customer_data[date_name])][emp_key][extr_key] = extr_value + dataset_value
+                                            elif db_check == 'update':
+                                                external_error_dataset[str(customer_data[date_name])][emp_key][extr_key] = extr_value
+                            else:
+                                external_error_dataset[str(customer_data[date_name])][emp_key]=local_externalerror_data
+                    else:
+                        na_key = [key_value for key_value in local_externalerror_data.values() if key_value=='not_applicable']
+                        if (len(na_key) == 1) and (sheet_names.get('external_error_sheet','')== sheet_names.get('internal_error_sheet','')) and (sheet_names.get('external_error_sheet','')== sheet_names.get('raw_table_sheet','')):
+                            if external_error_dataset[str(customer_data[date_name])].has_key(emp_key):
+                                for extr_key, extr_value in local_externalerror_data.iteritems():
+                                    if extr_key not in external_error_dataset[str(customer_data[date_name])][emp_key].keys():
+                                        external_error_dataset[str(customer_data[date_name])][emp_key][extr_key] = extr_value
+                            else:
+                                for intr_key, intr_value in local_externalerror_data.iteritems():
+                                    if intr_value == 'not_applicable':
+                                        delete_key = intr_key
+                                del local_externalerror_data[delete_key]
+                                if 'not_applicable' not in local_externalerror_data.values():
+                                    external_error_dataset[str(customer_data[date_name])][emp_key] = local_externalerror_data
+                    print local_externalerror_data
+        for date_key,date_value in internal_error_dataset.iteritems():
+            for emp_key,emp_value in date_value.iteritems():
+                internalerror_insert = internalerror_query_insertion(emp_value, prj_obj, center_obj,teamleader_obj_name,db_check)
+        for date_key,date_value in external_error_dataset.iteritems():
+            for emp_key,emp_value in date_value.iteritems():
+                externalerror_insert = externalerror_query_insertion(emp_value, prj_obj, center_obj,teamleader_obj_name,db_check)
+
+        for date_key,date_value in raw_table_dataset.iteritems():
+            for emp_key,emp_value in date_value.iteritems():
+                try:
+                    per_day_value = int(float(emp_value.get('per_day', '')))
+                except:
+                    per_day_value = 0
+                raw_table_insert = raw_table_query_insertion(emp_value, prj_obj, center_obj, teamleader_obj_name,per_day_value, db_check)
+
+        if len(raw_table_dataset)>0:
+            insert = redis_insert(prj_obj, center_obj, raw_table_dataset.keys(), key_type='Production')
+        if len(internal_error_dataset) > 0:
+            insert = redis_insert(prj_obj, center_obj, internal_error_dataset.keys(), key_type='Internal')
+        if len(external_error_dataset):
+            insert = redis_insert(prj_obj, center_obj, external_error_dataset.keys(), key_type='External')
+        var ='hello'
+        return HttpResponse(var)
+
+
+
+
+
+
+
+
+
+
 def user_data(request):
     user_group = request.user.groups.values_list('name',flat=True)[0]
     manager_dict = {}
@@ -819,8 +1162,13 @@ def product_total_graph(date_list,prj_id,center_obj,work_packets,level_structure
                 volume_list = RawTable.objects.filter(**query_set).values('sub_project','work_packet').distinct()
             else:
                 volume_list = RawTable.objects.filter(**query_set).values('sub_project', 'work_packet','sub_packet').distinct()
-        if level_structure_key.has_key('work_packet') and level_structure_key.has_key('sub_packet'):
+        elif level_structure_key.has_key('work_packet') and level_structure_key.has_key('sub_packet'):
             volume_list = RawTable.objects.filter(**query_set).values('sub_project','work_packet','sub_packet').distinct()
+        elif level_structure_key.has_key('sub_project') and len(level_structure_key) ==1:
+            if level_structure_key['sub_project'] == "All":
+                volume_list = RawTable.objects.filter(**query_set).values('sub_project').distinct()
+            else:
+                volume_list = RawTable.objects.filter(**query_set).values('sub_project','work_packet').distinct()
 
         count =0
         for vol_type in volume_list:
@@ -904,7 +1252,7 @@ def product_total_graph(date_list,prj_id,center_obj,work_packets,level_structure
                 new_list.append(value)
                 volume_list_data.append(new_list)
         except:
-            import pdb;pdb.set_trace()
+            pass
     volume_bar_data['volume_new_data']=volume_list_data
     volume_bar_data['volume_values'] = volume_keys_data
     result['volumes_data'] = volume_bar_data
@@ -1208,7 +1556,7 @@ def internal_extrnal_graphs(request,date_list,prj_id,center_obj,packet_sum_data,
     prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
     center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
     final_internal_data = internal_extrnal_graphs_same_formula(request, date_list, prj_id, center_obj,level_structure_key,err_type='Internal')
-    if prj_name[0] in ['DellBilling','Dellcoding']:
+    if prj_name[0] in ['DellBilling','DellCoding']:
         final_external_data = internal_extrnal_graphs_same_formula(request, date_list, prj_id, center_obj,level_structure_key,err_type='External')
         final_internal_data.update(final_external_data)
         return final_internal_data
@@ -1259,42 +1607,55 @@ def day_week_month(request,dwm_dict,prj_id,center,work_packets,level_structure_k
         if error_graphs_data.has_key('external_accuracy_graph'):
             final_dict['external_accuracy_graph'] = graph_data_alignment(error_graphs_data['external_accuracy_graph'], name_key='y')
         final_dict.update(result_dict)
-        sub_pro_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_project').distinct()
-        sub_project_level = [i[0] for i in sub_pro_level]
-        if len(sub_project_level) > 1:
+        sub_pro_level = filter(None,RawTable.objects.filter(project=prj_id, center=center).values_list('sub_project',flat=True).distinct())
+        sub_project_level = [i for i in sub_pro_level]
+        if len(sub_project_level) >= 1:
             sub_project_level.append('all')
-        if len(sub_project_level) <= 1 and sub_project_level[0] == u'' :
+        else:
             sub_project_level = ''
-        work_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet').distinct()
-        work_packet_level = [j[0] for j in work_pac_level]
-        if len(work_packet_level) > 1:
+        work_pac_level = filter(None,RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet',flat=True).distinct())
+        work_packet_level = [j for j in work_pac_level]
+        if len(work_packet_level) >= 1:
             work_packet_level.append('all')
-        if len(work_packet_level) <= 1 and work_packet_level[0] == u'':
+        else:
             work_packet_level = ''
-        sub_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_packet').distinct()
-        sub_packet_level = [k[0] for k in sub_pac_level]
-        if len(sub_packet_level) > 1:
+        sub_pac_level = filter(None,RawTable.objects.filter(project=prj_id, center=center).values_list('sub_packet',flat=True).distinct())
+        sub_packet_level = [k for k in sub_pac_level]
+        if len(sub_packet_level) >= 1:
             sub_packet_level.append('all')
-        if len(sub_packet_level) <= 1 and sub_packet_level[0] == u'':
+        else:
             sub_packet_level = ''
-        sub_pro_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_project').distinct()
-        work_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet').distinct()
-        sub_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_packet').distinct() 
+        #sub_pro_level = filter(RawTable.objects.filter(project=prj_id, center=center).values_list('sub_project').distinct()
+        #work_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet').distinct()
+        #sub_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_packet').distinct() 
         final_details['sub_project']=0
         final_details['work_packet']=0
         final_details['sub_packet']=0
-        if len(sub_pro_level) > 1:
+        if len(sub_pro_level) >= 1:
             final_details['sub_project']=1
-        if len(work_pac_level) > 1:
+        if len(work_pac_level) >= 1:
             final_details['work_packet']=1
-        if len(sub_pac_level) > 1:
+        if len(sub_pac_level) >= 1:
             final_details['sub_packet']=1
 
         final_dict['sub_project_level'] = sub_project_level
         final_dict['work_packet_level'] = work_packet_level
         final_dict['sub_packet_level'] = sub_packet_level
+        big_dict = {}
         if final_details['sub_project']:
-            print 'sub_project_existe'
+            if final_details['sub_packet']:
+                first = RawTable.objects.filter(project=prj_id).values_list('sub_project').distinct()
+                big_dict = {}
+                total = {}
+                for i in first:
+                    list_val = RawTable.objects.filter(project=prj_id,sub_project=i[0]).values_list('work_packet').distinct()
+                    for j in list_val:
+                        total[j[0]] = []
+                        sub_pac_data = RawTable.objects.filter(project=prj_id,work_packet=j[0]).values_list('sub_packet').distinct()
+                        for l in sub_pac_data:
+                            total[j[0]].append(l[0])
+                    big_dict[i[0]] = total
+                    total = {}
         elif final_details['work_packet']:
             if final_details['sub_packet']:
                 first = RawTable.objects.filter(project=prj_id).values_list('work_packet').distinct()
@@ -1667,23 +2028,26 @@ def from_to(request):
     center_id = request.GET['center'].split('-')[0].strip()
     count = 0
     all_count = [count + 1 for key in level_structure_key.values() if key == "All"]
-    if len(all_count) > 1:
+    if len(all_count) >= 2:
         level_structure_key = {}
-
-
+    
+    #import pdb;pdb.set_trace()
     center = Center.objects.filter(name=center_id).values_list('id', flat=True)
     prj_id = Project.objects.filter(name=project).values_list('id', flat=True)
     if not level_structure_key:
-        sub_pro_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_project',flat=True).distinct()
-        if len(sub_pro_level)> 1:
+        #sub_pro_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_project',flat=True).distinct()
+        sub_pro_level = filter(None,RawTable.objects.filter(project=prj_id, center=center).values_list('sub_project',flat=True).distinct())
+        if len(sub_pro_level)>= 1:
             level_structure_key['sub_project'] = "All"
         if not level_structure_key:
-            work_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet',flat=True).distinct()
-            if len(work_pac_level)>1:
+            #work_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet',flat=True).distinct()
+            work_pac_level = filter(None,RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet',flat=True).distinct())
+            if len(work_pac_level)>=1:
                 level_structure_key['work_packet'] = "All"
         if not level_structure_key:
-            sub_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_packet',flat=True).distinct()
-            if len(sub_pac_level)>1:
+            #sub_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_packet',flat=True).distinct()
+            sub_pac_level = filter(None,RawTable.objects.filter(project=prj_id, center=center).values_list('sub_packet',flat=True).distinct())
+            if len(sub_pac_level)>=1:
                 level_structure_key['sub_packet'] = "All"
 
     #center = request.GET['center'].split('-')[0].strip()
@@ -1760,7 +2124,7 @@ def from_to(request):
         dwm_dict['month'] = months_dict
         for month_name,month_values in months_dict.iteritems():
             if employe_dates.has_key('days'):
-                employe_dates['days'] = employe_dates['days'].appeend(month_values)
+                employe_dates['days'] = employe_dates['days'].append(month_values)
             else:
                 employe_dates['days']=month_values
     if type == 'week':
