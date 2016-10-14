@@ -221,6 +221,7 @@ class Targets(models.Model):
     work_packet = models.CharField(max_length=255)
     sub_packet  = models.CharField(max_length=255, blank=True)
     target      = models.IntegerField(max_length=125)
+    fte_target  = models.IntegerField(max_length=125,default=0)
     center = models.ForeignKey(Center, null=True)
     project = models.ForeignKey(Project, null=True)
 

@@ -30,10 +30,21 @@
 
              $http({method:"GET", url:project}).success(function(result){
 
-                    if(result.result.role === 'team_lead'){
+/*                    if(result.result.role === 'team_lead'){
                         self.hideLoading();
                     }
-                if((result.result.role === 'customer') || (result.result.role === 'team_lead')){ 
+
+                    if(result.result.role === 'center_manager'){
+                        self.hideLoading();
+                    }
+
+                    if(result.result.role === 'nextwealth_manager'){
+                        self.hideLoading();
+                    }*/
+
+                if((result.result.role === 'customer') || (result.result.role === 'team_lead') || (result.result.role === 'center_manager') || 
+                    (result.result.role === 'nextwealth_manager'))
+                { 
                     var pro_cen_nam = result.result.list[1]
                     self.first = result.result.dates.from_date;
                     self.lastDate = self.first;
@@ -463,10 +474,15 @@
                         $("#0").append(new Option("All"));
                         $("#1").append(new Option("All"));
                         $("#2").append(new Option("All"));
-                        /*var from_to_data = from_to + 'from=' + '2016-7-21' + '&to=' + '2016-7-27' + '&project=' + self.project
-                         + '&center=' + self.location;*/
+                        if (self.project == "Wallmart - "){
+                            var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + 'DellBilling - ' +
+                                '&center=' + 'Salem - ' + '&type=' + self.day_type;
+                        }
+                        else
+                        {
                          var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + self.project +
                           '&center=' + self.location + '&type=' + self.day_type;
+                        }
                         self.tabData.state = JSON.parse("{}");
                         self.main_render(from_to_data)
                     }
@@ -767,7 +783,12 @@ plotOptions: {
                             console.log(e.target.name);
                             var internal_bar_graph ='/api/chart_data/?';
                             var dates_list = self.get_date();
-                            $http.get( internal_bar_graph + 'packet=' + e.target.name + '&from=' + dates_list[0] + '&to=' + dates_list[1]
+                            var packet_clicked = e.target.name;
+                            var is_exist = packet_clicked.indexOf('&');
+                            if (is_exist > 0){
+                                packet_clicked = packet_clicked.replace(' & ',' and ')
+                            }
+                            $http.get( internal_bar_graph + 'packet=' + packet_clicked + '&from=' + dates_list[0] + '&to=' + dates_list[1]
                              + '&type=' + 'Internal_Bar'+addition).success(
                             function(data, status)
                                 {
@@ -799,8 +820,13 @@ plotOptions: {
                 var addition = '&project=' + pro + '&center=' + loc;
                         console.log(e);
                             var external_bar_graph ='/api/chart_data/?';
+                            var packet_clicked = e.target.name;
+                            var is_exist = packet_clicked.indexOf('&');
+                            if (is_exist > 0){
+                                packet_clicked = packet_clicked.replace(' & ',' and ')
+                            }
                             var dates_list = self.get_date();
-                            $http.get( external_bar_graph + 'packet=' + e.target.name + '&from=' + dates_list[0] + '&to=' + dates_list[1]
+                            $http.get( external_bar_graph + 'packet=' + packet_clicked + '&from=' + dates_list[0] + '&to=' + dates_list[1]
                              + '&type=' + 'External_Bar' + addition).success(
                             function(data, status)
                                 {
