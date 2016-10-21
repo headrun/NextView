@@ -5,6 +5,9 @@
 ::-webkit-scrollbar {
       width: 8px;
 }
+.daterangepicker {
+    color: black;
+}
    .button {
       background-color: #3396C9;
       color: white;
@@ -124,11 +127,16 @@ table {
    margin-left: auto;
    margin-right: auto;
 }
-.btn-default:focus {
+/*.btn-default:focus {
      background-color: #555D50;
      color: white;
      border-color: #555D50;
-}
+}*/
+/*.btn-default:focus:after {
+    background-color: #555D50;
+    color: white;
+    border-color: #555D50;
+}*/
 </style>
 <body>
     <div class="row">
@@ -136,7 +144,7 @@ table {
         <div><h3 class="pull-left brand_style">{{$ctrl.project}}Dashboard</h3></div>
              <div id="inner1" class="form-group" style="margin-bottom:initial;">
                  <input class="form-control select" value="{{$ctrl.first}} to {{$ctrl.last}}" id="select" size="19">
-                 <i ng-click="$ctrl.click()"class="fa fa-calendar date" aria-hidden="true"></i>
+                 <i class="fa fa-calendar date" aria-hidden="true"></i>
              </div>
              <div ng-repeat="k in $ctrl.packet_hierarchy_list track by $index">
                 <form>
@@ -159,11 +167,11 @@ table {
                 <div class="widget-body">
                     <div ng-if="j.widget == '1' "class="input-group"id="inner2">
                          <div class="btn-group">
-                            <button type="button" id="day" class="btn btn-default" ng-click="$ctrl.dateType('day',j.opt)" style="cursor:pointer;">Day</button>
+                            <button type="button" id="day" class="active btn btn-default day" ng-click="$ctrl.dateType('day',j.opt)" style="cursor:pointer;">Day</button>
                             <button type="button" id="week"class="btn btn-default" ng-click="$ctrl.dateType('week',j.opt)" style="cursor:pointer;">Week</button>
                             <button type="button" id="Month"class="btn btn-default" ng-click="$ctrl.dateType('month',j.opt)" style="cursor:pointer;">Month</button>
-                    </div>
-                </div>
+                         </div>
+                     </div>
                     <highcharts options="j.opt"></highcharts>
                 </div>
             </div>
@@ -231,9 +239,10 @@ table {
     </div>
   </div>
 </body>
+
 <script>
-   configObject = {
-       autoClose: true,
-       }
-   $('#select').dateRangePicker(configObject);
+    $('body').on('click','.btn-group button', function(e) {
+     $(this).addClass('active');
+     $(this).siblings().removeClass('active');
+});
 </script>

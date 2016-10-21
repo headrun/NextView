@@ -1,90 +1,115 @@
 <style>
 
-.navbar-collapse.collapse {
-display: block!important;
+@media (min-width : 768px) {
+     .navbar-fixed-top {
+
+          height: 50px;
+
+     }
+ }
+ .navbar-collapse.in {
+
+     overflow-y: inherit;
+ }
+
+ .navbar-collapse {
+
+     overflow-x: hidden;
 }
 
+.navbar-toggle {
 
-.navbar-nav.navbar-right:last-child {
-margin-right: -15px !important;
+     margin-right: 2px;
 }
 
-.navbar-right {
-float: right!important;
+.navbar-default .navbar-toggle {
+
+     border-color: black;
+     background-color: black;
 }
 
-.navbar-header {
-float: none;
-}
+.navbar-default .navbar-toggle:hover {
 
-.navbar {
-margin-bottom:0px;
+    background-color: black;
+}    
+
+.name {
+
+    font-size:22px;
+    margin-right: 10px;
+ }
+ .admin {
+    padding:5px; 
+    margin-top:10px;
+    margin-right:-5px;
+    background:black;
+    border-color:white;
+    color:white;
 }
 </style>
 
-<nav class="navbar navbar-default"
-     ng-class="{collapsed: $ctrl.collapsed}"style="border-top-color: black;border-left-color: black;">
-         <div class="navbar-header">
-             <div class="">
-      		     <div><h1 class="pull-left brand icon">NextView</h1></div>
-                 <div>
-                    <ul class="nav navbar-nav pull-right" style="float:right;">
-            <li>
-                <!--<p>{{$ctrl.mapping_list}}</p>-->
-                <div class="dropdown" id="select_dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Select
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li ng-repeat="item in $ctrl.mapping_list">
-                            <a href="" ng-click="$ctrl.clickFun(item)">{{item}}</a>
-                        </li>
-                        <!--<li><a href="#">HTML</a></li>
-                        <li><a href="#">CSS</a></li>
-                        <li><a href="#">JavaScript</a></li>-->
-                    </ul>
-                </div>
-                <!--<div class="dropdown" id='only_project_dropdown'>
-                    <button class="btn btn-primary dropdown-toggle"style="background-color:black;border-color:white;margin-right:0px;" type="button" data-toggle="dropdown">Project
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" style="min-width:0px;">
-                        <li><a href="#!/page1">Probe</a></li>
-                        <li><a href="#!/page3">Dell</a></li>
-                    </ul>
-                </div>-->
-                <!--<div>
-                    <select id="center_dropdown" ng-model="projects" ng-options="center for (center, projects) in $ctrl.centers"style="background-color:#0a0909;border-color:white;margin-top:12px;border-radius:0.2em;">
-                        <option value=''>Center</option>
-                    </select>
-                    <select id="project_dropdown" ng-disabled="!projects" ng-model="page" ng-options="project for (project, pages) in projects"
-                            ng-change="$ctrl.onChange(page)"style="background-color:#0a0909;border-color:white;margin-top:12px;border-radius:0.2em;">
-                        <option value=''>Project</option>
-                    </select>
-                </div>-->
-            </li>
-            <li>
-               <div id="fileupload" class="upload">
-                    <span>Upload</span>
-               </div>
-            </li>
-            <li class="dropdown user">
+<nav class="navbar navbar-default navbar-fixed-top" style="position: initial;">
 
-                   <a href="" class="dropdown-toggle" data-toggle="dropdown" style="padding:0px;background-color:#0a0909;">
-                     <i class="fa fa-angle-down pull-right"></i>
-                     <b><span><i class="fa fa-user" style="font-size:22px;"></i>{{ $ctrl.user.userName }}</span></b>
-                     <br>
-                     <span style="font-size:15px;">{{ $ctrl.user.role }}</span>
-                   </a>
-             <ul class="dropdown-menu" style="text-align:left;padding-top:0px;padding-bottom:0px;padding-left:10px;background-color:black;">
-                <li><logout></logout></li>
-             </ul>
-           </li>
-        </ul>
-                 </div>
-             </div>
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed"  data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+          <a class="navbar-brand" style="font-size:2.0em;margin-left:-15px;color:#cdcdcd;font-weight:bold;">Nextview</a>
         </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+              <div class=""style="font-size:1.2em;padding-right:15px;">
+                  <ul class="nav navbar-nav pull-right">
+                  <li>
+                     <div class="dropdown" id="select_dropdown">
+                            <ul class="nav nav-pills left">
+                               <li class="dropdown active span8">
+                                  <a class="dropdown-toggle" id="inp_impact" data-toggle="dropdown">
+                                      <span id="dropdown_title">{{$ctrl.select_option}}</span><span class="caret"></span>
+                                  </a>
+                                   <ul ID="divNewNotifications" class="dropdown-menu">
+                                       <li >
+                                           <a href="" ng-repeat="item in $ctrl.mapping_list" ng-click="$ctrl.clickFun(item)"  >{{item}}</a>
+                                       </li>
+
+                                   </ul>
+                               </li>
+                            </ul>
+                     </div>
+                        <li>
+                            <div id="admin_but">
+                            <a href="http://nv.headrun.com:8181/admin/api" class="btn btn-info" style="padding:5px;margin-top:10px;margin-right:-5px;color:white;border-color:white;background-color:black;" role="button" target="_blank">Admin</a>
+                            </div>
+                        </li>
+              <li>
+                  <div id="fileupload" class="upload">
+                      <span>Upload</span>
+                  </div>
+              </li>
+
+              <li class="dropdown user">
+                  <a href="" class="dropdown-toggle" data-toggle="dropdown" style="padding:0px;background-color:#0a0909;margin-left:10px;">
+                      <b><span style="float:right;margin-right:-18px;"><i class="fa fa-user name"></i>{{ $ctrl.user.userName }} <i class="fa fa-angle-down"></i></span></b>
+                      <br>
+                      <span style="font-size:15px;">{{ $ctrl.user.role }}</span>
+                  </a>
+
+                  <ul class="dropdown-menu" style="text-align:left;padding-top:0px;padding-bottom:0px;padding-left:10px;background-color:black;">
+                      <li><logout></logout></li>
+                  </ul>
+              </li>
+                  </ul>
+              </div>
+          </ul>
+        </div>     <!--/.nav-collapse -->
+
 </nav>
+
+
+
 <script>
     $(function () {
        $("#fileupload").uploadFile({
@@ -104,4 +129,10 @@ margin-bottom:0px;
           },
        });
     });
+
+    $('.dropdown-toggle').dropdown();
+    $('#divNewNotifications li').on('click', function() {
+       $('#dropdown_title').html($(".brand_style").text().replace(" - Dashboard",''));
+    });
+
 </script>

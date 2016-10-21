@@ -40,12 +40,34 @@ class Customer(models.Model):
     name    = models.ForeignKey(User, null=True)
     center  = models.ManyToManyField(Center, null=True)
     project = models.ManyToManyField(Project, null=True)
+    layout = models.CharField(max_length=512, default='')
 
     class Meta:
         db_table = u'customer'
     def __unicode__(self):
         user_obj = User.objects.filter(id=self.name_id).values_list('username',flat=True)
         return user_obj[0]
+
+class Headcount(models.Model):
+    from_date = models.DateField()
+    to_date   = models.DateField()
+    sub_project = models.CharField(max_length=255, blank=True)
+    work_packet = models.CharField(max_length=255)
+    sub_packet = models.CharField(max_length=255, blank=True)
+    center = models.ForeignKey(Center, null=True)
+    project = models.ForeignKey(Project, null=True)
+    billable_agent = models.IntegerField(max_length=125)
+    buffer_agent = models.IntegerField(max_length=125)
+    billable_support = models.IntegerField(max_length=125)
+    buffer_support = models.IntegerField(max_length=125)
+    non_billable_support_others = models.IntegerField(max_length=125)
+    support_others_managers = models.IntegerField(max_length=125)
+
+    class Meta:
+        db_table = u'headcount_table'
+
+    def __unicode__(self):
+        return self.work_packet
 
 class Centermanager(models.Model):
     name    = models.ForeignKey(User, null=True)
@@ -102,6 +124,10 @@ class RawtableAuthoring(models.Model):
 
     class Meta:
         db_table = u'rawtable_authoring'
+    
+    def __unicode__(self):
+        return self.work_packet
+
 
 
 
@@ -269,7 +295,7 @@ class Worktrack(models.Model):
         return self.work_packet
 
 class WorktrackAuthoring(models.Model):
-    date = models.DateField()
+    date = models.CharField(max_length=255, blank=True)
     sub_project = models.CharField(max_length=255, blank=True)
     work_packet = models.CharField(max_length=255)
     sub_packet = models.CharField(max_length=255, blank=True)

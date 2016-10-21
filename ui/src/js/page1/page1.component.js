@@ -28,37 +28,47 @@
              var project = 'api/project/';
              var drop_down_link = '/api/dropdown_data/';
 
+             $('#select').daterangepicker({
+                    "autoApply": true,
+                    "locale": {
+                        "format": 'YYYY-MM-DD'
+                    },
+              }, function(start, end, label) {
+                self.start = start.format('YYYY-MM-DD');
+                self.end = end.format('YYYY-MM-DD');
+                self.click(start,end);
+               });
+
              $http({method:"GET", url:project}).success(function(result){
-
-/*                    if(result.result.role === 'team_lead'){
-                        self.hideLoading();
-                    }
-
-                    if(result.result.role === 'center_manager'){
-                        self.hideLoading();
-                    }
-
-                    if(result.result.role === 'nextwealth_manager'){
-                        self.hideLoading();
-                    }*/
-
-                if((result.result.role === 'customer') || (result.result.role === 'team_lead') || (result.result.role === 'center_manager') || 
+                if((result.result.role === 'customer') || (result.result.role === 'team_lead') || (result.result.role === 'center_manager') ||
                     (result.result.role === 'nextwealth_manager'))
-                { 
+                {
                     var pro_cen_nam = result.result.list[1]
                     self.first = result.result.dates.from_date;
                     self.lastDate = self.first;
                     self.last = result.result.dates.to_date;
-                    self.firstDate =self.last;
-                    if (result.result.lay.length == 1){
+                    self.firstDate = self.last;
+                    $('#select').val(self.first + ' - ' + self.last)
+                    /*if (result.result.lay.length == 1){
                         self.layout_list = result.result.lay[0][pro_cen_nam]
                     }
                     else {
                         self.layout_list = result.result.lay[1][pro_cen_nam]
+                    }*/
+                    if (result.result.role === 'customer'){
+                       self.layout_list = result.result.lay[0].layout
+                    }
+                    else {
+                        if (result.result.lay.length == 1){
+                            self.layout_list = result.result.lay[0][pro_cen_nam]
+                        }
+                        else {
+                            self.layout_list = result.result.lay[1][pro_cen_nam]
+                        }
                     }
                     self.list_object = {
                         "productivity_chart": {
-                            'title': 'Productivity Chart',
+                            'title': 'Production Trends',
                             'id': 1,
                             'col': 12,
                             'api': '',
@@ -66,7 +76,7 @@
                             'widget': 1
                         },
                         "internal_error_accuracy": {
-                            'title': 'Internal Accuracy Graph',
+                            'title': 'Internal Accuracy',
                             'id': 2,
                             'col': 6,
                             'api': '',
@@ -74,7 +84,7 @@
                             'widget': 0
                         },
                         "external_error_accuracy": {
-                            'title': 'External Accuracy Graph',
+                            'title': 'External Accuracy',
                             'id': 3,
                             'col': 6,
                             'api': '',
@@ -98,7 +108,7 @@
                             'widget': 0
                         },
                         "internal_accuracy_timeline": {
-                            'title': 'Internal Accuracy Timeline',
+                            'title': 'Internal Accuracy Trends',
                             'id': 6,
                             'col': 12,
                             'api': '',
@@ -106,7 +116,7 @@
                             'widget': 0
                         },
                         "external_accuracy_timeline": {
-                            'title': 'External Accuracy Timeline',
+                            'title': 'External Accuracy Trends',
                             'id': 7,
                             'col': 12,
                             'api': '',
@@ -114,7 +124,7 @@
                             'widget': 0
                         },
                         "productivity_bar_graph": {
-                            'title': 'Productivity Bar Chart',
+                            'title': 'Production Chart',
                             'id': 8,
                             'col': 12,
                             'api': '',
@@ -138,19 +148,35 @@
                             'widget': 0
                         },
                         "total_fte": {
-                            'title': 'WorkPacket Wise Total FTE',
+                            'title': 'WorkPacket Wise Productivity',
                             'id': 11,
-                            'col': 6,
+                            'col': 12,
                             'api': '',
                             'opt': self.chartOptions16,
                             'widget': 0
                         },
                         "sum_total_fte": {
-                            'title': 'Total FTE',
+                            'title': 'Total Productivity',
                             'id': 12,
                             'col': 6,
                             'api': '',
                             'opt': self.chartOptions16_2,
+                            'widget': 0
+                        },
+                        "volume_bar_graph": {
+                            'title': 'Volume Movement',
+                            'id': 13,
+                            'col': 12,
+                            'api': '',
+                            'opt': self.chartOptions17,
+                            'widget': 0
+                        },
+                        "volume_productivity_graph": {
+                            'title': 'Production Vs Volume',
+                            'id': 13,
+                            'col': 6,
+                            'api': '',
+                            'opt': self.chartOptions18,
                             'widget': 0
                         }
                     };
@@ -320,14 +346,20 @@
                                     self.drop_sub_proj = this.value;
                                     self.drop_work_pack = self.wor_pac_sel.value;
                                     self.drop_sub_pack = self.sub_pac_sel.value;
+                        $('.day').addClass('active');
+                        $('.day').siblings().removeClass('active');
+
                             var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack +
                                 '&work_packet=' + self.drop_work_pack
                             var dateEntered = document.getElementById('select').value
+                            dateEntered = dateEntered.replace(' - ','to');
                             var from = dateEntered.split('to')[0].replace(' ','');
                             var to = dateEntered.split('to')[1].replace(' ','');
                             var placeholder = ''
+                            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                                    + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
                                 self.chart_render(result,self.project,self.location);
@@ -338,14 +370,20 @@
                                     self.drop_sub_proj = self.sub_pro_sel.value
                                     self.drop_work_pack = this.value;
                                     self.drop_sub_pack = self.sub_pac_sel.value;
+                        $('.day').addClass('active');
+                        $('.day').siblings().removeClass('active');
+
                             var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack +
                                 '&work_packet=' + self.drop_work_pack
                             var dateEntered = document.getElementById('select').value
+                            dateEntered = dateEntered.replace(' - ','to');
                             var from = dateEntered.split('to')[0].replace(' ','');
                             var to = dateEntered.split('to')[1].replace(' ','');
                             var placeholder = ''
+                            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                                    + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
                                 self.chart_render(result,self.project,self.location);
@@ -356,13 +394,19 @@
                                         self.drop_work_pack = self.wor_pac_sel.value;
                                         self.drop_sub_proj = self.sub_pro_sel.value;
                                         self.drop_sub_pack = this.value;
+                        $('.day').addClass('active');
+                        $('.day').siblings().removeClass('active');
+
                             var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack + '&work_packet=' + self.drop_work_pack
                             var dateEntered = document.getElementById('select').value
+                            dateEntered = dateEntered.replace(' - ','to');
                             var from = dateEntered.split('to')[0].replace(' ','');
                             var to = dateEntered.split('to')[1].replace(' ','');
                             var placeholder = ''
+                            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                                    + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
                                 self.chart_render(result,self.project,self.location);
@@ -377,13 +421,19 @@
                                         self.drop_work_pack = this.value;
                                         self.drop_sub_proj = 'undefined';
                                         self.drop_sub_pack = self.sub_pac_sel.value;
+                        $('.day').addClass('active');
+                        $('.day').siblings().removeClass('active');
+
                             var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack + '&work_packet=' + self.drop_work_pack
                             var dateEntered = document.getElementById('select').value
+                            dateEntered = dateEntered.replace(' - ','to');
                             var from = dateEntered.split('to')[0].replace(' ','');
                             var to = dateEntered.split('to')[1].replace(' ','');
                             var placeholder = ''
+                            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                                    + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
                                 self.chart_render(result,self.project,self.location);
@@ -398,17 +448,23 @@
                                             self.drop_sub_proj = 'undefined';
                                             self.drop_sub_pack = 'undefined';
                                             self.pack_clicked = self.drop_work_pack
+                        $('.day').addClass('active');
+                        $('.day').siblings().removeClass('active');
+
                                             var is_exist = self.pack_clicked.indexOf('&');
                                             if (is_exist > 0){
                                                 self.pack_clicked = self.pack_clicked.replace(' & ',' and ')
                                             }
                             var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack + '&work_packet=' + self.pack_clicked
                             var dateEntered = document.getElementById('select').value
+                            dateEntered = dateEntered.replace(' - ','to');
                             var from = dateEntered.split('to')[0].replace(' ','');
                             var to = dateEntered.split('to')[1].replace(' ','');
                             var placeholder = ''
+                            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                                    + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.chart_render(result,self.project,self.location);
 
@@ -422,13 +478,19 @@
                                         self.drop_sub_pack = this.value;
                                         self.drop_sub_proj = 'undefined';
                                         self.drop_work_pack;
+                        $('.day').addClass('active');
+                        $('.day').siblings().removeClass('active');
+
             var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack + '&work_packet=' + self.drop_work_pack
             var dateEntered = document.getElementById('select').value
+            dateEntered = dateEntered.replace(' - ','to');
             var from = dateEntered.split('to')[0].replace(' ','');
             var to = dateEntered.split('to')[1].replace(' ','');
             var placeholder = ''
+            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                    + '&center=' + self.location + '&type=' + 'day'  + final_work;
             $http({method:"GET", url:from_to_data}).success(function(result){
                             self.chart_render(result,self.project,self.location);
             });
@@ -474,6 +536,9 @@
                         $("#0").append(new Option("All"));
                         $("#1").append(new Option("All"));
                         $("#2").append(new Option("All"));
+                        $('.day').addClass('active');
+                        $('.day').siblings().removeClass('active');
+
                         if (self.project == "Wallmart - "){
                             var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + 'DellBilling - ' +
                                 '&center=' + 'Salem - ' + '&type=' + self.day_type;
@@ -481,7 +546,7 @@
                         else
                         {
                          var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + self.project +
-                          '&center=' + self.location + '&type=' + self.day_type;
+                          '&center=' + self.location + '&type=' + 'day';
                         }
                         self.tabData.state = JSON.parse("{}");
                         self.main_render(from_to_data)
@@ -509,6 +574,7 @@
                 }
                 var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack + '&work_packet=' + self.packet_clicked;
                 var dateEntered = document.getElementById('select').value
+                dateEntered = dateEntered.replace(' - ','to');
                 var from = dateEntered.split('to')[0].replace(' ','');
                 var to = dateEntered.split('to')[1].replace(' ','');
                 var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
@@ -634,7 +700,13 @@ plotOptions: {
                             var addition = '&project=' + pro + '&center=' + loc;
                             console.log(e.target.series.name);
                             var productivity_graph ='/api/chart_data/?'
-                            $http.get( productivity_graph+ 'packet=' + e.target.series.name + '&date=' + e.target.category +
+                                                 var packet_clicked = e.target.series.name;
+                                                 var is_exist = packet_clicked.indexOf('&');
+                                                 if (is_exist > 0){
+                                                    packet_clicked = packet_clicked.replace(' & ',' and ')
+                                                 }
+
+                            $http.get( productivity_graph+ 'packet=' + packet_clicked + '&date=' + e.target.category +
                              '&type=' + 'External' + addition).success(
                             function(data, status)
                                 {
@@ -675,7 +747,13 @@ plotOptions: {
                             var addition = '&project=' + pro + '&center=' + loc;
                             console.log(e.target.series.name);
                             var productivity_graph ='/api/chart_data/?'
-                            $http.get( productivity_graph+ 'packet=' + e.target.series.name + '&date=' + e.target.category +
+                                                 var packet_clicked = e.target.series.name;
+                                                 var is_exist = packet_clicked.indexOf('&');
+                                                 if (is_exist > 0){
+                                                    packet_clicked = packet_clicked.replace(' & ',' and ')
+                                                 }
+
+                            $http.get( productivity_graph+ 'packet=' + packet_clicked + '&date=' + e.target.category +
                              '&type=' + 'Internal' + addition).success(
                             function(data, status)
                                 {
@@ -709,6 +787,37 @@ plotOptions: {
                             var addition = '&project=' + pro + '&center=' + loc;
                             console.log(e.target.name);
                             var productivity_bar_graph ='/api/chart_data/?';
+                                                 var packet_clicked = e.target.series.name;
+                                                 var is_exist = packet_clicked.indexOf('&');
+                                                 if (is_exist > 0){
+                                                    packet_clicked = packet_clicked.replace(' & ',' and ')
+                                                 }
+
+                            var dates_list = self.get_date();
+                            //var dates_list = [self.start,self.end];
+                            $http.get( productivity_bar_graph + 'packet=' + packet_clicked + '&date=' + e.target.category
+                             + '&type=' + 'Productivity_Bar'+addition).success(
+                            function(data, status)
+                                {
+                                    $('#myModal').modal('show');
+                                    self.names = data.result.data;
+                                    self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
+                                    self.chart_type = data.result.type;
+                                    console.log(self.names);
+                                }).error(function(error){ console.log("error")});
+                            }
+                            });
+                            angular.extend(self.chartOptions17, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date
+                            },
+                            series: self.high_data_gener[0].volume_graphs.bar_data
+                            });
+                            angular.extend(self.chartOptions17.plotOptions.series.point.events,{
+                            select: function(e) {
+                            var addition = '&project=' + pro + '&center=' + loc;
+                            console.log(e.target.name);
+                            var productivity_bar_graph ='/api/chart_data/?';
                             var dates_list = self.get_date();
                             $http.get( productivity_bar_graph + 'packet=' + e.target.series.name + '&date=' + e.target.category
                              + '&type=' + 'Productivity_Bar'+addition).success(
@@ -722,6 +831,53 @@ plotOptions: {
                                 }).error(function(error){ console.log("error")});
                             }
                             });
+angular.extend(self.chartOptions18, {
+                                xAxis: {
+                                    categories: self.high_data_gener[0].data.date,
+                                    title: {
+                                        text: '',
+                                    }
+                                },
+                                plotOptions: {
+                                    series : {
+                                        allowPointSelect: true,
+                                        cursor: 'pointer',
+                                        point: {
+                                            events:{
+                                             select: function(e) {
+
+                                             var addition = '&project=' +pro + '&center=' +loc;
+                                             console.log(e.target.series.name);
+                                             var productivity_graph ='/api/chart_data/?'
+                                             var packet_clicked = e.target.series.name;
+                                             var is_exist = packet_clicked.indexOf('&');
+                                             if (is_exist > 0){
+                                                packet_clicked = packet_clicked.replace(' & ',' and ')
+                                             }
+                            $http.get( productivity_graph+ 'packet=' + packet_clicked + '&date=' + e.target.category +
+                            '&type=' + 'Production' + addition).success(
+                            function(data, status)
+                                {
+
+                                    $('#myModal').modal('show');
+                                    self.names = data.result.data;
+                                    self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
+                                    self.chart_type = data.result.type;
+                                    console.log(self.names);
+                                }).error(function(error){ console.log("error")});
+
+                        }
+                    }
+                    }
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+               series: self.high_data_gener[0].volume_graphs.line_data
+             });
                             angular.extend(self.chartOptions5,{
                                 series: [{
                                     name: '',
@@ -734,9 +890,15 @@ plotOptions: {
                             select: function(e) {
                             var addition = '&project=' + pro + '&center=' + loc;
                             console.log(e.target.name);
+                            var packet_clicked = e.target.name;
+                            var is_exist = packet_clicked.indexOf('&');
+                            if (is_exist > 0){
+                                packet_clicked = packet_clicked.replace(' & ',' and ')
+                            }
                             var internal_bar_graph ='/api/chart_data/?';
                             var dates_list = self.get_date();
-                            $http.get( internal_bar_graph + 'packet=' + e.target.name + '&from=' + dates_list[0] + '&to=' + dates_list[1]
+                            //var dates_list = [self.start,self.end];
+                            $http.get( internal_bar_graph + 'packet=' + packet_clicked + '&from=' + dates_list[0] + '&to=' + dates_list[1]
                              + '&type=' + 'Internal_Bar_Pie' + addition).success(
                             function(data, status)
                                 {
@@ -762,7 +924,13 @@ plotOptions: {
                             console.log(e.target.name);
                             var external_bar_graph ='/api/chart_data/?';
                             var dates_list = self.get_date();
-                            $http.get( external_bar_graph + 'packet=' + e.target.name + '&from=' + dates_list[0] + '&to=' + dates_list[1]
+                            var packet_clicked = e.target.name;
+                            var is_exist = packet_clicked.indexOf('&');
+                            if (is_exist > 0){
+                                packet_clicked = packet_clicked.replace(' & ',' and ')
+                            }
+                            //var dates_list = [self.start,self.end];
+                            $http.get( external_bar_graph + 'packet=' + packet_clicked + '&from=' + dates_list[0] + '&to=' + dates_list[1]
                              + '&type=' + 'External_Bar_Pie'+ addition).success(
                             function(data, status)
                                 {
@@ -783,6 +951,7 @@ plotOptions: {
                             console.log(e.target.name);
                             var internal_bar_graph ='/api/chart_data/?';
                             var dates_list = self.get_date();
+                            //var dates_list = [self.start,self.end];
                             var packet_clicked = e.target.name;
                             var is_exist = packet_clicked.indexOf('&');
                             if (is_exist > 0){
@@ -826,6 +995,7 @@ plotOptions: {
                                 packet_clicked = packet_clicked.replace(' & ',' and ')
                             }
                             var dates_list = self.get_date();
+                            //var dates_list = [self.start,self.end];
                             $http.get( external_bar_graph + 'packet=' + packet_clicked + '&from=' + dates_list[0] + '&to=' + dates_list[1]
                              + '&type=' + 'External_Bar' + addition).success(
                             function(data, status)
@@ -931,13 +1101,17 @@ plotOptions: {
             }
             self.get_date = function(){
                 var dateEntered = document.getElementById('select').value;
+                dateEntered = dateEntered.replace(' - ','to');
                 var from = dateEntered.split('to')[0].replace(' ','');
                 var to = dateEntered.split('to')[1].replace(' ','');
                 return [from,to];
             };
-            self.click = function(){
+            self.click = function(start,end){
+                self.start = start.format('YYYY-MM-DD');
+                self.end = end.format('YYYY-MM-DD');
                 self.showLoading();
-                var dates_list = self.get_date();
+                //var dates_list = self.get_date();
+                var dates_list = [self.start,self.end];
                 self.wor_pac_sel_two = document.getElementById("0").value;
                 self.sub_pac_sel_two = document.getElementById("1").value;
                 self.sub_pro_sel_two = 'undefined';
@@ -948,7 +1122,10 @@ plotOptions: {
                 }
                 var final_work =  '&sub_project=' + self.sub_pro_sel_two + '&sub_packet=' + self.sub_pac_sel_two + '&work_packet=' + self.packet_clicked;
                 var from_to_data = from_to + 'from=' + dates_list[0] + '&to=' + dates_list[1] + '&project=' + self.project
-                         + '&center=' + self.location + '&type=' + self.day_type + final_work;
+                         + '&center=' + self.location + '&type=' + 'day' + final_work;
+                $('.day').addClass('active');
+                $('.day').siblings().removeClass('active');
+
                 /*var from_to_data = from_to + 'from=' + dates_list[0] + '&to=' + dates_list[1] + '&project=' + self.project
                          + '&center=' + self.location + '&type=' + self.day_type;*/
                 $http({method:"GET", url:from_to_data}).success(function(result){
@@ -961,12 +1138,12 @@ plotOptions: {
             var wor_pac = self.sel_pack[2];
             var final_work =  '&sub_project=' + sub_pro + '&sub_packet=' + sub_pac + '&work_packet=' + wor_pac
             var dateEntered = document.getElementById('select').value
+            dateEntered = dateEntered.replace(' - ','to');
             var from = dateEntered.split('to')[0].replace(' ','');
             var to = dateEntered.split('to')[1].replace(' ','');
             var placeholder = ''
             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                     + '&center=' + self.location + '&type=' + self.day_type  + final_work;
-
 
             $http({method:"GET", url:from_to_data}).success(function(result){
                 self.high_data_gener = [];
@@ -1068,6 +1245,53 @@ plotOptions: {
                                     data: self.high_data_gener[0].external_accuracy_graph
                                 }]
                             });
+angular.extend(self.chartOptions18, {
+                                xAxis: {
+                                    categories: self.high_data_gener[0].data.date,
+                                    title: {
+                                        text: '',
+                                    }
+                                },
+                                plotOptions: {
+                                    series : {
+                                        allowPointSelect: true,
+                                        cursor: 'pointer',
+                                        point: {
+                                            events:{
+                                             select: function(e) {
+
+                                             var addition = '&project=' +pro + '&center=' +loc;
+                                             console.log(e.target.series.name);
+                                             var productivity_graph ='/api/chart_data/?'
+                                             var packet_clicked = e.target.series.name;
+                                             var is_exist = packet_clicked.indexOf('&');
+                                             if (is_exist > 0){
+                                                packet_clicked = packet_clicked.replace(' & ',' and ')
+                                             }
+                            $http.get( productivity_graph+ 'packet=' + packet_clicked + '&date=' + e.target.category +
+                            '&type=' + 'Production' + addition).success(
+                            function(data, status)
+                                {
+
+                                    $('#myModal').modal('show');
+                                    self.names = data.result.data;
+                                    self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
+                                    self.chart_type = data.result.type;
+                                    console.log(self.names);
+                                }).error(function(error){ console.log("error")});
+
+                        }
+                    }
+                    }
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+               series: self.high_data_gener[0].productivity_data
+             });
                             angular.extend(self.chartOptions6.yAxis.title,{
                                 text: ''
                             });
@@ -1209,6 +1433,9 @@ plotOptions: {
             xAxis: {
                 type: 'category'
             },
+            legend: {
+                enabled: false
+            },
             yAxis: {
                 min:'',
                 max:'',
@@ -1308,6 +1535,9 @@ plotOptions: {
             },
             xAxis: {
                 type: 'category'
+            },
+            legend: {
+                enabled: false
             },
             yAxis: {
                 min:'',
@@ -1423,6 +1653,59 @@ plotOptions: {
                 enabled: false
                },
             };
+            self.chartOptions17 = {
+            chart: {
+                type: 'column',
+                backgroundColor: "transparent"
+             },
+            title: {
+                text: ''
+            },
+            subtitle: {
+                text: ''
+            },
+            yAxis: {
+                gridLineColor: 'a2a2a2',
+                min: 0,
+                title: {
+                    text: ''
+                }
+            },
+            plotOptions:{
+                series:{
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                point: {
+                    events:{
+                    }
+                }
+                }
+            }
+            };
+            self.chartOptions18 = {
+                chart : {
+                 backgroundColor: "transparent"
+                },
+                               yAxis: {
+                gridLineColor: 'a2a2a2',
+                min: 0,
+                title: {
+                 text: '',
+                 align: 'high'
+                },
+                labels: {
+                 overflow: 'justify'
+                }
+               },
+
+               tooltip: {
+                valueSuffix: ''
+               },
+               credits: {
+                enabled: false
+               },
+            };
+
             //self.hideLoading();
             self.names;
             self.names_2;
@@ -1441,6 +1724,8 @@ plotOptions: {
             self.top_employee_details = '';
             self.firstDate;
             self.lastDate;
+            self.start;
+            self.end;
             }],
 
             "bindings": {

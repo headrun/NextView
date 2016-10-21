@@ -11,12 +11,17 @@ class CenterAdmin(admin.ModelAdmin):
 admin.site.register(Center,CenterAdmin)
 
 class TeamleadAdmin(admin.ModelAdmin):
-    list_display = ['name']
+    list_display = ['name','project','center']
+    list_filter = ('project','center')
 admin.site.register(TeamLead,TeamleadAdmin)
 
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ['name']
 admin.site.register(Customer,CustomerAdmin)
+
+class HeadcountAdmin(admin.ModelAdmin):
+    list_display = ['work_packet','sub_packet','from_date','to_date','billable_agent']
+admin.site.register(Headcount,HeadcountAdmin)
 
 class CentermanagerAdmin(admin.ModelAdmin):
     list_display = ['name']
@@ -33,19 +38,22 @@ admin.site.register(RawTable,RawtableAdmin)
 
 
 class RawtableAuthoringAdmin(admin.ModelAdmin):
-    list_display = ['work_packet','sub_project','sub_packet','per_day','employee_id','norm','date','project','center']
-    list_filter = ('project',)
+    list_display = ['sub_project','work_packet','sub_packet','employee_id','per_day','norm','date','project','center','sheet_name']
+    list_filter = ('project','center')
+    list_display_links = ('work_packet',)
 admin.site.register(RawtableAuthoring,RawtableAuthoringAdmin)
 
 
 class InternalerrorsAdmin(admin.ModelAdmin):
     list_display = ['work_packet','sub_project','sub_packet','audited_errors','total_errors','date','employee_id']
     list_filter = ('sub_project','work_packet','sub_packet','project','center')
+    list_display_links = ('work_packet',)
 admin.site.register(Internalerrors,InternalerrorsAdmin)
 
 class InternalerrorsAuthoringAdmin(admin.ModelAdmin):
-    list_display = ['work_packet','sub_project','sub_packet','audited_errors','total_errors','date','employee_id','project','center','sheet_name']
+    list_display = ['sub_project','work_packet','sub_packet','employee_id','audited_errors','total_errors','date','project','center','sheet_name']
     list_filter = ('project',)
+    list_display_links = ('work_packet',)
 admin.site.register(InternalerrorsAuthoring,InternalerrorsAuthoringAdmin)
 
 
@@ -55,8 +63,10 @@ class ExternalerrorsAdmin(admin.ModelAdmin):
 admin.site.register(Externalerrors,ExternalerrorsAdmin)
 
 class ExternalerrorsAuthoringAdmin(admin.ModelAdmin):
-    list_display = ['work_packet', 'sub_project', 'sub_packet', 'audited_errors', 'total_errors', 'date', 'employee_id','project', 'center', 'sheet_name']
+    #list_display = ['work_packet', 'sub_project', 'sub_packet', 'audited_errors', 'total_errors', 'date', 'employee_id','project', 'center', 'sheet_name']
+    list_display = ['sub_project','work_packet','sub_packet','employee_id','audited_errors','total_errors','date','project','center','sheet_name']
     list_filter = ('project',)
+    list_display_links = ('work_packet',)
 admin.site.register(ExternalerrorsAuthoring,ExternalerrorsAuthoringAdmin)
 
 
@@ -76,10 +86,12 @@ admin.site.register(TargetsAuthoring,TargetsAuthoringAdmin)
 
 class WorktrackAdmin(admin.ModelAdmin):
     list_display = ['work_packet', 'opening', 'received', 'completed']
+    list_filter = ['project']
 admin.site.register(Worktrack,WorktrackAdmin)
 
 class WorktrackAuthoringAdmin(admin.ModelAdmin):
     list_display = ['work_packet','sub_project','sub_packet']
+    list_filter = ['project']
 admin.site.register(WorktrackAuthoring,WorktrackAuthoringAdmin)
 
 

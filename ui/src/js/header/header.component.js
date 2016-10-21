@@ -16,10 +16,12 @@
                     this.user.role = "Team Lead";
                 }
                 if (this.user.roles.indexOf("customer") >= 0) {
+                    $('#admin_but').hide();
                     this.user.role = "Customer";
                 }
                 if (this.user.roles.indexOf("center_manager") >= 0) {
                     $('#fileupload').hide();
+                    $('#admin_but').hide();
                     this.user.role = "Center Manager";
                 }
                 if (this.user.roles.indexOf("nextwealth_manager") >= 0) {
@@ -59,17 +61,25 @@
                     }
                     var map_list = result.result.list;
                     self.mapping_list = map_list;
+                    if (result.result.list[0] != "none"){
+                        var option = map_list[1];
+                        self.select_option = option.split(' - ')[1];
+                    }
                 }
                 if (result.result['role'] == "center_manager")
                     {
                     var map_list = result.result.list;
                     self.mapping_list = map_list;
+                    var option = map_list[1];
+                    self.select_option = option.split(' - ')[1];
                     }
 
                 if (result.result['role'] == "nextwealth_manager")
                     {
                     var map_list = result.result.list;
                     self.mapping_list = map_list;
+                    var option = map_list[1];
+                    self.select_option = option.split(' - ')[1];
                     }
 
 
@@ -79,6 +89,7 @@
               self.center = '';
               self.ppp = '';
               self.mapping_list = '';
+              self.select_option = '';
               self.center_list = [];
               self.cen_pro_name = {};
              }

@@ -175,37 +175,19 @@ def project(request):
         details = {}
         select_list = []
         layout_list = []
+        lay_list = json.loads(str(Customer.objects.filter(name_id=request.user.id).values_list('layout')[0][0]))
+        layout_list.append({'layout': lay_list})
         center_list = Customer.objects.filter(name_id=request.user.id).values_list('center')
         project_list = Customer.objects.filter(name_id=request.user.id).values_list('project')
-        """
-        sub_pro_level = RawTable.objects.filter(project=project_list[0][0], center=center_list[0][0]).values_list('sub_project').distinct()
-        work_pac_level = RawTable.objects.filter(project=project_list[0][0], center=center_list[0][0]).values_list('work_packet').distinct()
-        sub_pac_level = RawTable.objects.filter(project=project_list[0][0], center=center_list[0][0]).values_list('sub_packet').distinct() 
-        final_details['sub_project']=0
-        final_details['work_packet']=0
-        final_details['sub_packet']=0
-        if sub_pro_level[0][0] != '':
-            final_details['sub_project']=1
-        if work_pac_level[0][0] != '':
-            final_details['work_packet']=1
-        if sub_pac_level[0][0] != '':
-            final_details['sub_packet']=1
-        """
         if (len(center_list) & len(project_list)) == 1:
             select_list.append('none')
-        """
-        if len(project_list) > 1:
-            for project in project_list:
-                project_name = str(Project.objects.filter(id=project[0])[0])
-                select_list.append(project_name)
-        """
         if len(center_list) < 2:
             center_name = str(Center.objects.filter(id=center_list[0][0])[0])
             for project in project_list:
                 project_name = str(Project.objects.filter(id=project[0])[0])
-                lay_list = json.loads(str(Project.objects.filter(id=project[0]).values_list('layout')[0][0]))
+                #lay_list = json.loads(str(Project.objects.filter(id=project[0]).values_list('layout')[0][0]))
                 vari = center_name + ' - ' + project_name
-                layout_list.append({vari:lay_list})
+                #layout_list.append({vari:lay_list})
                 select_list.append(vari)
         elif len(center_list) >= 2:
             for center in center_list:
@@ -238,7 +220,6 @@ def latest_dates(request,prj_id):
         result['to_date'] = '2016-08-14'
     return result
 
-
 def redis_insertion_final(prj_obj,center_obj,dates_list,key_type,level_structure):
     data_dict = {}
     prj_name = prj_obj.name
@@ -250,6 +231,8 @@ def redis_insertion_final(prj_obj,center_obj,dates_list,key_type,level_structure
         volumes_list = Internalerrors.objects.filter(project=prj_obj, center=center_obj).values('sub_project', 'work_packet', 'sub_packet').distinct()
     if key_type == 'External':
         volumes_list = Externalerrors.objects.filter(project=prj_obj, center=center_obj).values('sub_project', 'work_packet', 'sub_packet').distinct()
+    if key_type == 'WorkTrack':
+        volumes_list = Worktrack.objects.filter(project=prj_obj, center=center_obj).values('sub_project', 'work_packet', 'sub_packet').distinct()
     for date in dates_list:
         date_is = datetime.datetime.strptime(date,'%Y-%m-%d').date()
         for row_record_dict in volumes_list:
@@ -298,6 +281,35 @@ def redis_insertion_final(prj_obj,center_obj,dates_list,key_type,level_structure
                 value_dict['total_errors'] = str(total_errors['total_errors__sum'])
                 print value_dict,redis_key
                 data_dict[redis_key] = value_dict
+            if key_type == 'WorkTrack':
+                redis_key = '{0}_{1}_{2}_{3}_worktrack'.format(prj_name, center_name, final_work_packet,str(date_is))
+                closing_balance = Worktrack.objects.filter(**query_set).values_list('closing_balance')
+                received = Worktrack.objects.filter(**query_set).values_list('received')
+                completed = Worktrack.objects.filter(**query_set).values_list('completed')
+                opening = Worktrack.objects.filter(**query_set).values_list('opening')
+                non_workable_count = Worktrack.objects.filter(**query_set).values_list('non_workable_count')
+                try:
+                    value_dict['closing_balance'] = str(closing_balance[0][0])
+                except:
+                    value_dict['closing_balance'] = ''
+                try:
+                    value_dict['completed'] = str(completed[0][0])
+                except:
+                    value_dict['completed'] = ''
+                try:
+                    value_dict['opening'] = str(opening[0][0])
+                except:
+                    value_dict['opening'] = ''
+                try:
+                    value_dict['non_workable_count'] = str(non_workable_count[0][0])
+                except:
+                    value_dict['non_workable_count'] = ''
+                try:
+                    value_dict['received'] = int(received[0][0])
+                except:
+                    value_dict['received'] = ''
+                print value_dict, redis_key
+                data_dict[redis_key] = value_dict
 
     print data_dict, all_dates
     conn = redis.Redis(host="localhost", port=6379, db=0)
@@ -306,7 +318,6 @@ def redis_insertion_final(prj_obj,center_obj,dates_list,key_type,level_structure
         current_keys.append(key)
         conn.hmset(key, value)
     return "hai"
-
 
 def redis_insert(prj_obj,center_obj,dates_list,key_type):
     wp_count,sub_pct_count,sub_prj_count = 0,0,0
@@ -324,6 +335,11 @@ def redis_insert(prj_obj,center_obj,dates_list,key_type):
         sub_prj = [sub_prj_count + 1 for key in level_herarchy_packets if len(key['sub_project'])]
     if key_type == 'External':
         level_herarchy_packets = Externalerrors.objects.filter(project=prj_obj, center=center_obj).values('sub_project', 'work_packet', 'sub_packet').distinct()
+        wk_packet = [wp_count + 1 for key in level_herarchy_packets if len(key['work_packet'])]
+        sub_packet = [sub_pct_count + 1 for key in level_herarchy_packets if len(key['sub_packet'])]
+        sub_prj = [sub_prj_count + 1 for key in level_herarchy_packets if len(key['sub_project'])]
+    if key_type == 'WorkTrack':
+        level_herarchy_packets = Worktrack.objects.filter(project=prj_obj, center=center_obj).values('sub_project','work_packet','sub_packet').distinct()
         wk_packet = [wp_count + 1 for key in level_herarchy_packets if len(key['work_packet'])]
         sub_packet = [sub_pct_count + 1 for key in level_herarchy_packets if len(key['sub_packet'])]
         sub_prj = [sub_prj_count + 1 for key in level_herarchy_packets if len(key['sub_project'])]
@@ -348,8 +364,6 @@ def redis_insert(prj_obj,center_obj,dates_list,key_type):
     for level_key in level_dict:
         final_inserting = redis_insertion_final(prj_obj, center_obj, dates_list, key_type, level_dict[level_key])
     return "completed"
-
-
 
 def redis_insert_old(prj_obj,center_obj,dates_list,key_type):
     prj_name = prj_obj.name
@@ -562,6 +576,7 @@ def upload(request):
     prj_obj = Project.objects.filter(id=teamleader_obj[0])[0]
     prj_name= prj_obj.name
     center_obj = Center.objects.filter(id=teamleader_obj[1])[0]
+    import pdb;pdb.set_trace()
     fname = request.FILES['myfile']
     var = fname.name.split('.')[-1].lower()
     if var not in ['xls', 'xlsx', 'xlsb']:
@@ -771,8 +786,6 @@ def sheet_upload_one(prj_obj,center_obj,teamleader_obj,key,one_sheet_data):
                                      center=center_obj, error_type=external_errors.get('error_name',''))
             new_can.save()
 
-
-
 def upload_new(request):
     teamleader_obj_name = TeamLead.objects.filter(name_id=request.user.id)[0]
     teamleader_obj = TeamLead.objects.filter(name_id=request.user.id).values_list('project_id','center_id')[0]
@@ -850,14 +863,18 @@ def upload_new(request):
                     required_filed = map_value.split('#<>#')
                     if len(required_filed) >= 2 and required_filed != '':
                         other_fileds.append(required_filed[1])
-        other_fileds = filter(None,other_fileds)
-        """worktrack_map_query = WorktrackAuthoring.objects.filter(project=prj_obj, center=center_obj)[0].__dict__
+        worktrack_map_query = WorktrackAuthoring.objects.filter(project=prj_obj, center=center_obj)[0].__dict__
+
         for map_key,map_value in worktrack_map_query.iteritems():
             if map_value != '' and map_key not in mapping_ignores:
-                worktrack_mapping[map_key]= map_value.lower()"""
+                worktrack_mapping[map_key]= map_value.lower()
+                if '#<>#' in map_value:
+                    required_filed = map_value.split('#<>#')
+                    other_fileds.append(required_filed[1])
+        other_fileds = filter(None, other_fileds)
         db_check = str(Project.objects.filter(name=prj_obj.name,center=center_obj).values_list('project_db_handling',flat=True)[0])
         #sheet_count = Authoringtable.objects.filter(project=prj_obj, center=center_obj).values_list('sheet_name',flat=True).distinct()
-        raw_table_dataset,internal_error_dataset,external_error_dataset = {},{},{}
+        raw_table_dataset, internal_error_dataset, external_error_dataset, work_track_dataset = {}, {}, {}, {}
         for key,value in sheet_index_dict.iteritems():
             one_sheet_data = {}
             prod_date_list,internal_date_list,external_date_list=[],[],[]
@@ -872,7 +889,7 @@ def upload_new(request):
                 for column, col_idx in sheet_headers:
                     cell_data = get_cell_data(open_sheet, row_idx, col_idx)
                     #column_name = mapping_table.get(column, '')
-                    if column in ["date", "from date","to date","audited date"]:
+                    if column in ["date", "from date","to date","audited date","to date","from date"]:
                         cell_data = xlrd.xldate_as_tuple(int(cell_data.split('.')[0]), 0)
                         cell_data = '%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
                         customer_data[column] = ''.join(cell_data)
@@ -881,14 +898,26 @@ def upload_new(request):
                     #elif column !="date" and column in mapping_table.keys():
                         #customer_data[column] = ''.join(cell_data)
 
-                if customer_data.has_key('date'):
+                if customer_data.has_key('date') :
                     if not raw_table_dataset.has_key(customer_data['date']):
                         raw_table_dataset[str(customer_data['date'])]={}
                     if not internal_error_dataset.has_key(customer_data['date']):
                         internal_error_dataset[str(customer_data['date'])]={}
                     if not external_error_dataset.has_key(customer_data['date']):
                         external_error_dataset[str(customer_data['date'])]={}
+                    if not work_track_dataset.has_key(customer_data['date']):
+                        work_track_dataset[str(customer_data['date'])]={}
                     date_name = 'date'
+                elif customer_data.has_key('to date') :
+                    if not raw_table_dataset.has_key(customer_data['to date']):
+                        raw_table_dataset[str(customer_data['to date'])]={}
+                    if not internal_error_dataset.has_key(customer_data['to date']):
+                        internal_error_dataset[str(customer_data['to date'])]={}
+                    if not external_error_dataset.has_key(customer_data['to date']):
+                        external_error_dataset[str(customer_data['to date'])]={}
+                    if not work_track_dataset.has_key(customer_data['to date']):
+                        work_track_dataset[str(customer_data['to date'])]={}
+                    date_name = 'to date'
                 else:
                     if not internal_error_dataset.has_key(customer_data['audited date']):
                         internal_error_dataset[str(customer_data['audited date'])]={}
@@ -1047,13 +1076,74 @@ def upload_new(request):
                                 del local_externalerror_data[delete_key]
                                 if 'not_applicable' not in local_externalerror_data.values():
                                     external_error_dataset[str(customer_data[date_name])][emp_key] = local_externalerror_data
-                    print local_externalerror_data
+
+                if key == sheet_names.get('worktrack_sheet', ''):
+                    local_worktrack_data = {}
+                    for raw_key, raw_value in worktrack_mapping.iteritems():
+                        if '#<>#' in raw_value:
+                            checking_values = raw_value.split('#<>#')
+                            if customer_data.has_key(checking_values[0].lower()):
+                                if customer_data[checking_values[0].lower()].lower() == checking_values[1].lower():
+                                    local_worktrack_data[raw_key] = customer_data[checking_values[2].lower()]
+                                else:
+                                    local_worktrack_data[raw_key] = 'not_applicable'
+
+                        elif ('#<>#' not in raw_value) and (raw_value in customer_data.keys()):
+                            local_worktrack_data[raw_key] = customer_data[raw_value]
+
+                    emp_key = '{0}_{1}_{2}_{3}'.format(local_worktrack_data.get('sub_project', 'NA'),
+                                                       local_worktrack_data.get('work_packet', 'NA'),
+                                                       local_worktrack_data.get('sub_packet', 'NA'),
+                                                       local_worktrack_data.get('employee_id', 'NA'))
+                    if 'not_applicable' not in local_worktrack_data.values():
+                        if work_track_dataset.has_key(str(customer_data[date_name])):
+                            if work_track_dataset[str(customer_data[date_name])].has_key(emp_key):
+                                for extr_key, extr_value in local_worktrack_data.iteritems():
+                                    if extr_key not in work_track_dataset[str(customer_data[date_name])][emp_key].keys():
+                                        work_track_dataset[str(customer_data[date_name])][emp_key][extr_key] = extr_value
+                                    else:
+                                        if (extr_key == 'total_errors') or (extr_key == 'audited_errors'):
+                                            try:
+                                                extr_value = int(float(extr_value))
+                                            except:
+                                                extr_value = 0
+                                            try:
+                                                dataset_value = int(float(
+                                                    work_track_dataset[str(customer_data[date_name])][emp_key][extr_key]))
+                                            except:
+                                                dataset_value = 0
+                                            if db_check == 'aggregate':
+                                                work_track_dataset[str(customer_data[date_name])][emp_key][extr_key] = extr_value + dataset_value
+                                            elif db_check == 'update':
+                                                work_track_dataset[str(customer_data[date_name])][emp_key][extr_key] = extr_value
+                            else:
+                                work_track_dataset[str(customer_data[date_name])][emp_key] = local_worktrack_data
+                    else:
+                        na_key = [key_value for key_value in local_worktrack_data.values() if key_value == 'not_applicable']
+                        if (len(na_key) == 1) and (sheet_names.get('external_error_sheet', '') == sheet_names.get('internal_error_sheet','')) and(sheet_names.get('external_error_sheet', '') == sheet_names.get('raw_table_sheet', '')):
+                            if external_error_dataset[str(customer_data[date_name])].has_key(emp_key):
+                                for extr_key, extr_value in local_worktrack_data.iteritems():
+                                    if extr_key not in work_track_dataset[str(customer_data[date_name])][emp_key].keys():
+                                        work_track_dataset[str(customer_data[date_name])][emp_key][extr_key] = extr_value
+                            else:
+                                for intr_key, intr_value in local_worktrack_data.iteritems():
+                                    if intr_value == 'not_applicable':
+                                        delete_key = intr_key
+                                del local_worktrack_data[delete_key]
+                                if 'not_applicable' not in local_worktrack_data.values():
+                                    work_track_dataset[str(customer_data[date_name])][emp_key] = local_worktrack_data
+                    print local_worktrack_data
+
+        #import pdb;pdb.set_trace()
         for date_key,date_value in internal_error_dataset.iteritems():
             for emp_key,emp_value in date_value.iteritems():
                 internalerror_insert = internalerror_query_insertion(emp_value, prj_obj, center_obj,teamleader_obj_name,db_check)
         for date_key,date_value in external_error_dataset.iteritems():
             for emp_key,emp_value in date_value.iteritems():
                 externalerror_insert = externalerror_query_insertion(emp_value, prj_obj, center_obj,teamleader_obj_name,db_check)
+        for date_key,date_value in work_track_dataset.iteritems():
+            for emp_key,emp_value in date_value.iteritems():
+                externalerror_insert = worktrack_query_insertion(emp_value, prj_obj, center_obj,teamleader_obj_name,db_check)
 
         for date_key,date_value in raw_table_dataset.iteritems():
             for emp_key,emp_value in date_value.iteritems():
@@ -1069,17 +1159,76 @@ def upload_new(request):
             insert = redis_insert(prj_obj, center_obj, internal_error_dataset.keys(), key_type='Internal')
         if len(external_error_dataset):
             insert = redis_insert(prj_obj, center_obj, external_error_dataset.keys(), key_type='External')
+        if len(work_track_dataset) > 0:
+            insert = redis_insert(prj_obj, center_obj, work_track_dataset.keys(), key_type='WorkTrack')
         var ='hello'
         return HttpResponse(var)
 
+def worktrack_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, db_check):
+    worktrac_date_list = customer_data['date']
+    check_query = Worktrack.objects.filter(project=prj_obj, sub_project=customer_data.get('sub_project', ''),
+                                          work_packet=customer_data['work_packet'],
+                                          sub_packet=customer_data.get('sub_packet', ''),
+                                          date=customer_data['date'],
+                                          center=center_obj).values('opening','received', 'non_workable_count','completed','closing_balance')
 
+    try:
+        opening = int(float(customer_data['opening']))
+    except:
+        opening = 0
+    try:
+        received = int(float(customer_data['received']))
+    except:
+        received = 0
+    try:
+        non_workable_count = int(float(customer_data['non_workable_count']))
+    except:
+        non_workable_count = 0
+    try:
+        completed = int(float(customer_data['completed']))
+    except:
+        completed = 0
+    try:
+        closing_balance = int(float(customer_data['closing_balance']))
+    except:
+        closing_balance = 0
 
+    if len(check_query) == 0:
+        new_can = Worktrack(sub_project=customer_data.get('sub_project', ''),
+                            work_packet=customer_data['work_packet'],
+                            sub_packet=customer_data.get('sub_packet', ''), date=customer_data['date'],
+                            opening=opening,
+                            received = received,
+                            non_workable_count = non_workable_count,
+                            completed = completed,
+                            closing_balance = closing_balance,
+                            project=prj_obj, center=center_obj)
+        if new_can:
+            try:
+                print customer_data
+                new_can.save()
+            except:
+                print "error in internal_table_query"
 
-
-
-
-
-
+    if len(check_query) > 0:
+        if db_check == 'aggregate':
+            opening = opening + int(check_query[0]['opening'])
+            received = received + int(check_query[0]['received'])
+            non_workable_count = non_workable_count + int(check_query[0]['non_workable_count'])
+            completed = completed + int(check_query[0]['completed'])
+            closing_balance = closing_balance + int(check_query[0]['closing_balance'])
+            new_can_agr = Worktrack.objects.filter(id=int(check_query[0]['id'])).update(opening=opening,
+                            received = received,
+                            non_workable_count = non_workable_count,
+                            completed = completed,
+                            closing_balance = closing_balance,)
+        elif db_check == 'update':
+            new_can_upd = Internalerrors.objects.filter(id=int(check_query[0]['id'])).update(opening=opening,
+                            received = received,
+                            non_workable_count = non_workable_count,
+                            completed = completed,
+                            closing_balance = closing_balance,)
+    return worktrac_date_list
 
 def user_data(request):
     user_group = request.user.groups.values_list('name',flat=True)[0]
@@ -1602,7 +1751,7 @@ def internal_extrnal_graphs(request,date_list,prj_id,center_obj,packet_sum_data,
     prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
     center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
     final_internal_data = internal_extrnal_graphs_same_formula(request, date_list, prj_id, center_obj,level_structure_key,err_type='Internal')
-    if prj_name[0] in ['DellBilling','DellCoding','Ujjivan']:
+    if prj_name[0] in ['DellBilling','DellCoding','Ujjivan','Mobius']:
         final_external_data = internal_extrnal_graphs_same_formula(request, date_list, prj_id, center_obj,level_structure_key,err_type='External')
         final_internal_data.update(final_external_data)
         return final_internal_data
@@ -1744,15 +1893,22 @@ def day_week_month(request,dwm_dict,prj_id,center,work_packets,level_structure_k
         final_external_accuracy_timeline = {}
         external_accuracy_timeline = {}
         #final_external_accuracy_timeline = {}
+        month_names = []
         final_productivity = {}
         productivity_list={}
         all_internal_error_accuracy = {}
         all_external_error_accuracy = {}
+        data_date = []
         for month_key,month_values in dwm_dict.iteritems():
             for month_name,month_dates in month_values.iteritems():
+                data_date.append(month_dates[0] + ' to ' + month_dates[-1])
                 result_dict = product_total_graph(month_dates,prj_id,center,work_packets,level_structure_key)
                 if len(result_dict['prod_days_data']) > 0:
                     productivity_list[month_name] = result_dict['volumes_data']['volume_values']
+                    month_names.append(month_name)
+                else:
+                    productivity_list[month_name] = {}
+                    month_names.append(month_name)
                 packet_sum_data = result_dict['volumes_data']['volume_values']
 
                 error_graphs_data = internal_extrnal_graphs(request, month_dates, prj_id, center, packet_sum_data,level_structure_key)
@@ -1781,13 +1937,26 @@ def day_week_month(request,dwm_dict,prj_id,center,work_packets,level_structure_k
                             all_external_error_accuracy[vol_key] = vol_values
                 print error_graphs_data
         #below for productivity,packet wise performance
-        for prodct_key,prodct_value in productivity_list.iteritems():
-            for vol_key,vol_values in prodct_value.iteritems():
-                if final_productivity.has_key(vol_key):
-                    final_productivity[vol_key].append(vol_values)
-                else:
-                    final_productivity[vol_key]=[vol_values]
-        print internal_accuracy_timeline
+
+        for final_key, final_value in productivity_list.iteritems():
+            for month_key, month_value in final_value.iteritems():
+                if month_key not in final_productivity.keys():
+                    final_productivity[month_key] = []
+
+        for prodct_month_value in month_names:
+            if len(productivity_list[prodct_month_value]) > 0:
+                for vol_key,vol_values in productivity_list[prodct_month_value].iteritems():
+                    if final_productivity.has_key(vol_key):
+                        final_productivity[vol_key].append(vol_values)
+                    else:
+                        final_productivity[vol_key]=[vol_values]
+                for prod_key, prod_values in final_productivity.iteritems():
+                    if prod_key not in productivity_list[prodct_month_value].keys():
+                        final_productivity[prod_key].append(0)
+            else:
+                for vol_key, vol_values in final_productivity.iteritems():
+                    final_productivity[vol_key].append(0)
+
         for prodct_key,prodct_value in internal_accuracy_timeline.iteritems():
             for vol_key,vol_values in prodct_value.iteritems():
                 if final_internal_accuracy_timeline.has_key(vol_key):
@@ -1824,7 +1993,7 @@ def day_week_month(request,dwm_dict,prj_id,center,work_packets,level_structure_k
             print sum(error_value),len(error_value)
         result_dict['internal_accuracy_graph'] = graph_data_alignment(all_internal_error_accuracy, name_key='y')
         result_dict['external_accuracy_graph'] = graph_data_alignment(all_external_error_accuracy, name_key='y')
-        result_dict['data']['date'] = [productivity_list.keys()]
+        result_dict['data']['date'] = data_date
         return result_dict
 
     if dwm_dict.has_key('week'):
@@ -1842,15 +2011,23 @@ def day_week_month(request,dwm_dict,prj_id,center,work_packets,level_structure_k
         all_external_error_accuracy = {}
         data_date = []
         week_num = 0
+        week_names = []
         internal_week_num = 0
         external_week_num = 0
         for week_key, week_dates in dwm_dict.iteritems():
             for week in week_dates:
-                data_date.append(week[0])
+                #data_date.append(week[0])
+                data_date.append(week[0] + ' to ' + week[-1])
                 result_dict = product_total_graph(week,prj_id,center,work_packets,level_structure_key)
                 if len(result_dict['prod_days_data']) > 0:
                     week_name = str('week' + str(week_num))
+                    week_names.append(week_name)
                     productivity_list[week_name] = result_dict['volumes_data']['volume_values']
+                    week_num = week_num + 1
+                else:
+                    week_name = str('week' + str(week_num))
+                    week_names.append(week_name)
+                    productivity_list[week_name] = {}
                     week_num = week_num + 1
                 packet_sum_data = result_dict['volumes_data']['volume_values']
                 error_graphs_data = internal_extrnal_graphs(request, week, prj_id, center, packet_sum_data,level_structure_key)
@@ -1883,12 +2060,26 @@ def day_week_month(request,dwm_dict,prj_id,center,work_packets,level_structure_k
                             all_external_error_accuracy[vol_key] = vol_values
                 print error_graphs_data
         # below for productivity,packet wise performance
-        for prodct_key, prodct_value in productivity_list.iteritems():
-            for vol_key, vol_values in prodct_value.iteritems():
-                if final_productivity.has_key(vol_key):
-                    final_productivity[vol_key].append(vol_values)
-                else:
-                    final_productivity[vol_key] = [vol_values]
+
+        for final_key,final_value in productivity_list.iteritems():
+            for week_key,week_value in final_value.iteritems():
+                if week_key not in final_productivity.keys():
+                    final_productivity[week_key] = []
+        for prod_week_num in week_names:
+            if len(productivity_list[prod_week_num])>0:
+                for vol_key, vol_values in productivity_list[prod_week_num].iteritems():
+                    if final_productivity.has_key(vol_key):
+                        final_productivity[vol_key].append(vol_values)
+                    else:
+                        final_productivity[vol_key] = [vol_values]
+                for prod_key, prod_values in final_productivity.iteritems():
+                    if prod_key not in productivity_list[prod_week_num].keys():
+                        final_productivity[prod_key].append(0)
+            else:
+                for vol_key, vol_values in final_productivity.iteritems():
+                    final_productivity[vol_key].append(0)
+
+
 
         for prodct_key, prodct_value in internal_accuracy_timeline.iteritems():
             for vol_key, vol_values in prodct_value.iteritems():
@@ -2251,7 +2442,104 @@ def from_to(request):
     final_result_dict['utilization_work_packet_details'] = utilization_work_packet_details
     fte_calc_data = fte_calculation(request, dwm_dict, prj_id, center, employe_dates)
     final_result_dict['fte_calc_data'] = fte_calc_data
+    volume_graph = volume_graph_data(employe_dates['days'], prj_id, center, level_structure_key)
+    final_result_dict['volume_graphs'] = volume_graph
     return HttpResponse(final_result_dict)
+
+def volume_graph_data(date_list,prj_id,center_obj,level_structure_key):
+    conn = redis.Redis(host="localhost", port=6379, db=0)
+    result = {}
+    volumes_dict = {}
+    date_values = {}
+    #volume_list = RawTable.objects.filter(project=prj_id,center=center_obj).values_list('volume_type', flat=True).distinct()
+    prj_name = Project.objects.filter(id=prj_id).values_list('name',flat=True)
+    center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
+    query_set = query_set_generation(prj_id,center_obj,level_structure_key,date_list)
+    for date_va in date_list:
+        #below code for product,wpf graphs
+        volume_list = []
+        if level_structure_key.has_key('work_packet') and len(level_structure_key) ==1:
+            if level_structure_key['work_packet'] == "All":
+                volume_list = RawTable.objects.filter(**query_set).values('sub_project','work_packet').distinct()
+            else:
+                volume_list = RawTable.objects.filter(**query_set).values('sub_project', 'work_packet','sub_packet').distinct()
+        if level_structure_key.has_key('work_packet') and level_structure_key.has_key('sub_packet'):
+            volume_list = RawTable.objects.filter(**query_set).values('sub_project','work_packet','sub_packet').distinct()
+
+        count =0
+        # import pdb;pdb.set_trace()
+        for vol_type in volume_list:
+            final_work_packet = level_hierarchy_key(level_structure_key,vol_type)
+            if not final_work_packet:
+                final_work_packet = level_hierarchy_key(volume_list[count],vol_type)
+            count = count+1
+            date_pattern = '{0}_{1}_{2}_{3}_worktrack'.format(prj_name[0], str(center_name[0]), str(final_work_packet), date_va)
+            key_list = conn.keys(pattern=date_pattern)
+            if not key_list:
+                if date_values.has_key(final_work_packet):
+                    date_values[final_work_packet]['opening'].append(0)
+                    date_values[final_work_packet]['received'].append(0)
+                    date_values[final_work_packet]['completed'].append(0)
+                    date_values[final_work_packet]['non_workable_count'].append(0)
+                    date_values[final_work_packet]['closing_balance'].append(0)
+                else:
+                    date_values[final_work_packet] = {}
+                    date_values[final_work_packet]['opening']= [0]
+                    date_values[final_work_packet]['received']= [0]
+                    date_values[final_work_packet]['completed'] = [0]
+                    date_values[final_work_packet]['non_workable_count'] = [0]
+                    date_values[final_work_packet]['closing_balance']= [0]
+            for cur_key in key_list:
+                var = conn.hgetall(cur_key)
+                for key,value in var.iteritems():
+                    if (value == 'None') or (value == ''):
+                        value = 0
+                    if not date_values.has_key(final_work_packet):
+                        date_values[final_work_packet] = {}
+                    if date_values.has_key(final_work_packet):
+                        if date_values[final_work_packet].has_key(key):
+                            date_values[final_work_packet][key].append(int(value))
+                        else:
+                            date_values[final_work_packet][key]=[int(value)]
+
+                volumes_dict['data'] = date_values
+                volumes_dict['date'] = date_list
+                result['data'] = volumes_dict
+    if result.has_key('data'):
+        opening,received,nwc,closing_bal,completed = [],[],[],[],[]
+        for vol_key in result['data']['data'].keys():
+            for volume_key,vol_values in result['data']['data'][vol_key].iteritems():
+                if volume_key == 'opening':
+                    opening.append(vol_values)
+                elif volume_key == 'received':
+                    received.append(vol_values)
+                elif volume_key == 'completed':
+                    completed.append(vol_values)
+                elif volume_key == 'closing_balance':
+                    closing_bal.append(vol_values)
+                elif volume_key == 'non_workable_count':
+                    nwc.append(vol_values)
+        worktrack_volumes= {}
+        worktrack_volumes['opening'] = [sum(i) for i in zip(*opening)]
+        worktrack_volumes['received'] = [sum(i) for i in zip(*received)]
+        worktrack_volumes['non_workable_count'] = [sum(i) for i in zip(*nwc)]
+        worktrack_volumes['completed'] = [sum(i) for i in zip(*completed)]
+        worktrack_volumes['closing_balance'] = [sum(i) for i in zip(*closing_bal)]
+        worktrack_timeline = {}
+        day_opening =[worktrack_volumes['opening'], worktrack_volumes['received']]
+        worktrack_timeline['day opening'] = [sum(i) for i in zip(*day_opening)]
+        worktrack_timeline['day completed'] = worktrack_volumes['completed']
+        final_volume_graph = {}
+        final_volume_graph['bar_data'] = graph_data_alignment(worktrack_volumes,name_key='data')
+        final_volume_graph['line_data'] = graph_data_alignment(worktrack_timeline,name_key='data')
+        return final_volume_graph
+
+        print result
+    else:
+        final_volume_graph ={}
+        final_volume_graph['bar_data'] = {}
+        final_volume_graph['line_data'] = {}
+        return final_volume_graph
 
 def internal_bar_data(pro_id, cen_id, from_, to_, work_packet, chart_type):
     date_range = num_of_days(to_,from_)
@@ -2283,38 +2571,38 @@ def internal_chart_data(pro_id,cen_id,to_date,work_packet,chart_type):
     final_internal_drilldown['data'] = internal_list
     return final_internal_drilldown
 
-def productivity_chart_data(pro_id,cen_id,to_date,work_packet,chart_type):
+def productivity_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type):
     final_productivity_drilldown = {}
     final_productivity_drilldown['type'] = chart_type
     packets_list = work_packet.split('_')
     if len(packets_list) == 2:
         if '_' in work_packet:
             work_packet,sub_packet = work_packet.split('_')
-            detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date,work_packet=work_packet,sub_packet=sub_packet).values_list('employee_id','per_day')
+            detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date__range=[to_date[0], to_date[-1]],work_packet=work_packet,sub_packet=sub_packet).values_list('employee_id','per_day')
         else:
-            is_work_pac_exist = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date).values_list('work_packet','sub_packet').distinct()[0]
+            is_work_pac_exist = RawTable.objects.filter(center=cen_id,project=pro_id,date__range=[to_date[0], to_date[-1]]).values_list('work_packet','sub_packet').distinct()[0]
             if len(is_work_pac_exist) > 1:
-                detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date,work_packet=work_packet).values_list('employee_id','per_day','sub_packet')
+                detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date__range=[to_date[0], to_date[-1]],work_packet=work_packet).values_list('employee_id','per_day','sub_packet')
             else:
-                detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date,work_packet=work_packet).values_list('employee_id','per_day')
+                detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date__range=[to_date[0], to_date[-1]],work_packet=work_packet).values_list('employee_id','per_day')
         packet_dict = []
     elif len(packets_list) == 3:
         if '_' in work_packet:
             sub_project,work_packet,sub_packet = work_packet.split('_')
-            detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date,work_packet=work_packet,sub_packet=sub_packet).values_list('employee_id','per_day')
+            detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date__range=[to_date[0], to_date[-1]],work_packet=work_packet,sub_packet=sub_packet).values_list('employee_id','per_day')
         else:
-            is_work_pac_exist = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date).values_list('work_packet','sub_packet').distinct()[0]
+            is_work_pac_exist = RawTable.objects.filter(center=cen_id,project=pro_id,date__range=[to_date[0], to_date[-1]]).values_list('work_packet','sub_packet').distinct()[0]
             if len(is_work_pac_exist) > 1:
-                detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date,work_packet=work_packet).values_list('employee_id','per_day','sub_packet')
+                detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date__range=[to_date[0], to_date[-1]],work_packet=work_packet).values_list('employee_id','per_day','sub_packet')
             else:
-                detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date,work_packet=work_packet).values_list('employee_id','per_day')
+                detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date__range=[to_date[0], to_date[-1]],work_packet=work_packet).values_list('employee_id','per_day')
         packet_dict = []
     else:
-        is_work_pac_exist = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date).values_list('work_packet','sub_packet').distinct()[0]
+        is_work_pac_exist = RawTable.objects.filter(center=cen_id,project=pro_id,date__range=[to_date[0], to_date[-1]]).values_list('work_packet','sub_packet').distinct()[0]
         if len(is_work_pac_exist) > 1:
-            detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date,work_packet=work_packet).values_list('employee_id','per_day','sub_packet')   
+            detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date__range=[to_date[0], to_date[-1]],work_packet=work_packet).values_list('employee_id','per_day','sub_packet')
         else:
-            detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date,work_packet=work_packet).values_list('employee_id','per_day')
+            detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date__range=[to_date[0], to_date[-1]],work_packet=work_packet).values_list('employee_id','per_day')
         packet_dict = []
 
     for i in detail_list:
@@ -2324,6 +2612,52 @@ def productivity_chart_data(pro_id,cen_id,to_date,work_packet,chart_type):
             packet_dict.append({'name':i[0],'done':i[1], 'sub_packet':i[2]})
     final_productivity_drilldown['data'] = packet_dict
     return final_productivity_drilldown
+
+def productivity_chart_data(pro_id,cen_id,to_date,work_packet,chart_type):
+    final_productivity_drilldown = {}
+    final_productivity_drilldown['type'] = chart_type
+    if len(to_date) == 2:
+        final_val_result = productivity_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type)
+        return final_val_result
+    else:
+        packets_list = work_packet.split('_')
+        if len(packets_list) == 2:
+            if '_' in work_packet:
+                work_packet,sub_packet = work_packet.split('_')
+                detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date[0],work_packet=work_packet,sub_packet=sub_packet).values_list('employee_id','per_day')
+            else:
+                is_work_pac_exist = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date[0]).values_list('work_packet','sub_packet').distinct()[0]
+                if len(is_work_pac_exist) > 1:
+                    detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date[0],work_packet=work_packet).values_list('employee_id','per_day','sub_packet')
+                else:
+                    detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date[0],work_packet=work_packet).values_list('employee_id','per_day')
+            packet_dict = []
+        elif len(packets_list) == 3:
+            if '_' in work_packet:
+                sub_project,work_packet,sub_packet = work_packet.split('_')
+                detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date[0],work_packet=work_packet,sub_packet=sub_packet).values_list('employee_id','per_day')
+            else:
+                is_work_pac_exist = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date[0]).values_list('work_packet','sub_packet').distinct()[0]
+                if len(is_work_pac_exist) > 1:
+                    detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date[0],work_packet=work_packet).values_list('employee_id','per_day','sub_packet')
+                else:
+                    detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date[0],work_packet=work_packet).values_list('employee_id','per_day')
+            packet_dict = []
+        else:
+            is_work_pac_exist = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date[0]).values_list('work_packet','sub_packet').distinct()[0]
+            if len(is_work_pac_exist) > 1:
+                detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date[0],work_packet=work_packet).values_list('employee_id','per_day','sub_packet')   
+            else:
+                detail_list = RawTable.objects.filter(center=cen_id,project=pro_id,date=to_date[0],work_packet=work_packet).values_list('employee_id','per_day')
+            packet_dict = []
+
+        for i in detail_list:
+            if len(i) == 2:
+                packet_dict.append({'name':i[0],'done':i[1]})
+            else:
+                packet_dict.append({'name':i[0],'done':i[1], 'sub_packet':i[2]})
+        final_productivity_drilldown['data'] = packet_dict
+        return final_productivity_drilldown
 
 
 def chart_data(request):
@@ -2336,7 +2670,16 @@ def chart_data(request):
         from_ = datetime.datetime.strptime(request.GET['from'], '%Y-%m-%d').date()
         to_ = datetime.datetime.strptime(request.GET['to'], '%Y-%m-%d').date()
     else:
-        to_date = datetime.datetime.strptime(request.GET['date'], '%Y-%m-%d').date()
+        drilldown_dates = []
+        date_taken = request.GET['date']
+        if 'to' in request.GET['date']:
+            to_date_1 = date_taken.split('to')[0].strip()
+            to_date_2 = date_taken.split('to')[1].strip()
+            drilldown_dates.append(to_date_1)
+            drilldown_dates.append(to_date_2)
+        else:
+            to_date = datetime.datetime.strptime(request.GET['date'], '%Y-%m-%d').date()
+            drilldown_dates.append(to_date)
     work_packet = str(request.GET['packet'])
     if ' and ' in work_packet:
         work_packet = work_packet.replace(' and ',' & ')
@@ -2346,7 +2689,7 @@ def chart_data(request):
     elif chart_type == 'Internal_Bar' or chart_type == 'External_Bar' or chart_type == 'Internal_Bar_Pie' or chart_type == 'External_Bar_Pie':
         final_dict = internal_bar_data(pro_id, cen_id, from_, to_, work_packet, chart_type)
     else:
-        final_dict = productivity_chart_data(pro_id,cen_id,to_date,work_packet,chart_type)
+        final_dict = productivity_chart_data(pro_id,cen_id,drilldown_dates,work_packet,chart_type)
     return HttpResponse(final_dict)
 
 def utilization_data(center,prj_id,dwm_dict):
