@@ -85,8 +85,8 @@ class TargetsAuthoringAdmin(admin.ModelAdmin):
 admin.site.register(TargetsAuthoring,TargetsAuthoringAdmin)
 
 class WorktrackAdmin(admin.ModelAdmin):
-    list_display = ['work_packet', 'opening', 'received', 'completed']
-    list_filter = ['project']
+    list_display = ['work_packet', 'opening', 'received', 'completed','date']
+    list_filter = ['project','work_packet']
 admin.site.register(Worktrack,WorktrackAdmin)
 
 class WorktrackAuthoringAdmin(admin.ModelAdmin):

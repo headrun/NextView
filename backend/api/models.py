@@ -41,6 +41,7 @@ class Customer(models.Model):
     center  = models.ManyToManyField(Center, null=True)
     project = models.ManyToManyField(Project, null=True)
     layout = models.CharField(max_length=512, default='')
+    is_drilldown = models.BooleanField(default=None)
 
     class Meta:
         db_table = u'customer'

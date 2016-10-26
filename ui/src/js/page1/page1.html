@@ -92,6 +92,8 @@ table {
     background-color:#2a2a2a;
     margin: 5px;
     padding-right: 10px;
+    padding-left: 10px;
+    padding-bottom: 1px;
 }
 .table-bordered>tbody>tr>td {
     border : none;
@@ -137,6 +139,10 @@ table {
     color: white;
     border-color: #555D50;
 }*/
+.col-md-6 {
+    padding-left: 0px;
+    padding-right: 0px;
+}
 </style>
 <body>
     <div class="row">
@@ -167,9 +173,9 @@ table {
                 <div class="widget-body">
                     <div ng-if="j.widget == '1' "class="input-group"id="inner2">
                          <div class="btn-group">
-                            <button type="button" id="day" class="active btn btn-default day" ng-click="$ctrl.dateType('day',j.opt)" style="cursor:pointer;">Day</button>
-                            <button type="button" id="week"class="btn btn-default" ng-click="$ctrl.dateType('week',j.opt)" style="cursor:pointer;">Week</button>
-                            <button type="button" id="Month"class="btn btn-default" ng-click="$ctrl.dateType('month',j.opt)" style="cursor:pointer;">Month</button>
+                            <button type="button" id="day" class="active btn btn-default day" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" style="cursor:pointer;">Day</button>
+                            <button type="button" id="week"class="btn btn-default week" ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')" style="cursor:pointer;">Week</button>
+                            <button type="button" id="Month"class="btn btn-default month" ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')" style="cursor:pointer;">Month</button>
                          </div>
                      </div>
                     <highcharts options="j.opt"></highcharts>
@@ -179,7 +185,8 @@ table {
     </div>
 
     <div class="row">
-        <div class="col-md-6 graph">
+        <div class="col-md-6">
+            <div class="graph">
                 <div class="widget-title clearfix" title="Sample Widg">
                     <h4>Employee Performance Details</h4>
                 </div>
@@ -203,8 +210,38 @@ table {
                             </tr>
                         </tbody>
                 </table>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="graph">
+                <div class="widget-title clearfix" title="Sample Widg">
+                    <h4>Top 5 Employee Performance Details</h4>
+                </div>
+                <table class="table table-bordered line">
+                        <thead>
+                            <tr class="row_name">
+                                <th>Rank</th>
+                                <th>Employee Name</th>
+                                <th>Productivity</th>
+                                <th>Packet</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="l in $ctrl.top_five">
+                                <td>{{l.rank}}</td>
+                                <td>{{l.employee_id}}</td>
+                                <td>{{l.productivity}}</td>
+                                <td>{{l.work_packet}}</td>
+                                <td>{{l.date}}</td>
+                            </tr>
+                        </tbody>
+                </table>
+            </div>
         </div>
     </div>
+
 
 <div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog">

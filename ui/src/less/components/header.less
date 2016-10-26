@@ -1,17 +1,56 @@
 header{
 
-  .user{
+@media only screen and (max-device-width: 480px) {
+
+.navbar-collapse.collapse {
+    display: block!important;
+ }
+
+
+.navbar-nav.navbar-right:last-child {
+    margin-right: -15px !important;
+ }
+
+.navbar-right {
+   float: right!important;
+ }
+
+.navbar-header {
+    float: none;
+    width:auto;
+ }
+
+.navbar {
+   margin-bottom:0px;
+ }
+}
+
+.fa.pull-right {
+
+     float: none;
+
+  }
+
+/* .pull-right {
+
+     flaot: right!important;
+     float: right;
+  }  */
+.user {
        margin-top:5px;
-       margin-right:10px;
-       text-align: center;
-  }      
+       margin-right:20px;
+       text-align: right;
+  }
+
   .project {
             margin-left:30%;
             margin-top:10px;
         }
+
   .icon {
         margin-top:10px;
         }
+
   .button {
        background-color: #3396C9;
        border: none;
@@ -24,17 +63,20 @@ header{
        margin: 1px 2px;
        cursor: pointer;
      }
+
   .upload {
        float:right;
        margin:10px 20px;
      }
+
   button {
         height:35px;
         margin-top:6%;
         border-bottom:0px;
         margin-right:10px;
-     }
-  a.brand {
+
+        }
+   a.brand {
 
     padding: 5px 0;
 
@@ -49,8 +91,8 @@ header{
     background-color: #000000;
     box-shadow: 0 5px 24px -10px rgba(0,0,0,1);
     border-bottom: none;
-    padding: 0 10px;
-    height: 40px;
+    padding: 0 15px;
+   /* height: 40px; */
 
     &> a {
 
@@ -70,7 +112,6 @@ header{
       li {
 
         a {
-
           color: @text-color-light;
           margin-right: 20px;
           display: inline-block;
@@ -82,6 +123,9 @@ header{
 
             color: @brand-primary;
             text-decoration: none;
+           /* color: white;
+            background-color: black;
+            border-color: white;*/
           }
         }
 
@@ -89,10 +133,11 @@ header{
 
           a, a:hover, a:focus {
 
-            color: @brand-primary;
-            background-color: transparent;
+          /*  color: @brand-primary;
             border-bottom: 3px solid @brand-primary;
-            padding-bottom: 12px;
+            padding-bottom: 12px; */
+            background-color: transparent;
+            cursor: pointer;
           }
         }
 

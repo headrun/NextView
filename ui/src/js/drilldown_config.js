@@ -1,0 +1,112 @@
+var drilldown_config = {
+    'Probe':{
+        'Production Trends':[
+            "name",
+            "done",
+            "date"
+         ],
+        'Internal Accuracy':[
+            "date",
+            "name",
+            "audited_count",
+            "total_errors",
+            "accuracy"
+        ],
+        'External Accuracy':[
+            "date",
+            "name",
+            "productivity",
+            "total_errors",
+            "accuracy"
+        ],
+        'Internal Accuracy Trends':[
+            "name",
+            "audited_count",
+            "total_errors",
+            "accuracy"
+        ],
+        'External Accuracy Trends':[
+            "name",
+            "productivity",
+            "total_errors",
+            "accuracy"
+        ],
+        'Internal_Bar_Pie':[
+            "date",
+            "name",
+            "audited_count",
+            "total_errors",
+            "accuracy"
+        ],
+        'External_Bar_Pie':[
+            "date",
+            "name",
+            "productivity",
+            "total_errors",
+            "accuracy"
+        ],
+        'Production Chart':[
+             "name",
+             "done",
+             "date"
+        ]
+    },
+
+    'DellBiling':{
+        'Production':[
+            "name",
+            "sub_packet",
+            "done"
+        ],
+        'Internal_Bar':[
+            "date",
+            "name",
+            "audited_count",
+            "total_errors"
+        ],
+        'External_Bar':[
+            "date",
+            "name",
+            "audited_count",
+            "total_errors"
+        ],
+        'Internal':[
+            "name",
+            "audited_count",
+            "total_errors"
+        ],
+        'External':[
+            "name",
+            "audited_count",
+            "total_errors"
+        ],
+        'Internal_Bar_Pie':[
+            "date",
+            "name",
+            "audited_count",
+            "total_errors"
+        ],
+        'External_Bar_Pie':[
+            "date",
+            "name",
+            "audited_count",
+            "total_errors"
+        ],
+        'Productivity_Bar':[
+            "name",
+            "sub_packet",
+            "done"
+        ]
+  },
+
+    'DellCoding':{
+        'Prodcution':[],
+        'Internal_Bar':[],
+        'External_Bar':[],
+        'Internal_Bar_Pie':[],
+        'External_Bar_Pie':[],
+        'Internal':[],
+        'External':[],
+        'Productivity_Bar':[]
+    }
+}
