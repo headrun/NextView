@@ -1290,6 +1290,12 @@ def user_data(request):
 
 
 def graph_data_alignment(volumes_data,name_key):
+    color_coding = {
+        'GroupCompanies': '#6BA9FF', 'Manual Download': '#8ACC95', 'LLP': '#EC932F', 'DataDownload': '#E14D57', \
+        'About the Company': '#AF72AD', 'Charges': '#B6926B', 'ECL': '#CC527B', 'Compliance': '#FFAC48',
+        'Legal & CDR': '#FA6670', 'FES': '#E56B94', \
+        'DetailFinancial with FES': '#4C9F98', 'CompanyCoordinates': '#C6BD4D', \
+        }
     productivity_series_list = []
     for vol_name, vol_values in volumes_data.iteritems():
         if isinstance(vol_values, float):
@@ -1303,6 +1309,8 @@ def graph_data_alignment(volumes_data,name_key):
                 prod_dict[name_key] = vol_values
             else:
                 prod_dict[name_key] = [vol_values]
+        if vol_name in color_coding.keys():
+            prod_dict['color'] = color_coding[vol_name]
         productivity_series_list.append(prod_dict)
 
     return productivity_series_list
@@ -2274,13 +2282,15 @@ def num_of_days(to_date,from_date):
 
 
 
-def fte_calculation(request,dwm_dict,prj_id,center_obj,date_list):
+def fte_calculation(request,dwm_dict,prj_id,center_obj,date_list,level_structure_key):
     query_set = {} 
     query_set['project'] = prj_id
     query_set['center'] = center_obj
     prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
     center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
-    work_packets = Targets.objects.filter(**query_set).values('sub_project','work_packet','sub_packet','fte_target').distinct()
+    work_packet_query =  query_set_generation(prj_id,center_obj,level_structure_key,[])
+    work_packets = Targets.objects.filter(**work_packet_query).values('sub_project','work_packet','sub_packet','fte_target').distinct()
+    #work_packets = Targets.objects.filter(**query_set).values('sub_project','work_packet','sub_packet','fte_target').distinct()
     sub_packets = filter(None,Targets.objects.filter(**query_set).values_list('sub_packet',flat=True).distinct())
     conn = redis.Redis(host="localhost", port=6379, db=0)
     new_date_list = []
@@ -2411,7 +2421,28 @@ def fte_calculation(request,dwm_dict,prj_id,center_obj,date_list):
 
 
 def top_five_emp(center,prj_id,dwm_dict):
-    dict_to_render = []
+    final_list = []
+    packets_list = RawTable.objects.filter(project=prj_id,center=center,date__range=[dwm_dict['days'][0],dwm_dict['days'][-1:][0]]).values_list('work_packet',flat=True).distinct()
+    for i in packets_list:
+        dict_to_render = []
+        employee_name = RawTable.objects.filter(project=prj_id,center=center,date__range=[dwm_dict['days'][0],dwm_dict['days'][-1:][0]],work_packet=i).values_list('employee_id').distinct()
+        for name in employee_name:
+            values = RawTable.objects.filter(project=prj_id,center=center,date__range=[dwm_dict['days'][0],dwm_dict['days'][-1:][0]],work_packet=i,employee_id=name[0]).values_list('per_day','date')
+            result = 0
+            for val in values:
+                tar = Targets.objects.filter(project=prj_id,center=center,work_packet=i,from_date__lte=val[1],to_date__gte=val[1]).values_list('target',flat=True)
+                if tar:
+                    productivity = float(val[0]) / int(tar[0])
+                    result = result + productivity
+            result = float('%.2f' % round(result, 2))
+            dict_to_render.append({'employee_id':name[0],'work_packet':i,'productivity':result})
+        max_in_packet = max([i['productivity'] for i in dict_to_render])
+        top_in = [i if i['productivity'] == max_in_packet else '' for i in dict_to_render]
+        required_top = [x for x in top_in if x]
+        for i in required_top:
+            final_list.append(i)
+    return final_list
+    """ dict_to_render = []
     all_packets_list = RawTable.objects.filter(project=prj_id,center=center,date__range=[dwm_dict['days'][0], dwm_dict['days'][-1:][0]]).values_list('work_packet').distinct()
     for one_pack in all_packets_list:
         targets = Targets.objects.filter(project=prj_id, center=center,work_packet=one_pack[0]).values_list('target',flat=True).distinct()
@@ -2432,10 +2463,15 @@ def top_five_emp(center,prj_id,dwm_dict):
                     vol_values = float('%.2f' % round(productivity, 2))
                     list_of_values['productivity'] =vol_values
         dict_to_render.append(list_of_values)
-    return dict_to_render
+    return dict_to_render"""
 
 
 def from_to(request):
+    color_coding = {
+    'GroupCompanies':'#6BA9FF','Manual Download':'#8ACC95','LLP':'#EC932F','DataDownload':'#E14D57',\
+    'About the Company':'#AF72AD','Charges':'#B6926B','ECL':'#CC527B','Compliance':'#FFAC48','Legal & CDR':'#FA6670','FES':'#E56B94',\
+    'DetailFinancial with FES':'#4C9F98','CompanyCoordinates':'#C6BD4D',\
+    }
     from_date = datetime.datetime.strptime(request.GET['from'],'%Y-%m-%d').date()
     to_date = datetime.datetime.strptime(request.GET['to'],'%Y-%m-%d').date()
     type = request.GET['type']
@@ -2620,7 +2656,7 @@ def from_to(request):
     final_result_dict['only_top_five'] = only_top_five
     final_result_dict['utilization_data_details'] = utilization_data_details
     final_result_dict['utilization_work_packet_details'] = utilization_work_packet_details
-    fte_calc_data = fte_calculation(request, dwm_dict, prj_id, center, employe_dates)
+    fte_calc_data = fte_calculation(request, dwm_dict, prj_id, center, employe_dates,level_structure_key)
     final_result_dict['fte_calc_data'] = fte_calc_data
     volume_graph = volume_graph_data(employe_dates['days'], prj_id, center, level_structure_key)
     #final_result_dict['volume_graphs'] = volume_graph
