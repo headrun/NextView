@@ -1,5 +1,13 @@
 <style>
-
+::-webkit-scrollbar-thumb {
+      background:#4c4c4c;
+}
+::-webkit-scrollbar {
+      width: 8px;
+}
+.daterangepicker {
+    color: black;
+}
    .button {
       background-color: #3396C9;
       color: white;
@@ -78,32 +86,82 @@ table {
     margin-right: 5px;
     margin-top:-17px;
 }
+.graph {
+   /* border: 1px solid #3c3c3c;*/
+    border-radius:0.3em;
+    background-color:#2a2a2a;
+    margin: 5px;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-bottom: 1px;
+}
+.table-bordered>tbody>tr>td {
+    border : none;
+}
 
+.table>tbody>tr>td {
+    border-top: none;
+}
+.table-bordered>tfoot>tr>th {
+    border : none;
+}
+.table-bordered>thead>tr>td {
+    border : none;
+}
+.table-bordered>thead>tr>th {
+    border : none;
+}
+/*.line {
+   border:1px solid #3c3c3c;
+   margin-left:-2px;
+   margin-bottom:12px;
+}*/
+.row_name {
+   font-size: 15px;
+   margin-right: 0px;
+   background-color: #373737;
+   color: #dadada;
+}
+.line {
+   border:1px solid #3c3c3c;
+   /*margin-left:-2px;*/
+   margin-bottom:12px;
+   margin-left: auto;
+   margin-right: auto;
+}
+/*.btn-default:focus {
+     background-color: #555D50;
+     color: white;
+     border-color: #555D50;
+}*/
+/*.btn-default:focus:after {
+    background-color: #555D50;
+    color: white;
+    border-color: #555D50;
+}*/
+.col-md-6 {
+    padding-left: 0px;
+    padding-right: 0px;
+}
 </style>
-
 <body>
     <div class="row">
     <div id="wrapper">
-        <div><h3 class="pull-left brand_style">{{$ctrl.location}}{{$ctrl.project}}Dashboard</h3></div>
-             <div id="inner1" class="form-group">
-                 <input class="form-control select" value="{{$ctrl.first}} to {{$ctrl.last}}" id="select" size="19">
+        <div><h3 class="pull-left brand_style">{{$ctrl.project}}Dashboard</h3></div>
+             <div id="inner1" class="form-group" style="margin-bottom:initial;">
+                 <!--<input class="form-control select" value="{{$ctrl.first}} to {{$ctrl.last}}" id="select" size="19">-->
+                 <input class="form-control select" id="select" size="19">
                  <i class="fa fa-calendar date" aria-hidden="true"></i>
              </div>
-             <div  class="input-group"id="inner2">
-                 <ul class="nav nav-pills">
-                     <span class="input-group-addon" style="background-color:#fff;">
-                         <li id="day"><a style="color:black; cursor:pointer;" href="" ng-click="$ctrl.dateType('day')">Day</a></li>
-                     </span>
-                     <span class="input-group-addon" style="background-color:#fff;">
-                         <li id="week"><a style="color:black; cursor:pointer;" href="" ng-click="$ctrl.dateType('week')">Week</a></li>
-                     </span>
-                     <span class="input-group-addon" style="background-color:#fff;">
-                         <li id="month"><a style="color:black; cursor:pointer;" href="" ng-click="$ctrl.dateType('month')">Month</a></li>
-                     </span>
-
-                 </ul>
+             <div ng-repeat="k in $ctrl.packet_hierarchy_list track by $index">
+                <form>
+                    <div class="form-group" style="float:left;padding-left:1%;padding-top:5px;margin-bottom:0px;">
+                        <select class="form-control input-sm" id="{{$index}}">
+                            <option>All</option>
+                        </select>
+                    </div>
+                </form>
              </div>
-
         </div>
 
     </div>
@@ -111,156 +169,100 @@ table {
         <div ng-repeat="j in i" class="col-sm-{{j.col}} widget">
             <div class="widget-content">
                 <div class="widget-title clearfix" title="Sample Widg">
-                    <span class="pull-left">{{j.title}}</span>
+                    <span class="pull-left">{{j.name}}</span>
                 </div>
                 <div class="widget-body">
-                    <highcharts options="j.opt"></highcharts>
+                    <div ng-if="j.day_type_widget" class="input-group"id="inner2">
+                         <div class="btn-group">
+                            <button type="button" id="day" class="active btn btn-default day" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" style="cursor:pointer;">Day</button>
+                            <button type="button" id="week"class="btn btn-default week" ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')" style="cursor:pointer;">Week</button>
+                            <button type="button" id="Month"class="btn btn-default month" ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')" style="cursor:pointer;">Month</button>
+                         </div>
+                     </div>
+                    <highcharts options="$ctrl.final_layout_values_list[j.opt]"></highcharts>
                 </div>
             </div>
         </div>
     </div>
-    <!--<div ng-repeat="j in i" class="col-md-{{j.col}} widget all">
-            <div class="widget-content">
+
+    <div class="row">
+        <!--<div class="col-md-6">
+            <div class="graph">
                 <div class="widget-title clearfix" title="Sample Widg">
-                    <span class="pull-left">{{j.title}}</span>
+                    <h4>Employee Performance Details</h4>
                 </div>
-                <div class="widget-body">
-                    <highcharts options="j.opt"></highcharts>
-                </div>
+                <table class="table table-bordered line">
+                        <thead>
+                            <tr class="row_name">
+                                <th>Employee Name</th>
+                                <th>Productivity</th>
+                                <th>Packet</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="l in $ctrl.top_employee_details">
+                                <td>{{l.employee_id}}</td>
+                                <td>{{l.productivity}}</td>
+                                <td>{{l.work_packet}}</td>
+                            </tr>
+                        </tbody>
+                </table>
             </div>
         </div>-->
-            <!--<div class="widget-content">
+
+        <div class="col-md-6" id="emp_widget">
+            <div class="graph">
                 <div class="widget-title clearfix" title="Sample Widg">
-                    <span class="pull-left">{{i.title}}</span>
+                    <h4>Top Employee Performance Details</h4>
                 </div>
-                <div class="widget-body">
-                    <highcharts options="i.opt"></highcharts>
-                </div>
+                <table class="table table-bordered line">
+                        <thead>
+                            <tr class="row_name">
+                                <th>Rank</th>
+                                <th>Employee Name</th>
+                                <th>Productivity</th>
+                                <th>Packet</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="l in $ctrl.top_five">
+                                <td>{{l.rank}}</td>
+                                <td>{{l.employee_id}}</td>
+                                <td>{{l.productivity}}</td>
+                                <td>{{l.work_packet}}</td>
+                            </tr>
+                        </tbody>
+                </table>
             </div>
-        </div>-->
-    <!--<div class="row">
-            <div class="widget col-md-12 col-xs-12 all" >
-                <div class="widget-content">
-
-
-    <div class="widget-title clearfix"
-         title="Sample Widg">
-      <span class="pull-left">Productivity Chart</span>
-    </div>
-
-                    <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions"></highcharts>
-                    </div>
-                </div>
-            </div>
-    </div>
-    <div class="row">
-            <div class="widget col-md-3 col-xs-6 all"  >
-
-                <div class="widget-content">
-
-                    <div class="widget-title clearfix"
-                         title="Sample Widg">
-                        <span class="pull-left">Packetwise internal error count</span>
-                    </div>
-
-                    <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions5"></highcharts>
-                    </div>
-                </div>
-            </div>
-            <div class="widget col-md-3 col-xs-6 all"  >
-
-                <div class="widget-content">
-
-                    <div class="widget-title clearfix"
-                         title="Sample Widg">
-                        <span class="pull-left">Packetwise external error count</span>
-                    </div>
-
-                    <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions5_2"></highcharts>
-                    </div>
-                </div>
-            </div>
-            <div class="widget col-md-6 col-xs-12 all"  >
-
-                <div class="widget-content">
-
-                    <div class="widget-title clearfix"
-                         title="Sample Widg">
-                        <span class="pull-left">Internal Accuracy Graph</span>
-                    </div>
-
-                    <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions4"></highcharts>
-                    </div>
-                </div>
-            </div>
-    </div>
-    <div class="row">
-        <div class="widget col-md-6 col-xs-12 all"  >
-                <div class="widget-content">
-                    <div class="widget-title clearfix"
-                         title="Sample Widg">
-                        <span class="pull-left">External Accuracy Graph</span>
-                    </div>
-                    <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions6"></highcharts>
-                    </div>
-                </div>
         </div>
-        <div class="widget col-md-6 col-xs-12 all"  >
+    </div>
 
-                <div class="widget-content">
 
-                    <div class="widget-title clearfix"
-                         title="Sample Widg">
-                        <span class="pull-left">Workpacket Wise Performance</span>
-                    </div>
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+             <button type="button" class="close" data-dismiss="modal">&times;</button>
+             <h4 class="modal-title">{{$ctrl.chart_type}}</h4>
 
-                    <div class="widget-body">
-                        <highcharts options="$ctrl.chartOptions3"></highcharts>
-                    </div>
+         </div>
+         <div class="modal-body">
+            <div class="row" style="margin-right:16px;">
+                <div class="">
+                     <table style="border:1px solid #3c3c3c;">
+                          <thead style="display:block;">
+                              <tr class="row_name">
+                                  <th ng-repeat="i in $ctrl.fields_list_drilldown" style="width:120px;padding:5px;text-align:-webkit-center;">{{i}}</th>
+                              </tr>
+                          </thead>
+                          <tbody style="max-height:150px;overflow-y:auto;display:block;">
+                             <tr ng-repeat= "x in $ctrl.names">
+                                 <td ng-repeat="i in $ctrl.fields_list_drilldown" style="width:120px;padding:5px;text-align:-webkit-center;">{{x[i]}}</td>
+                             </tr>
+                          </tbody>
+                      </table>
                 </div>
             </div>
-    </div>-->
-<!--</div>-->
-
-<!--<div class="modal fade" id="myModal" role="dialog">
-    <div class="modal-dialog">
-      <div class="modal-content">
-         <div class="modal-header">
-             <button type="button" class="close" data-dismiss="modal">&times;</button>
-             <h4 class="modal-title">PRODUCTIVITY CHART</h4>
-         </div>
-         <div class="modal-body">
-                 <table style="color:white; padding:5px;border:1px solid white;" border = 1px solid white; >
-                 <tr ng-repeat= "x in $ctrl.names">
-
-                    <td style="padding:5px;" >{{x.emp}}</td>
-                     <td style="padding:5px;" >{{x.packet_value}}</td>
-
-                 </tr>
-             </table>
-           </div>
-         <div class="modal-footer">
-           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-         </div>
-       </div>
-    </div>
-  </div>
-
-<div class="modal fade" id="workpacket_per" role="dialog">
-    <div class="modal-dialog">
-      <div class="modal-content">
-         <div class="modal-header">
-             <button type="button" class="close" data-dismiss="modal">&times;</button>
-             <h4 class="modal-title" >WORKPACKET WISE PERFORMANCE</h4>
-         </div>
-         <div class="modal-body">
-           <h1 id="wpp_hello" style="color:black;">Hello Hello</h1>
-           <p id="wpp_temp" style="color:black;"></p>
          </div>
          <div class="modal-footer">
            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -268,49 +270,11 @@ table {
        </div>
     </div>
   </div>
-
-
-<div class="modal fade" id="percent_graph" role="dialog">
-    <div class="modal-dialog">
-      <div class="modal-content">
-         <div class="modal-header">
-             <button type="button" class="close" data-dismiss="modal">&times;</button>
-             <h4 class="modal-title" >Internal Accuracy</h4>
-         </div>
-         <div class="modal-body">
-           <h1 id="perc_hello" >Hello Hello</h1>
-           <p id="perc_temp" ></p>
-         </div>
-         <div class="modal-footer">
-           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-         </div>
-       </div>
-    </div>
-  </div>
-
-
-<div class="modal fade" id="pwe_myModal" role="dialog">
-    <div class="modal-dialog">
-      <div class="modal-content">
-         <div class="modal-header">
-             <button type="button" class="close" data-dismiss="modal">&times;</button>
-             <h4 class="modal-title" >Workpacket Wise Performance</h4>
-         </div>
-         <div class="modal-body">
-           <h1 id="pwe_hello" >Hello Hello</h1>
-           <p id="pwe_temp" ></p>
-         </div>
-         <div class="modal-footer">
-           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-         </div>
-       </div>
-    </div>
-  </div>-->
-
 </body>
+
 <script>
-   configObject = {
-       autoClose: true,
-       }
-   $('#select').dateRangePicker(configObject);
+    $('body').on('click','.btn-group button', function(e) {
+     $(this).addClass('active');
+     $(this).siblings().removeClass('active');
+});
 </script>

@@ -38,7 +38,16 @@
     font-size:22px;
     margin-right: 10px;
  }
+ .admin {
+    padding:5px; 
+    margin-top:10px;
+    margin-right:-5px;
+    background:black;
+    border-color:white;
+    color:white;
+}
 </style>
+
 <nav class="navbar navbar-default navbar-fixed-top" style="position: initial;">
 
         <div class="navbar-header">
@@ -59,7 +68,7 @@
                             <ul class="nav nav-pills left">
                                <li class="dropdown active span8">
                                   <a class="dropdown-toggle" id="inp_impact" data-toggle="dropdown">
-                                      <span id="dropdown_title">Select</span><span class="caret"></span>
+                                      <span id="dropdown_title">{{$ctrl.select_option}}</span><span class="caret"></span>
                                   </a>
                                    <ul ID="divNewNotifications" class="dropdown-menu">
                                        <li >
@@ -70,7 +79,11 @@
                                </li>
                             </ul>
                      </div>
-
+                        <li>
+                            <div id="admin_but">
+                            <a href="http://nv-dev.headrun.com:8181/admin/api" class="btn btn-info" style="padding:5px;margin-top:10px;margin-right:-5px;color:white;border-color:white;background-color:black;" role="button" target="_blank">Admin</a>
+                            </div>
+                        </li>
               <li>
                   <div id="fileupload" class="upload">
                       <span>Upload</span>
