@@ -31,20 +31,28 @@ dashboard {
     bottom: 0;
     .cover;
     z-index: 1;
-    background: transparent url(/img/preloader.gif) center center no-repeat;
+    background: transparent url(/img/preload.gif) center center no-repeat;
   }
 
   div.dashboard-content {
 
     height: 100%;
     position: relative;
-    top: 0;
+    top: -10px;
     left: 0;
-    padding: @gutter 0 0 0;
+    padding-left: @gutter;
+    padding-right: @gutter;
+    padding-bottom: @gutter;
+   /* padding-top: @gutter; */
+   /* margin-top: -10px; */
 
     div.widget {
 
-      padding-left: @gutter;
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      height: 330px;
 
       div.widget-content {
 
@@ -66,9 +74,12 @@ dashboard {
           width: 100%;
           padding: @gutter/2 30px @gutter/2 @gutter;
           background-color: @widget-title-bg;
-          .text-overflow;
           color: @widget-bg;
-        }
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+
+          }
 
         div.widget-body {
 

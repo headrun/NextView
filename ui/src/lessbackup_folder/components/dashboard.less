@@ -1,0 +1,117 @@
+dashboard {
+
+  display: block;
+  .cover;
+
+  div.dashboard-content-wrapper {
+
+    .cover;
+
+    &.loading {
+
+      div.dashboard-content {
+
+        .opacity(0.2);
+      }
+
+      div.loading-overlay {
+
+        display: block;
+      }
+    }
+  }
+
+  div.loading-overlay {
+
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    .cover;
+    z-index: 1;
+    background: transparent url(/img/preloader.gif) center center no-repeat;
+  }
+
+  div.dashboard-content {
+
+    height: 100%;
+    position: relative;
+    top: 0;
+    left: 0;
+    padding: @gutter 0 0 0;
+
+    div.widget {
+
+      padding-left: @gutter;
+
+      div.widget-content {
+
+        .cover;
+        .box-shadow(0 0 4px @widget-shadow-color);
+        background-color: @widget-bg;
+        border: 1px solid @widget-border;
+        text-align: left;
+        position: relative;
+
+        div.widget-title {
+
+          font-size: 1.2em;
+          line-height: 120%;
+          height: 20px + @gutter;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          padding: @gutter/2 30px @gutter/2 @gutter;
+          background-color: @widget-title-bg;
+          .text-overflow;
+          color: @widget-bg;
+        }
+
+        div.widget-body {
+
+          position: relative;
+          padding: 20px + @gutter @gutter @gutter @gutter;
+          height: 100%;
+
+          button.insights-trigger {
+
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            border-radius: 0;
+          }
+
+          .download-btn {
+
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            z-index: 1;
+            color: rgba(255,255,255,0.5);
+
+            &:hover {
+
+              color: #ffffff;
+            }
+
+            a.dropdown-toggle {
+
+              color: inherit;
+              text-decoration: none;
+            }
+
+            ul.dropdown-menu {
+
+              right: 0;
+              left: auto;
+            }
+          }
+
+        }
+      }
+    }
+  }
+}

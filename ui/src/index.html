@@ -9,7 +9,8 @@
     <link href="/libs/jquery-uploadfile/css/uploadfile.css" rel="stylesheet">
     <!-- application specific styles -->
     <link rel="stylesheet" href="app.css"/>
-    <link rel="stylesheet" href="/libs/daterangepicker.min.css"/>
+    <!--<link rel="stylesheet" href="/libs/daterangepicker.min.css"/>-->
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
   </head>
 
   <body>
@@ -25,9 +26,11 @@
     <!-- Vendor Scripts -->
     <script src="/libs/jquery/dist/jquery.min.js"></script>
     <script src="/libs/moment.min.js"></script>
-    <script src="http://longbill.github.io/jquery-date-range-picker/dist/jquery.daterangepicker.min.js"></script>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+    <!--<script src="http://longbill.github.io/jquery-date-range-picker/dist/jquery.daterangepicker.min.js"></script>-->
     <script src="/libs/highcharts/highcharts.js"></script>
     <script src="/libs/highcharts/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>
     <script src="/libs/angular/angular.min.js"></script>
     <script src="/libs/angular-ui-router/release/angular-ui-router.min.js"></script>
     <script src="/libs/jquery-uploadfile/js/jquery.uploadfile.min.js"></script>
@@ -56,6 +59,9 @@
     <!-- Header Module -->
     <script src="/js/header/header.module.js"></script>
     <script src="/js/header/header.component.js"></script>
+
+    <!-- Drilldown config file -->
+    <script src="/js/drilldown_config.js"></script>
 
     <!-- Page1 Module -->
     <script src="/js/page1/page1.module.js"></script>
