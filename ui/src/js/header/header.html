@@ -34,7 +34,6 @@
 }    
 
 .name {
-
     font-size:22px;
     margin-right: 10px;
  }
@@ -46,6 +45,8 @@
     border-color:white;
     color:white;
 }
+
+
 </style>
 
 <nav class="navbar navbar-default navbar-fixed-top" style="position: initial;">
@@ -57,7 +58,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-          <a class="navbar-brand" style="font-size:2.0em;margin-left:-15px;color:#cdcdcd;font-weight:bold;">Nextview</a>
+          <a class="navbar-brand" style="font-size:2.0em;margin-left:-15px;font-weight:bold;color:black;">NextView</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
@@ -67,12 +68,12 @@
                      <div class="dropdown" id="select_dropdown">
                             <ul class="nav nav-pills left">
                                <li class="dropdown active span8">
-                                  <a class="dropdown-toggle" id="inp_impact" data-toggle="dropdown">
+                                  <a class="dropdown-toggle" id="inp_impact" data-toggle="dropdown" style="color:black;">
                                       <span id="dropdown_title">{{$ctrl.select_option}}</span><span class="caret"></span>
                                   </a>
                                    <ul ID="divNewNotifications" class="dropdown-menu">
                                        <li >
-                                           <a href="" ng-repeat="item in $ctrl.mapping_list" ng-click="$ctrl.clickFun(item)"  >{{item}}</a>
+                                           <a href="" ng-repeat="item in $ctrl.mapping_list" ng-click="$ctrl.clickFun(item)">{{item}}</a>
                                        </li>
 
                                    </ul>
@@ -80,24 +81,24 @@
                             </ul>
                      </div>
                         <li>
-                            <div id="admin_but">
-                            <a href="http://nv-dev.headrun.com:8181/admin/api" class="btn btn-info" style="padding:5px;margin-top:10px;margin-right:-5px;color:white;border-color:white;background-color:black;" role="button" target="_blank">Admin</a>
+                            <div>
+                                <a href="http://nv.headrun.com:8188/admin/api" class="btn btn-info" style="padding:5px;margin-top:10px;margin-right:-5px;color:black;border-color:black;background-color:white;" role="button" target="_blank">Admin</a>
                             </div>
                         </li>
-              <li>
-                  <div id="fileupload" class="upload">
-                      <span>Upload</span>
-                  </div>
-              </li>
+                        <li>
+                            <div id="fileupload" class="upload">
+                                <span>Upload</span>
+                            </div>
+                        </li>
 
               <li class="dropdown user">
-                  <a href="" class="dropdown-toggle" data-toggle="dropdown" style="padding:0px;background-color:#0a0909;margin-left:10px;">
+                  <a href="" class="dropdown-toggle color-out" data-toggle="dropdown" style="padding:0px;margin-left:10px;">
                       <b><span style="float:right;margin-right:-18px;"><i class="fa fa-user name"></i>{{ $ctrl.user.userName }} <i class="fa fa-angle-down"></i></span></b>
                       <br>
                       <span style="font-size:15px;">{{ $ctrl.user.role }}</span>
                   </a>
 
-                  <ul class="dropdown-menu" style="text-align:left;padding-top:0px;padding-bottom:0px;padding-left:10px;background-color:black;">
+                  <ul class="dropdown-menu sym-log" style="text-align:left;padding-top:0px;padding-bottom:0px;padding-left:10px;">
                       <li><logout></logout></li>
                   </ul>
               </li>

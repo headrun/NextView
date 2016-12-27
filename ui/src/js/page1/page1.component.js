@@ -5,11 +5,11 @@
          .component("page1", {
 
            "templateUrl": "/js/page1/page1.html",
-           "controller": ['$http','$scope',
+           "controller": ['$http','$scope','$rootScope',
 
-           function ($http,$scope) {
-
+           function ($http,$scope,$rootScope) {
              var self = this;
+             var color = $rootScope.color;
              var from_to = '/api/from_to/?'
              var error_api = '/api/error_board'
              var def_disp = '/api/default'
@@ -31,7 +31,8 @@
              $('#select').daterangepicker({
                     "autoApply": true,
                     "locale": {
-                        "format": 'YYYY-MM-DD'
+                        "format": 'YYYY-MM-DD',
+                        "separator": ' to '
                     },
               }, function(start, end, label) {
                 self.start = start.format('YYYY-MM-DD');
@@ -83,167 +84,12 @@
                     'self.chartOptions19':self.chartOptions19,
                     'self.chartOptions20':self.chartOptions20,
                     'self.chartOptions21':self.chartOptions21,
+                    'self.chartOptions22':self.chartOptions22,
+                    'self.chartOptions23':self.chartOptions23,
+                    'self.chartOptions24':self.chartOptions24,
+                    'self.chartOptions25':self.chartOptions25,
                     };
-                    /*self.list_object = {
-                        "productivity_chart": {
-                            'title': 'Production Trends',
-                            'id': 1,
-                            'col': 12,
-                            'api': 'chartOptions',
-                            'opt': self.chartOptions,
-                            'widget': 1
-                        },
-                        "internal_error_accuracy": {
-                            'title': 'Internal Accuracy',
-                            'id': 2,
-                            'col': 6,
-                            'api': '',
-                            'opt': self.chartOptions4,
-                            'widget': 0
-                        },
-                        "external_error_accuracy": {
-                            'title': 'External Accuracy',
-                            'id': 3,
-                            'col': 6,
-                            'api': '',
-                            'opt': self.chartOptions6,
-                            'widget': 0
-                        },
-                        "internal_error_accuracy_pie":{
-                            'title': 'Internal Accuracy Graph [PIE]',
-                            'id': 4,
-                            'col': 6,
-                            'api': '',
-                            'opt': self.chartOptions5,
-                            'widget': 0
-                        },
-                        "external_error_accuracy_pie":{
-                            'title': 'External Accuracy Graph [PIE]',
-                            'id': 5,
-                            'col': 6,
-                            'api': '',
-                            'opt': self.chartOptions5_2,
-                            'widget': 0
-                        },
-                        "internal_accuracy_timeline": {
-                            'title': 'Internal Accuracy Trends',
-                            'id': 6,
-                            'col': 12,
-                            'api': 'chartOptions9',
-                            'opt': self.chartOptions9,
-                            'widget': 1
-                        },
-                        "external_accuracy_timeline": {
-                            'title': 'External Accuracy Trends',
-                            'id': 7,
-                            'col': 12,
-                            'api': 'chartOptions9_2',
-                            'opt': self.chartOptions9_2,
-                            'widget': 1
-                        },
-                        "productivity_bar_graph": {
-                            'title': 'Production Chart',
-                            'id': 8,
-                            'col': 12,
-                            'api': 'chartOptions10',
-                            'opt': self.chartOptions10,
-                            'widget': 1
-                        },
-                        "utilisation_wrt_work_packet": {
-                            'title': 'Utilisation Trends',
-                            'id': 9,
-                            'col': 6,
-                            'api': '',
-                            'opt': self.chartOptions15,
-                            'widget': 0
-                        },
-                        "utilisation_wrt_wp_date": {
-                            'title': 'WorkPacket Utilisation Trends',
-                            'id': 10,
-                            'col': 6,
-                            'api': '',
-                            'opt': self.chartOptions15_2,
-                            'widget': 0
-                        },
-                        "total_fte": {
-                            'title': 'WorkPacket Wise FTE',
-                            'id': 11,
-                            'col': 12,
-                            'api': '',
-                            'opt': self.chartOptions16,
-                            'widget': 0
-                        },
-                        "sum_total_fte": {
-                            'title': 'Total FTE',
-                            'id': 12,
-                            'col': 6,
-                            'api': '',
-                            'opt': self.chartOptions16_2,
-                            'widget': 0
-                        },
-                        "volume_bar_graph": {
-                            'title': 'Volume Movement',
-                            'id': 13,
-                            'col': 12,
-                            'api': 'chartOptions17',
-                            'opt': self.chartOptions17,
-                            'widget': 1
-                        },
-                        "volume_productivity_graph": {
-                            'title': 'Production Vs Volume',
-                            'id': 13,
-                            'col': 6,
-                            'api': 'chartOptions18',
-                            'opt': self.chartOptions18,
-                            'widget': 1
-                        }
-                    };*/
-                    /*self.list_object_drilldown = {
-                    "Production":[
-                        "name",
-                        "sub_packet",
-                        "done"
-                    ],
-                    "Internal":[
-                        "name",
-                        "audited_count",
-                        "total_errors"
-                    ],
-                    "External":[
-                        "name",
-                        "audited_count",
-                        "total_errors"
-                    ],
-                    "Internal_Bar":[
-                        "date",
-                        "name",
-                        "audited_count",
-                        "total_errors"
-                    ],
-                    "External_Bar":[
-                        "date",
-                        "name",
-                        "audited_count",
-                        "total_errors"
-                    ],
-                    "Internal_Bar_Pie":[
-                        "date",
-                        "name",
-                        "audited_count",
-                        "total_errors"
-                    ],
-                    "External_Bar_Pie":[
-                        "date",
-                        "name",
-                        "audited_count",
-                        "total_errors"
-                    ],
-                    "Productivity_Bar":[
-                        "name",
-                        "sub_packet",
-                        "done"
-                    ]
-                    };*/
+
                     var final_layout_list = [];
                     for (var single in self.layout_list){
                         for (var double in self.list_object){
@@ -283,7 +129,7 @@
                     self.location = pro_cen_nam.split('-')[0].replace(' ','') + ' - '
                     self.project = pro_cen_nam.split('-')[1].replace(' ','') + ' - '
                     var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + self.project
-                            + '&center=' + self.location + '&type=' + self.day_type;
+                              + '&center=' + self.location  + '&type=' + self.day_type;
                     self.main_render(from_to_data)
                 }
              })
@@ -325,6 +171,15 @@
                                     //$('#1').remove();
                                 }
                             }
+                            
+                            if (result.result.fin.sub_packet) {
+                                    console.log('sub_packet_exist');
+                                }
+                            else {
+                                    $('#2').hide();
+                                    //$('#1').remove();
+                              }                            
+
                         for (var sub_pro in self.drop_list) {
                             self.sub_pro_sel.options[self.sub_pro_sel.options.length] = new Option(sub_pro, sub_pro);
                         }
@@ -495,7 +350,7 @@
                             /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                                     + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                    + '&center=' + self.location + '&type=' + 'day'  + final_work;
+                                  + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
                                 self.chart_render(result,self.project,self.location);
@@ -543,7 +398,7 @@
                             /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                                     + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                    + '&center=' + self.location + '&type=' + 'day'  + final_work;
+                                  + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
                                 self.chart_render(result,self.project,self.location);
@@ -591,7 +446,7 @@
                             /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                                     + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                    + '&center=' + self.location + '&type=' + 'day'  + final_work;
+                                  + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.chart_render(result,self.project,self.location);
                             });
@@ -637,7 +492,7 @@
             /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                     + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                    + '&center=' + self.location + '&type=' + 'day'  + final_work;
+                   + '&center=' + self.location + '&type=' + 'day'  + final_work;
             $http({method:"GET", url:from_to_data}).success(function(result){
                             self.chart_render(result,self.project,self.location);
             });
@@ -698,6 +553,7 @@
                         var url_to_call = 'api/project/?name=' + self.project;
                         $http({method:"GET", url:url_to_call}).success(function(result){
                             var pro_cen_nam = result.result.list[1]
+                            //var pro_cen_nam = result.result.list[1].split(' - ')[1];
                             self.first = result.result.dates.from_date;
                             self.lastDate = self.first;
                             self.last = result.result.dates.to_date;
@@ -710,12 +566,12 @@
                         $('.day').siblings().removeClass('active');
                         if (self.project == "Wallmart - "){
                             var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + 'DellBilling - ' +
-                                '&center=' + 'Salem - ' + '&type=' + self.day_type;
+                                 '&center=' + 'Salem' + '&type=' + self.day_type;
                         }
                         else
                         {
                          var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + self.project +
-                          '&center=' + self.location + '&type=' + 'day';
+                             '&center=' + self.location + '&type=' + 'day';
                         }
                         self.tabData.state = JSON.parse("{}");
                         self.main_render(from_to_data)
@@ -726,8 +582,7 @@
              this.$onDestroy = function () {
                return unWatch && unWatch();
              }
-             var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + self.project
-                         + '&center=' + self.location;
+             var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + self.project + '&center=' + self.location;
 
                 self.last = self.firstDate;
                 self.first = self.lastDate;
@@ -750,7 +605,7 @@
                 var from = dateEntered.split('to')[0].replace(' ','');
                 var to = dateEntered.split('to')[1].replace(' ','');
                 var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                         + '&center=' + self.location + '&type=' + self.day_type + final_work;
+                        + '&center=' + self.location + '&type=' + self.day_type + final_work;
                 console.log(from_to_data);
                 $http({method:"GET", url:from_to_data}).success(function(result){
                             self.hideLoading();
@@ -849,8 +704,8 @@
                                     var pro_drill = data.result.table_headers;
                                     //var pro_drill = drilldown_config[proj];
                                     var chart_type = data.result.type;
-                                    self.fields_list_drilldown = pro_drill;
                                     //self.fields_list_drilldown = pro_drill[chart_type];
+                                    self.fields_list_drilldown = pro_drill;
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
@@ -1179,8 +1034,8 @@
                                     var pro_drill = data.result.table_headers;
                                     //var pro_drill = drilldown_config[proj];
                                     var chart_type = data.result.type;
-                                    self.fields_list_drilldown = pro_drill;
                                     //self.fields_list_drilldown = pro_drill[chart_type];
+                                    self.fields_list_drilldown = pro_drill;
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
@@ -1291,8 +1146,8 @@
                                     var pro_drill = data.result.table_headers;
                                     //var pro_drill = drilldown_config[proj];
                                     var chart_type = data.result.type;
-                                    self.fields_list_drilldown = pro_drill;
                                     //self.fields_list_drilldown = pro_drill[chart_type];
+                                    self.fields_list_drilldown = pro_drill;
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
@@ -1397,6 +1252,7 @@
                             self.top_employee_details =  result.result.top_five_employee_details;
                             self.top_five = result.result.only_top_five;
                             angular.extend(self.chartOptions, {
+
                                 xAxis: {
                                     categories: self.high_data_gener[0].data.date,
                                     title: {
@@ -1404,7 +1260,8 @@
                                     }
                                 },
                                 plotOptions: {
-                                    series : {
+
+                                     series : {
                                         allowPointSelect: true,
                                         cursor: 'pointer',
                                         point: {
@@ -1429,8 +1286,11 @@
                                     self.names = data.result.data;
                                     var proj = data.result.project;
                                     var pro_drill = data.result.table_headers;
+                                    //var pro_drill = drilldown_config[proj];
                                     var chart_type = data.result.type;
                                     self.fields_list_drilldown = pro_drill;
+                                    //self.fields_list_drilldown = pro_drill[chart_type];
+                                    //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
@@ -1448,6 +1308,71 @@
                series: self.high_data_gener[0].productivity_data
              });
 
+
+                            /*angular.extend(self.chartOptions22, {
+                                xAxis: {
+                                    categories: self.high_data_gener[0].data.date,
+                                    title: {
+                                        text: '',
+                                    }
+                                },
+                                plotOptions: {
+                                    series : {
+                                        allowPointSelect: true,
+                                        cursor: 'pointer',
+                                        point: {
+                                            events:{
+                                             select: function(e) {
+                                             var chart_name = 'top_employee_performance_details';
+                                             var is_drill = self.list_object[chart_name].is_drilldown;
+                                             if (is_drill){
+                                             var addition = '&project=' +pro + '&center=' +loc;
+                                             console.log(e.target.series.name);
+                                             var productivity_graph ='/api/chart_data/?'
+                                             var packet_clicked = e.target.series.name;
+                                             var is_exist = packet_clicked.indexOf('&');
+                                             if (is_exist > 0){
+                                                packet_clicked = packet_clicked.replace(' & ',' and ')
+                                             }
+                            $http.get( productivity_graph+ 'packet=' + packet_clicked + '&date=' + e.target.category +
+                            '&type=' + 'Top Employee Performance Details' + addition).success(
+                            function(data, status)
+                                {
+                                    $('#myModal').modal('show');
+                                    self.names = data.result.data;
+                                    var proj = data.result.project;
+                                    var pro_drill = data.result.table_headers;
+                                    //var pro_drill = drilldown_config[proj];
+                                    var chart_type = data.result.type;
+                                    self.fields_list_drilldown = pro_drill;
+                                    //self.fields_list_drilldown = pro_drill[chart_type];
+                                    //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
+                                    self.chart_type = data.result.type;
+                                    console.log(self.names);
+                                }).error(function(error){ console.log("error")});
+                                }
+                        }
+                    }
+                    }
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+               series: self.high_data_gener[0].only_top_five
+             });
+
+
+                            angular.extend(self.chartOptions22, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date,
+                                title: {
+                                    text: '',
+                                }
+                            },*/
+
                             angular.extend(self.chartOptions9_2.yAxis,{
                                 min:result.result.min_external_time_line,
                                 max:result.result.max_external_time_line
@@ -1459,6 +1384,9 @@
                                     text: '',
                                 }
                             },
+
+
+
 plotOptions: {
                 series : {
                     allowPointSelect: true,
@@ -1486,9 +1414,11 @@ plotOptions: {
                                     self.names = data.result.data;
                                     var proj = data.result.project;
                                     var pro_drill = data.result.table_headers;
+                                    //var pro_drill = drilldown_config[proj];
                                     var chart_type = data.result.type;
-                                    self.fields_list_drilldown = pro_drill[chart_type];
                                     self.fields_list_drilldown = pro_drill;
+                                    //self.fields_list_drilldown = pro_drill[chart_type];
+                                    //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
@@ -1517,6 +1447,7 @@ plotOptions: {
                                     text: '',
                                 }
                             },
+
 plotOptions: {
                 series : {
                     allowPointSelect: true,
@@ -1544,8 +1475,11 @@ plotOptions: {
                                     self.names = data.result.data;
                                     var proj = data.result.project;
                                     var pro_drill = data.result.table_headers;
+                                    //var pro_drill = drilldown_config[proj];
                                     var chart_type = data.result.type;
                                     self.fields_list_drilldown = pro_drill;
+                                    //self.fields_list_drilldown = pro_drill[chart_type];
+                                    //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
@@ -1562,6 +1496,12 @@ plotOptions: {
                },
                             series: self.high_data_gener[0].internal_time_line
                             });
+
+                            angular.extend(self.chartOptions19.yAxis,{
+                                min:result.result.min_original_productivity_graph,
+                                max:result.result.max_original_productivity_graph
+                            });
+
                             angular.extend(self.chartOptions19, {
                             xAxis: {
                                 categories: self.high_data_gener[0].data.date,
@@ -1583,6 +1523,7 @@ plotOptions: {
                             series: self.high_data_gener[0].original_productivity_graph
                             });
                             angular.extend(self.chartOptions20, {
+
                             xAxis: {
                                 categories: self.high_data_gener[0].data.date,
                                 title: {
@@ -1654,8 +1595,11 @@ plotOptions: {
                                     self.names = data.result.data;
                                     var proj = data.result.project;
                                     var pro_drill = data.result.table_headers;
+                                    //var pro_drill = drilldown_config[proj];
                                     var chart_type = data.result.type;
                                     self.fields_list_drilldown = pro_drill;
+                                    //self.fields_list_drilldown = pro_drill[chart_type];
+                                    //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
@@ -1779,6 +1723,49 @@ plotOptions: {
                                 }
                             }
                             });
+
+
+                            angular.extend(self.chartOptions23,{
+                                series: [{
+                                    name: '',
+                                    colorByPoint: true,
+                                    cursor: 'pointer',
+                                    data: self.high_data_gener[0].internal_errors_types
+                                }]
+                            });
+                            angular.extend(self.chartOptions23.plotOptions.pie.point.events,{
+                            select: function(e) {
+                            var chart_name = 'tat';
+                            var is_drill = self.list_object[chart_name].is_drilldown;
+                            if (is_drill){
+                            var addition = '&project=' + pro + '&center=' + loc;
+                            console.log(e.target.name);
+                            var packet_clicked = e.target.name;
+                            var is_exist = packet_clicked.indexOf('&');
+                            if (is_exist > 0){
+                                packet_clicked = packet_clicked.replace(' & ',' and ')
+                            }
+                            var internal_bar_graph ='/api/chart_data/?';
+                            var dates_list = self.get_date();
+                            //var dates_list = [self.start,self.end];
+                            $http.get( internal_bar_graph + 'packet=' + packet_clicked + '&from=' + dates_list[0] + '&to=' + dates_list[1]
+                             + '&type=' + 'TAT' + addition).success(
+                            function(data, status)
+                                {
+                                    $('#myModal').modal('show');
+                                    self.names = data.result.data;
+                                    var proj = data.result.project;
+                                    var pro_drill = drilldown_config[proj];
+                                    var chart_type = data.result.type;
+                                    self.fields_list_drilldown = pro_drill[chart_type];
+                                    //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
+                                    self.chart_type = data.result.type;
+                                    console.log(self.names);
+                                }).error(function(error){ console.log("error")});
+                                }
+                            }
+                            });
+
                             angular.extend(self.chartOptions5_2,{
                                 series: [{
                                     name: '',
@@ -1844,8 +1831,11 @@ plotOptions: {
                                     $('#myModal').modal('show');
                                     self.names = data.result.data;
                                     var proj = data.result.project;
+                                    //var pro_drill = drilldown_config[proj];
                                     var pro_drill = data.result.table_headers;
                                     var chart_type = data.result.type;
+                                    //self.fields_list_drilldown = pro_drill[chart_type];
+                                    //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
                                     self.fields_list_drilldown = pro_drill;
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
@@ -1890,10 +1880,12 @@ plotOptions: {
                                     $('#myModal').modal('show');
                                     self.names = data.result.data;
                                     var proj = data.result.project;
+                                    //var pro_drill = drilldown_config[proj];
                                     var pro_drill = data.result.table_headers;
                                     var chart_type = data.result.type;
-                                    self.fields_list_drilldown = pro_drill;
+                                    //self.fields_list_drilldown = pro_drill[chart_type];
                                     //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
+                                    self.fields_list_drilldown = pro_drill;
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
@@ -1912,6 +1904,12 @@ plotOptions: {
                                 min:result.result.ext_min_value,
                                 max:result.result.ext_max_value
                             });
+
+                            angular.extend(self.chartOptions15.yAxis,{
+                                min:result.result.min_original_utilization_graph,
+                                max:result.result.max_original_utilization_graph
+                            });
+
                             angular.extend(self.chartOptions15, {
                                 xAxis: {
                                     categories: self.high_data_gener[0].data.date,
@@ -1931,6 +1929,47 @@ plotOptions: {
                                 },
                                 series: self.high_data_gener[0].original_utilization_graph
                             });
+
+                            angular.extend(self.chartOptions24, {
+                                xAxis: {
+                                    categories: self.high_data_gener[0].data.date,
+                                    title: {
+                                        text: '',
+                                    }
+                                },
+                                plotOptions: {
+                                    series : {
+                                        allowPointSelect: true,
+                                    },
+                                    bar: {
+                                        dataLabels: {
+                                            enabled: true
+                                        }
+                                    }
+                                },
+                                series: self.high_data_gener[0].utilization_fte_details
+                            });
+
+                            angular.extend(self.chartOptions25, {
+                                xAxis: {
+                                    categories: self.high_data_gener[0].data.date,
+                                    title: {
+                                        text: '',
+                                    }
+                                },
+                                plotOptions: {
+                                    series : {
+                                        allowPointSelect: true,
+                                    },
+                                    bar: {
+                                        dataLabels: {
+                                            enabled: true
+                                        }
+                                    }
+                                },
+                                series: self.high_data_gener[0].utilization_operational_details
+                            });
+
                             angular.extend(self.chartOptions15_2, {
                                 xAxis: {
                                     categories: self.high_data_gener[0].data.date,
@@ -2029,7 +2068,13 @@ plotOptions: {
                     self.sub_pac_sel_two = sub_pro.value;
                     self.wor_pac_sel_two = sub_pac.value;
                 }
-                else if ((wor_pac.length > 1) && (sub_pac.length > 1)){
+
+               else if ((wor_pac.length == 3) && (sub_pac.length == 1)){ 
+                    self.sub_pro_sel_two = wor_pac.value;
+                    self.sub_pac_sel_two = sub_pro.value;
+                    self.wor_pac_sel_two = sub_pac.value;
+                } 
+               else if ((wor_pac.length > 1) && (sub_pac.length > 1)){
                     self.sub_pro_sel_two = 'undefined';
                     self.sub_pac_sel_two = sub_pac.value;
                     self.wor_pac_sel_two = wor_pac.value;
@@ -2056,7 +2101,7 @@ plotOptions: {
                 }
                 var final_work =  '&sub_project=' + self.sub_pro_sel_two + '&sub_packet=' + self.sub_pac_sel_two + '&work_packet=' + self.packet_clicked;
                 var from_to_data = from_to + 'from=' + dates_list[0] + '&to=' + dates_list[1] + '&project=' + self.project
-                         + '&center=' + self.location + '&type=' + 'day' + final_work;
+                       + '&center=' + self.location + '&type=' + 'day' + final_work;
                 $('.day').addClass('active');
                 $('.day').siblings().removeClass('active');
 
@@ -2091,7 +2136,7 @@ plotOptions: {
             var to = dateEntered.split('to')[1].replace(' ','');
             var placeholder = ''
             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+                   + '&center=' + self.location + '&type=' + self.day_type  + final_work;
 
             $http({method:"GET", url:from_to_data}).success(function(result){
                 self.high_data_gener = [];
@@ -2160,6 +2205,11 @@ plotOptions: {
                             },
                             series: self.high_data_gener[0].internal_time_line
                             });
+
+                            /*angular.extend(self.chartOptions19.yAxis,{
+                                min:result.result.min_original_productivity_graph,
+                                max:result.result.max_original_productivity_graph
+                            });*/
                             angular.extend(self.chartOptions19, {
                             xAxis: {
                                 categories: self.high_data_gener[0].data.date,
@@ -2224,6 +2274,15 @@ plotOptions: {
                                     data: self.high_data_gener[0].internal_errors_types
                                 }]
                             });
+
+                            angular.extend(self.chartOptions23,{
+                                series: [{
+                                    name: '',
+                                    colorByPoint: true,
+                                    data: self.high_data_gener[0].internal_errors_types
+                                }]
+                            });
+
                             angular.extend(self.chartOptions5_2,{
                                 series: [{
                                     name: '',
@@ -2311,7 +2370,10 @@ angular.extend(self.chartOptions18, {
                 chart : {
                  backgroundColor: "transparent"
                 },
-                               yAxis: {
+                lang: {
+			       thousandsSep: ','
+		        },
+                yAxis: {
                 gridLineColor: 'a2a2a2',
                 min: 0,
                 title: {
@@ -2326,6 +2388,7 @@ angular.extend(self.chartOptions18, {
                tooltip: {
                 valueSuffix: ''
                },
+
                credits: {
                 enabled: false
                },
@@ -2476,6 +2539,40 @@ angular.extend(self.chartOptions18, {
                         }
                     },
                 };
+
+            self.chartOptions23 = {
+                chart: {
+                    backgroundColor: "transparent",
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie'
+                  },
+                title: {
+                    text: ''
+                  },
+                tooltip: {
+                    pointFormat: '<b>{point.y}</b>'
+                  },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        point: {
+                           events:{
+                           }
+                        },
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y} ',
+                            style: {
+                                color:(Highcharts.theme && Highcharts.theme.background2) || '#EEE'
+                               }
+                            }
+                        }
+                    },
+                };
+
             self.chartOptions5_2 = {
                 chart: {
                     backgroundColor: "transparent",
@@ -2570,6 +2667,55 @@ angular.extend(self.chartOptions18, {
                 enabled: false
                },
             };
+
+            self.chartOptions24 = {
+                chart : {
+                 backgroundColor: "transparent"
+                },
+                               yAxis: {
+                gridLineColor: 'a2a2a2',
+                min: 0,
+                title: {
+                 text: '',
+                 align: 'high'
+                },
+                labels: {
+                 overflow: 'justify'
+                }
+               },
+
+               tooltip: {
+                valueSuffix: ''
+               },
+               credits: {
+                enabled: false
+               },
+            };
+
+            self.chartOptions25 = {
+                chart : {
+                 backgroundColor: "transparent"
+                },
+                               yAxis: {
+                gridLineColor: 'a2a2a2',
+                min: 0,
+                title: {
+                 text: '',
+                 align: 'high'
+                },
+                labels: {
+                 overflow: 'justify'
+                }
+               },
+
+               tooltip: {
+                valueSuffix: ''
+               },
+               credits: {
+                enabled: false
+               },
+            };
+
             self.chartOptions15_2 = {
                 chart : {
                  backgroundColor: "transparent"
@@ -2810,6 +2956,10 @@ angular.extend(self.chartOptions18, {
                }
         },
     }
+
+
+    self.chartOptions22 = '<p> workpacket </p>'
+
 
 
             //self.hideLoading();

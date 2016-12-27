@@ -21,6 +21,7 @@ admin.site.register(Customer,CustomerAdmin)
 
 class HeadcountAdmin(admin.ModelAdmin):
     list_display = ['work_packet','sub_packet','billable_agent']
+    list_filter = ['project','center']
 admin.site.register(Headcount,HeadcountAdmin)
 
 class CentermanagerAdmin(admin.ModelAdmin):
@@ -36,6 +37,14 @@ class RawtableAdmin(admin.ModelAdmin):
     list_filter = ('work_packet', 'date','project','center')
 admin.site.register(RawTable,RawtableAdmin)
 
+class WidgetsAdmin(admin.ModelAdmin):
+    list_display = ['config_name','name','col','api','opt','id_num','day_type_widget','priority']
+admin.site.register(Widgets,WidgetsAdmin)
+
+class Widget_MappingAdmin(admin.ModelAdmin):
+    list_display = ['widget_name','user_name','widget_priority','is_display','is_drilldown']
+    list_filter = ['user_name']
+admin.site.register(Widget_Mapping,Widget_MappingAdmin)
 
 class RawtableAuthoringAdmin(admin.ModelAdmin):
     list_display = ['sub_project','work_packet','sub_packet','employee_id','per_day','norm','date','project','center','sheet_name']
@@ -60,6 +69,7 @@ admin.site.register(InternalerrorsAuthoring,InternalerrorsAuthoringAdmin)
 class ExternalerrorsAdmin(admin.ModelAdmin):
     list_display = ['sub_project','work_packet','sub_packet','audited_errors','total_errors','date','employee_id']
     list_filter = ('sub_project','work_packet','sub_packet','project','center')
+    list_display_links = ('work_packet',)
 admin.site.register(Externalerrors,ExternalerrorsAdmin)
 
 class ExternalerrorsAuthoringAdmin(admin.ModelAdmin):
@@ -75,13 +85,19 @@ class AuthoringtableAdmin(admin.ModelAdmin):
     list_filter = ['sheet_name','project','center']
 admin.site.register(Authoringtable,AuthoringtableAdmin)
 
+class HeadcountAuthoringAdmin(admin.ModelAdmin):
+    list_display = ['project','billable_agent','work_packet','work_packet','sub_packet']
+admin.site.register(HeadcountAuthoring,HeadcountAuthoringAdmin)
+
 class TargetsAdmin(admin.ModelAdmin):
     list_display = ['work_packet','sub_packet','from_date','to_date','target']
+    list_filter = ['project']
 admin.site.register(Targets,TargetsAdmin)
 
 
 class TargetsAuthoringAdmin(admin.ModelAdmin):
     list_display = ['work_packet','sub_project','sub_packet']
+    list_filter = ['project']
 admin.site.register(TargetsAuthoring,TargetsAuthoringAdmin)
 
 class WorktrackAdmin(admin.ModelAdmin):

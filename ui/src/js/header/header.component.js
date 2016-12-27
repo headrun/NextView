@@ -26,6 +26,7 @@
                 }
                 if (this.user.roles.indexOf("nextwealth_manager") >= 0) {
                     $('#fileupload').hide();
+                    $('#admin_but').hide();
                     this.user.role = "Nextwealth Manager";
                 }
                 if (this.user.role == "Customer") {
@@ -78,8 +79,13 @@
                     {
                     var map_list = result.result.list;
                     self.mapping_list = map_list;
-                    var option = map_list[1];
-                    self.select_option = option.split(' - ')[1];
+                    if (self.mapping_list.length > 1){
+                             var option = map_list[1];
+                             self.select_option = option.split(' - ')[1];
+                        }
+                    else{
+                        self.select_option = map_list[0].split(' - ')[1];
+                        }
                     }
 
 

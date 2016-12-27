@@ -112,7 +112,6 @@ class HeadcountAuthoring(models.Model):
     support_others_managers = models.CharField(max_length=255, blank=True)
     total = models.CharField(max_length=125, blank=True)
     sheet_name = models.CharField(max_length=255, default='')
-
     class Meta:
         db_table = u'headcount_authoring'
     def __unicode__(self):
@@ -337,6 +336,7 @@ class TargetsAuthoring(models.Model):
     work_packet = models.CharField(max_length=255)
     sub_packet  = models.CharField(max_length=255, blank=True)
     target      = models.CharField(max_length=125)
+    fte_target = models.CharField(max_length=125)
     center = models.ForeignKey(Center, null=True)
     project = models.ForeignKey(Project, null=True)
     sheet_name = models.CharField(max_length=255, default='')
