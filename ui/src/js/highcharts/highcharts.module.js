@@ -130,7 +130,11 @@
 
              options.chart.renderTo = element;
 
-             return new Hc.Chart(options);
+             var onComplete = options.onComplete;
+
+             delete options.onComplete;
+
+             return new Hc.Chart(options, onComplete);
            };
          });
 

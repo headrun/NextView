@@ -9,6 +9,71 @@
     color: black;
 }
 
+body.add-annotations div.annotations-bd {
+  position: fixed;
+  display: block;
+}
+
+.icon-action-group {
+  float: right;
+}
+
+body div.annotations-bd {
+  top: 0px;
+  right: 0px;
+  left: 0px;
+  bottom: 0px;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  z-index: 100;
+  position: relative;
+}
+
+body div.annotation-popover {
+  position: absolute;
+  width: 300px;
+}
+body div.annotation-popover > h3.popover-title {
+  display: block;
+  position: relative;
+}
+body div.annotation-popover > h3.popover-title > i {
+  position: absolute;
+}
+body div.annotation-popover > h3.popover-title > i.icon-trash {
+  right: 13px;
+  top: 10px;
+  cursor: pointer;
+}
+body div.annotation-popover > h3.popover-title > i.annotation-loading {
+  right: 32px;
+  background-image: url(/img/circle_loader.gif);
+  width: 20px;
+  height: 20px;
+  display: none;
+}
+body div.annotation-popover > h3.popover-title > i.annotation-loading.show {
+  display: inline-block;
+}
+body div.annotation-popover > div.popover-content {
+  padding: 9px;
+}
+body div.annotation-popover > div.popover-content > p {
+  margin: 0px;
+  border: 1px solid transparent;
+}
+body div.annotation-popover > div.popover-content > p:hover {
+  border: 1px solid #ddd;
+}
+
+body div.annotation-popover > h3.popover-title > i.annotation-loading > div.icon-blue {
+    background-image: url(/img/glyphicons-halflings-blue.png) !important;
+}
+
+body div.annotation-popover > h3.popover-title > i.annotation-loading > div.icon-trash {
+    background-position: -456px 0;
+}
+
 .button {
     background-color: #3396C9;
     color: white;
@@ -116,7 +181,6 @@ table {
     border-radius: 0.3em;
     background-color: #f5f5f5;
 }
-
 </style>
 <body>
     <div class="row">
@@ -131,50 +195,51 @@ table {
                 <form>
                     <div class="form-group" style="float:left;padding-left:1%;padding-top:5px;margin-bottom:0px;">
                         <select class="form-control input-sm" id="{{$index}}" style="background-color:#ffffff;color:#000000;">
-                            <option>All</option>
-                        </select>
-                    </div>
-                </form>
-             </div>
-        </div>
-
+                        <option>All</option>
+                    </select>
+                </div>
+            </form>
+         </div>
+        <button id="annotation_button" type="button" class="btn btn-default">Show Annotations</button>
+        <div class="annotations-bd"></div>
     </div>
-    <div class="row" ng-repeat="i in $ctrl.useful_layout">
-        <div ng-repeat="j in i" class="col-sm-{{j.col}} widget">
-            <div class="widget-content">
-                <div class="widget-title clearfix" title="Sample Widg">
-                    <span class="pull-left">{{j.name}}</span>
-                </div>
-                <div class="widget-body">
-                    <div ng-if="j.day_type_widget" class="input-group"id="inner2">
-                         <div class="btn-group">
-                            <button type="button" id="day" class="active btn btn-default day" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" style="cursor:pointer;">Day</button>
-                            <button type="button" id="week" class="btn btn-default week" ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')" style="cursor:pointer;">Week</button>
-                            <button type="button" id="Month" class="btn btn-default month" ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')" style="cursor:pointer;">Month</button>
-                         </div>
+</div>
+<div class="row" ng-repeat="i in $ctrl.useful_layout">
+    <div ng-repeat="j in i" class="col-sm-{{j.col}} widget">
+        <div class="widget-content">
+            <div class="widget-title clearfix" title="Sample Widg">
+                <span class="pull-left">{{j.name}}</span>
+            </div>
+            <div class="widget-body">
+                <div ng-if="j.day_type_widget" class="input-group"id="inner2">
+                     <div class="btn-group">
+                        <button type="button" id="day" class="active btn btn-default day" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" style="cursor:pointer;">Day</button>
+                        <button type="button" id="week" class="btn btn-default week" ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')" style="cursor:pointer;">Week</button>
+                        <button type="button" id="Month" class="btn btn-default month" ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')" style="cursor:pointer;">Month</button>
                      </div>
-                    <highcharts options="$ctrl.final_layout_values_list[j.opt]"></highcharts>
-                </div>
+                 </div>
+                <highcharts options="$ctrl.final_layout_values_list[j.opt]"></highcharts>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="row">
-        <div class="col-md-6" id="emp_widget">
-            <div class="graph">
-                <div class="widget-title clearfix" title="Sample Widg">
-                    <h4>Top Employee Performance Details</h4>
-                </div>
-                <table class="table table-bordered line">
-                        <thead>
-                            <tr class="row_name">
-                                <th>Rank</th>
-                                <th>Employee Name</th>
-                                <th>Productivity</th>
-                                <th>Packet</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+<div class="row">
+    <div class="col-md-6" id="emp_widget">
+        <div class="graph">
+            <div class="widget-title clearfix" title="Sample Widg">
+                <h4>Top Employee Performance Details</h4>
+            </div>
+            <table class="table table-bordered line">
+                    <thead>
+                        <tr class="row_name">
+                            <th>Rank</th>
+                            <th>Employee Name</th>
+                            <th>Productivity</th>
+                            <th>Packet</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                             <tr ng-repeat="l in $ctrl.top_five">
                                 <td>{{l.rank}}</td>
                                 <td>{{l.employee_id}}</td>
@@ -220,6 +285,7 @@ table {
        </div>
     </div>
   </div>
+
 </body>
 
 <script>

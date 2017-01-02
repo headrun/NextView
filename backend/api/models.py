@@ -399,3 +399,22 @@ class Color_Mapping(models.Model):
 
     def __unicode__(self):
         return self.work_packet
+
+class Annotation(models.Model):
+    epoch = models.CharField(max_length=40,verbose_name='selected_date')
+    text = models.TextField()
+    #key = models.CharField(max_length=255, unique=True)
+    #key = models.TextField()
+    key = models.CharField(max_length=512)
+    widget_name = models.ForeignKey(Widgets)
+    dt_created = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User)
+    center = models.ForeignKey(Center)
+    project = models.ForeignKey(Project)
+
+    class Meta:
+        db_table = u'annotations'
+        #unique_together = (('project', 'center'),('key','epoch'),)
+
+    def __unicode__(self):
+        return self.epoch

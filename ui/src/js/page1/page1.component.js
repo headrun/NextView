@@ -1,6 +1,8 @@
 ;(function (angular) {
   "use strict";
 
+  var Annotation = buzz_data.Annotation;
+
   angular.module("page1")
          .component("page1", {
 
@@ -27,6 +29,16 @@
              var lastDate = la_y + '-' + la_mm + '-' + la_dd;
              var project = 'api/project/';
              var drop_down_link = '/api/dropdown_data/';
+
+             self.annotations_data = {};
+
+             $('#annotation_button').click(function(){
+
+                var hasAnnotations = $("body").hasClass("add_annotation");
+
+                $("body")[!hasAnnotations ? "addClass"
+                                          : "removeClass"]('add_annotation');
+             });
 
              $('#select').daterangepicker({
                     "autoApply": true,
@@ -1267,6 +1279,12 @@
                                         point: {
                                             events:{
                                              select: function(e) {
+
+                                             if ($("body").hasClass("add_annotation")) {
+
+                                                return;
+                                             }
+
                                              var chart_name = 'productivity_chart';
                                              var is_drill = self.list_object[chart_name].is_drilldown;
                                              if (is_drill){
@@ -1295,6 +1313,14 @@
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
                                 }
+                        }, click : function (e) {
+
+
+                          if (!$("body").hasClass("add_annotation")) {
+
+                            return;
+                          }
+                          return new Annotation("productivity_chart", $(e.currentTarget), e.point.series.chart, e.point);
                         }
                     }
                     }
@@ -1305,8 +1331,65 @@
                  }
                 }
                },
-               series: self.high_data_gener[0].productivity_data
+               series: self.high_data_gener[0].productivity_data,
+               onComplete: function(chart){
+
+                 var series = null;
+
+                 var chart_data = chart.series;
+
+                 for(var i in chart_data){
+
+                   series = chart_data[i];
+
+                   (function(series){
+
+                     $http({method:"GET", url:"/api/annotations/?series_name="+series.name}).success(function(annotations){
+
+                       annotations = _.sortBy(annotations.result, function(annotation){ return annotation.epoch });
+
+                       $.each(annotations, function(j, annotation){
+
+                         var point = _.filter(series.points, function(point){ return point.x == annotation.epoch});
+
+                         point = point[0];
+
+                         if(annotation.epoch){
+                           var a = new Annotation("productivity_chart", $(self.chartOptions.chart.renderTo.innerHTML),
+                                chart, point, annotation);
+
+                           console.log(a);
+                           }
+                       })
+
+                     })
+                   }(series));
+                 }
+               }
              });
+             /*
+             var query_dict = {};
+             self.series = null;
+             var chart_data = self.chartOptions
+             for (var i in self.chartOptions.series){
+                self.series = self.chartOptions.series[i];
+                (function(){
+
+                    $http({method:"GET", url:"/api/annotations/?series_name="+self.series.name}).success(function(annotations){
+                        annotations = _.sortBy(annotations, function(annotation){ return annotation.epoch });
+                        $.each(annotations, function(j, annotation){
+                            if(annotation.epoch){
+                                var a = new Annotation("productivity_chart", $(self.chartOptions.chart.renderTo.innerHTML)
+                                    ,self.chartOptions,annotation.epoch, annotation);
+
+                                console.log(a);
+
+                                }
+                            })
+                    })
+                }());
+             }*/
+
 
 
                             /*angular.extend(self.chartOptions22, {

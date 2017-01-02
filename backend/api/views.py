@@ -21,6 +21,7 @@ import re
 import json
 from django.apps import apps
 from collections import OrderedDict
+from django.utils.timezone import utc
 
 def error_insert(request):
     pass
@@ -2473,7 +2474,7 @@ def external_internal_without_audit_graph(request,date_list,prj_id,center_obj,pa
         if total_done_value['per_day__max'] > 0:
             volume_list = RawTable.objects.filter(**query_set).values('sub_project','work_packet','sub_packet').distinct()
             count =0
-            for vol_type in volume_list:
+            for vol_type in extr_volumes_list:
                 final_work_packet = level_hierarchy_key(level_structure_key,vol_type)
                 if not final_work_packet:
                     final_work_packet = level_hierarchy_key(volume_list[count],vol_type)
@@ -3866,6 +3867,25 @@ def volume_graph_data(date_list,prj_id,center_obj,level_structure_key):
         return final_volume_graph
 
 
+def accuracy_query_generations(pro_id,cen_id,date,main_work_packet):
+    accuracy_query_set = {}
+    accuracy_query_set['project'] = pro_id
+    accuracy_query_set['center'] = cen_id
+    if isinstance(date, list):
+        accuracy_query_set['date__range']=[date[0], date[-1]]
+    else:
+        accuracy_query_set['date'] = date
+    if '_' in main_work_packet:
+        packets_list = main_work_packet.split('_')
+        accuracy_query_set['work_packet'] = packets_list[0]
+        accuracy_query_set['sub_packet'] = packets_list[1]
+    else:
+        accuracy_query_set['work_packet'] = main_work_packet
+
+    return accuracy_query_set
+
+
+
 def internal_bar_data(pro_id, cen_id, from_, to_, main_work_packet, chart_type,project):
     if (project == "Probe" and chart_type == 'External Accuracy') or (project == 'Ujjivan' and chart_type in ['External Accuracy','Internal Accuracy']):
         date_range = num_of_days(to_, from_)
@@ -3876,10 +3896,11 @@ def internal_bar_data(pro_id, cen_id, from_, to_, main_work_packet, chart_type,p
         table_headers = []
         #import pdb;pdb.set_trace()
         for date in date_range:
+            accuracy_query_set = accuracy_query_generations(pro_id,cen_id,date,main_work_packet)
             if chart_type == 'External Accuracy':
-                list_of = Externalerrors.objects.filter(project=pro_id, center=cen_id, date=date, work_packet=main_work_packet).values_list('employee_id','date','work_packet','total_errors','sub_packet')
+                list_of = Externalerrors.objects.filter(**accuracy_query_set).values_list('employee_id','date','work_packet','total_errors','sub_packet')
             elif project == 'Ujjivan' and chart_type == 'Internal Accuracy':
-                list_of = Internalerrors.objects.filter(project=pro_id, center=cen_id, date=date,work_packet=main_work_packet).values_list('employee_id', 'date','work_packet','total_errors','sub_packet')
+                list_of = Internalerrors.objects.filter(**accuracy_query_set).values_list('employee_id', 'date','work_packet','total_errors','sub_packet')
             for i in list_of:
                 per_day_value = RawTable.objects.filter(employee_id=i[0],date=i[1],work_packet=i[2]).values_list('per_day')
                 try: 
@@ -4055,7 +4076,14 @@ def internal_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type,proje
         final_internal_drilldown = {}
         final_internal_drilldown['type'] = chart_type
         final_internal_drilldown['project'] = project
-        list_of_internal = Externalerrors.objects.filter(project=pro_id,center=cen_id,date__range=[to_date[0], to_date[-1]],work_packet=work_packet).values_list('employee_id','work_packet','total_errors','date')
+        #list_of_internal = Externalerrors.objects.filter(project=pro_id,center=cen_id,date__range=[to_date[0], to_date[-1]],work_packet=work_packet).values_list('employee_id','work_packet','total_errors','date')
+        accuracy_query_set = accuracy_query_generations(pro_id, cen_id, to_date, work_packet)
+        if project == 'UjjivanNew' and chart_type == 'Internal Accuracy Trends':
+            #list_of_internal = Internalerrors.objects.filter(project=pro_id,center=cen_id,date__range=[to_date[0], to_date[-1]],work_packet=work_packet).values_list('employee_id','work_packet','total_errors','date')
+            list_of_internal = Internalerrors.objects.filter(**accuracy_query_set).values_list('employee_id','work_packet','total_errors','date')
+        elif chart_type == 'External Accuracy Trends':
+            list_of_internal = Externalerrors.objects.filter(**accuracy_query_set).values_list('employee_id','work_packet','total_errors','date')
+
         list_ext_data = []
         for i in list_of_internal:
             per_day_value = RawTable.objects.filter(employee_id=i[0],date=i[3],work_packet=i[1]).values_list('per_day')
@@ -4235,7 +4263,7 @@ def internal_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type,proje
 
 
 def internal_chart_data(pro_id,cen_id,to_date,work_packet,chart_type,project):
-    if (project == 'Probe' and chart_type == 'External Accuracy Trends') or (project == "Ujjivan" and chart_type in['External Accuracy Trends','Internal Accuracy Trends']):
+    if (project == 'Probe' and chart_type == 'External Accuracy Trends') or (project == "Ujjivan" and chart_type in ['External Accuracy Trends','Internal Accuracy Trends']):
         if len(to_date) == 2:
             final_internal_drilldown = {}
             final_val_res = internal_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type,project)
@@ -4248,10 +4276,11 @@ def internal_chart_data(pro_id,cen_id,to_date,work_packet,chart_type,project):
             #import pdb;pdb.set_trace()
             packets_list = work_packet.split('_')
             packets_list_type = ''
+            accuracy_query_set = accuracy_query_generations(pro_id, cen_id, to_date[0], work_packet)
             if project == 'Ujjivan' and chart_type == 'Internal Accuracy Trends':
-                list_of_internal = Internalerrors.objects.filter(project=pro_id,center=cen_id,date=to_date[0],work_packet=work_packet).values_list('employee_id','work_packet','total_errors','date','sub_packet')
+                list_of_internal = Internalerrors.objects.filter(**accuracy_query_set).values_list('employee_id','work_packet','total_errors','date','sub_packet')
             elif chart_type == 'External Accuracy Trends':
-                list_of_internal = Externalerrors.objects.filter(project=pro_id, center=cen_id, date=to_date[0],work_packet=work_packet).values_list('employee_id','work_packet','total_errors','date','sub_packet')
+                list_of_internal = Externalerrors.objects.filter(**accuracy_query_set).values_list('employee_id','work_packet','total_errors','date','sub_packet')
             final_internal_drilldown = {}
             final_internal_drilldown['type'] = chart_type
             final_internal_drilldown['project'] = project
@@ -4893,3 +4922,132 @@ def yesterdays_data(request):
     print result
     return HttpResponse(result)
 
+def get_annotations(request):
+    series_name = request.GET['series_name']
+    #level_name = request.POST.get("level_name", None)
+    #level_id = request.POST.get("level_id", None)
+    #series_name = request.POST.get("series_name", None)
+    #graph_name = request.POST.get("graph_name", None)
+    #from_date = request.POST.get("from_date")
+    #to_date = request.POST.get("to_date")
+
+    #text = 'added new annotation'
+    #epoch = '12345876543223456'
+    #key = 'DD#null#null#prod_widg'
+    #widget_name = Widgets.objects.all()[0]
+    #project = Project.objects.all()[0]
+    #center = Center.objects.all()[0]
+    #dt_created = datetime.datetime.now()
+
+    """
+    if not level_name or not level_id or not graph_name or not from_date or not to_date:
+
+        return HttpResponse(json.dumps({"status": "error", "message": "Invalid params"}), "error")
+
+    from_date = from_date + "-00-00-00"
+
+    to_date = to_date + "-23-59-59"
+
+    from_date = datetime.datetime.strptime(from_date, '%Y-%m-%d-%H-%M-%S').replace(tzinfo=utc)
+
+    from_date = from_date.strftime('%s') + "000"
+
+    to_date = datetime.datetime.strptime(to_date, '%Y-%m-%d-%H-%M-%S').replace(tzinfo=utc)
+
+    to_date = to_date.strftime('%s') + "000"
+    """
+
+    #annotations = Annotation.objects.filter(level_name=level_name, level_id=level_id, series_name=series_name, epoch__gte=from_date).filter(epoch__lte=to_date)
+    annotations = Annotation.objects.filter(key__contains=series_name)
+
+    annotations_data = []
+
+    if annotations:
+        for annotation in annotations:
+
+            final_data = {}
+
+            final_data['widget_name_id'] = annotation.widget_name_id
+            final_data['center_id'] = annotation.center_id
+            final_data['text'] = annotation.text
+            final_data['epoch'] = annotation.epoch
+            final_data['dt_created'] = str(annotation.dt_created)
+            final_data['key'] = annotation.key
+            final_data['created_by_id'] = annotation.created_by_id
+            final_data['project_id'] = annotation.project_id
+            final_data['id'] = annotation.key.split('<##>')[1]
+
+            annotations_data.append(final_data)
+
+    return HttpResponse(annotations_data)
+
+def add_annotation(request):
+    anno_id = request.POST.get('id')
+    epoch = request.POST.get("epoch")
+    text = request.POST.get("text")
+    graph_name = request.POST.get("graph_name")
+    #level_name = request.POST.get("level_name")
+    #level_id = request.POST.get("level_id")
+    series_name = request.POST.get("series_name")
+    key = request.POST.get("series_name")
+    key = key + '<##>' + anno_id
+    widget_name = request.POST.get("widget_name")
+    #dt_added = datetime.datetime.utcnow().replace(tzinfo=utc)
+    #dt_updated = datetime.datetime.utcnow().replace(tzinfo=utc)
+    created_by = request.user
+    #center = request.POST.get('center')
+    #project = request.POST.get('project')
+    dt_created = datetime.datetime.now()
+
+    prj_obj = Project.objects.filter(name='Probe')
+    center = Center.objects.filter(name='Salem') 
+    widget_obj = Widgets.objects.filter(config_name=graph_name)[0]
+    annotation = Annotation.objects.create(epoch=epoch, text=text, key=key, widget_name=widget_obj,\
+                                            dt_created=dt_created, created_by=created_by,\
+                                            center=center[0], project=prj_obj[0])
+
+
+    if not graph_name:
+        graph_name = 'sss'
+    if not series_name:
+        series_name = 'wid'
+    entity_json = {}
+
+    entity_json['id'] = anno_id
+    entity_json['epoch'] = epoch
+    entity_json['text'] = text
+    entity_json['graph_name'] = graph_name
+    entity_json['level_name'] = 12
+    entity_json['series_name'] = series_name
+
+    return HttpResponse(entity_json)
+
+def update_annotation(request):
+    action = request.POST.get("action", "update")
+    epoch = request.POST.get("epoch")
+    annotation_id = request.POST.get("id")
+
+    if not annotation_id:
+
+        return HttpResponse(json.dumps({"status": "error", "message": "Invalid ID"}), "error")
+
+    annotation = Annotation.objects.filter(epoch=epoch,created_by=request.user)
+
+    if not annotation:
+
+        return HttpResponse(json.dumps({"status": "error", "message": "Permission Denied!"}))
+
+    annotation = annotation[0]
+
+    if action == "delete":
+        annotation.delete()
+
+        return HttpResponse(json.dumps({"status": "success", "message": "deleted successfully"}))
+
+    text = request.POST.get("text")
+
+    annotation.text = text
+
+    annotation.save()
+
+    return HttpResponse(json.dumps({"status": "success", "message": "successfully updated"}))

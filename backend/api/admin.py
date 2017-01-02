@@ -6,6 +6,8 @@ class ProjectAdmin(admin.ModelAdmin):
     list_display = ['name']
 admin.site.register(Project,ProjectAdmin)
 
+admin.site.register(Annotation)
+
 class CenterAdmin(admin.ModelAdmin):
     list_display = ['name']
 admin.site.register(Center,CenterAdmin)
