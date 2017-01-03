@@ -164,7 +164,7 @@ table {
    margin-right: 0px;
    background-color: #ffffff;
    color: #000000;
-   border: 1px solid #000000;
+   border-bottom: 1px solid #000000;
 }
 .line {
    border:1px solid #3c3c3c;
@@ -180,6 +180,31 @@ table {
 .widget-content {
     border-radius: 0.3em;
     background-color: #f5f5f5;
+}
+.body {
+        width: 100%;
+    }
+.body thead, .body tbody, .body tr, .body td, .body th{
+    display: block;
+ }
+.body tr:after {
+    content: ' ';
+    display: block;
+    visibility: hidden;
+    clear: both;
+}
+ .body tbody{
+    height: 180px;
+    overflow-y: auto;
+}
+
+.body th {
+    height: 40px;
+}
+
+.body td, .body th {
+    width: 19.7%;
+    float: left;
 }
 </style>
 <body>
@@ -245,6 +270,37 @@ table {
                                 <td>{{l.employee_id}}</td>
                                 <td>{{l.productivity}}</td>
                                 <td>{{l.work_packet}}</td>
+                            </tr>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-6" id="emp_widget">
+            <div class="graph">
+                <div class="widget-title clearfix" title="Sample Widg">
+                    <h4>Volume Status</h4>
+                </div>
+                <table class="table table-bordered line body">
+                        <thead>
+                            <tr class="row_name">
+                                <th style="width:15%;">Opening</th>
+                                <th style="width:15%;">Received</th>
+                                <th style="width:28%;">Non Workable Count</th>
+                                <th style="width:15%;">Completed</th>
+                                <th style="width:22%;">Closing balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="l in $ctrl.volume_graphs">
+                                <td style="width:15%;">{{l.opening}}</td>
+                                <td style="width:16%;">{{l.received}}</td>
+                                <td style="width:28%;">{{l.non_workable_count}}</td>
+                                <td style="width:15%;">{{l.completed}}</td>
+                                <td style="width:22%;">{{l.closing_balance}}</td>
                             </tr>
                         </tbody>
                 </table>

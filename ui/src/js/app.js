@@ -2,6 +2,6 @@
   "use strict";
 
   angular.module("bootstrap", ["ui.router", "auth", "login",
-                               "dashboard"]);
+                               "dashboard","landing"]);
 
 }(window.angular));

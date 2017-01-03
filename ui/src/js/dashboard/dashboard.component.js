@@ -11,11 +11,11 @@
                    "state"   : {},
                    "stateStr": "{}"
                  },
-                 "page2": {
+                 "landing": {
 
-                   "name"    : "page2",
-                   "fullName": "dashboard.page2",
-                   "text"    : "Page 2",
+                   "name"    : "landing",
+                   "fullName": "dashboard.landing",
+                   "text"    : "Landing Page",
                    "state"   : {},
                    "stateStr": "{}"
                  },
@@ -34,7 +34,7 @@
 		     {"name": "tab-data", "value":"$ctrl.tab"}];
 
   // If one uses a menu bar, the order of appearance is here
-  var pagesOrder = ["page1", "page2", "page3"];
+  var pagesOrder = ["landing", "page1", "page3"];
 
   var stre = 'Hello';
 
