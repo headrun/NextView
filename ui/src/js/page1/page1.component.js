@@ -100,6 +100,7 @@
                     'self.chartOptions23':self.chartOptions23,
                     'self.chartOptions24':self.chartOptions24,
                     'self.chartOptions25':self.chartOptions25,
+                    'self.chartOptions26':self.chartOptions26,
                     };
 
                     var final_layout_list = [];
@@ -160,6 +161,7 @@
 
                         self.top_employee_details =  result.result.top_five_employee_details;
                         self.top_five = result.result.only_top_five;
+                        self.volume_graphs = result.result.volumes_graphs_details;
                         self.drop_list =  result.result.drop_value
                         self.sub_pro_sel = document.getElementById("0");
                         self.wor_pac_sel = document.getElementById("1");
@@ -1263,7 +1265,7 @@
                             self.high_data_gener.push(final_data_gener);
                             self.top_employee_details =  result.result.top_five_employee_details;
                             self.top_five = result.result.only_top_five;
-
+                            self.volume_graphs = result.result.volumes_graphs_details;
                             angular.extend(self.chartOptions, {
 
                                 xAxis: {
@@ -1778,6 +1780,57 @@ plotOptions: {
                },
                series: self.high_data_gener[0].volume_graphs.line_data
              });
+
+                            angular.extend(self.chartOptions26, {
+                                xAxis: {
+                                    categories: self.high_data_gener[0].data.date,
+                                    title: {
+                                        text: '',
+                                    }
+                                },
+                                plotOptions: {
+                                    series : {
+                                        allowPointSelect: true,
+                                        cursor: 'pointer',
+                                        point: {
+                                            events:{
+                                             select: function(e) {
+                                             var chart_name = 'monthly_volume widget';
+                                             var is_drill = self.list_object[chart_name].is_drilldown;
+                                             if (is_drill){
+                                             var addition = '&project=' +pro + '&center=' +loc;
+                                             console.log(e.target.series.name);
+                                             var productivity_graph ='/api/chart_data/?'
+                                             var packet_clicked = e.target.series.name;
+                                             var is_exist = packet_clicked.indexOf('&');
+                                             if (is_exist > 0){
+                                                packet_clicked = packet_clicked.replace(' & ',' and ')
+                                             }
+                            $http.get( productivity_graph+ 'packet=' + packet_clicked + '&date=' + e.target.category +
+                            '&type=' + 'Monthly Volume' + addition).success(
+                            function(data, status)
+                                {
+
+                                    $('#myModal').modal('show');
+                                    self.names = data.result.data;
+                                    self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
+                                    self.chart_type = data.result.type;
+                                    console.log(self.names);
+                                }).error(function(error){ console.log("error")});
+                                }
+                        }
+                    }
+                    }
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+               series: self.high_data_gener[0].monthly_volume_graph_details
+             });
+
                             angular.extend(self.chartOptions5,{
                                 series: [{
                                     name: '',
@@ -2025,6 +2078,11 @@ plotOptions: {
                                 series: self.high_data_gener[0].original_utilization_graph
                             });
 
+                            angular.extend(self.chartOptions24.yAxis,{
+                                min:result.result.min_utilization_fte_details,
+                                max:result.result.max_utilization_fte_details
+                            });
+
                             angular.extend(self.chartOptions24, {
                                 xAxis: {
                                     categories: self.high_data_gener[0].data.date,
@@ -2043,6 +2101,11 @@ plotOptions: {
                                     }
                                 },
                                 series: self.high_data_gener[0].utilization_fte_details
+                            });
+
+                            angular.extend(self.chartOptions25.yAxis,{
+                                min:result.result.min_utilization_operational_details,
+                                max:result.result.max_utilization_operational_details
                             });
 
                             angular.extend(self.chartOptions25, {
@@ -2548,7 +2611,7 @@ angular.extend(self.chartOptions18, {
                },
 
                tooltip: {
-                valueSuffix: ''
+                valueSuffix: ' %'
                },
                credits: {
                 enabled: false
@@ -2571,7 +2634,7 @@ angular.extend(self.chartOptions18, {
                },
 
                tooltip: {
-                valueSuffix: ''
+                valueSuffix: ' %'
                },
                credits: {
                 enabled: false
@@ -2602,6 +2665,9 @@ angular.extend(self.chartOptions18, {
                     text: ''
                 }
             },
+            tooltip: {
+                valueSuffix: ' %',
+            },
             plotOptions:{
                 series:{
                     allowPointSelect: true,
@@ -2611,6 +2677,8 @@ angular.extend(self.chartOptions18, {
                 },
                 dataLabels: {
                 enabled: true,
+                format: '{y} %',
+                valueDecimals: 2
                 }
                 }
             },
@@ -2739,6 +2807,9 @@ angular.extend(self.chartOptions18, {
                     text: ''
                 }
             },
+            tooltip: {
+                valueSuffix: ' %',
+            },
             plotOptions:{
                 series:{
                     allowPointSelect: true,
@@ -2748,6 +2819,8 @@ angular.extend(self.chartOptions18, {
                 },
                 dataLabels: {
                     enabled: true,
+                    format: '{y} %',
+                    valueDecimals: 2
                 }
                 }
             },
@@ -2799,6 +2872,30 @@ angular.extend(self.chartOptions18, {
                credits: {
                 enabled: false
                },
+            };
+
+            self.chartOptions26 = {
+                chart : {
+                 backgroundColor: "transparent"
+                },
+                yAxis: {
+                    gridLineColor: 'a2a2a2',
+                    min: 0,
+                    title: {
+                        text: '',
+                        align: 'high'
+                    },
+                    labels: {
+                    overflow: 'justify'
+                    }
+                },
+
+                tooltip: {
+                    valueSuffix: ''
+                },
+                credits: {
+                    enabled: false
+                },
             };
 
             self.chartOptions25 = {
