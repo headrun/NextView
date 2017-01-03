@@ -4923,41 +4923,9 @@ def yesterdays_data(request):
     return HttpResponse(result)
 
 def get_annotations(request):
+
     series_name = request.GET['series_name']
-    #level_name = request.POST.get("level_name", None)
-    #level_id = request.POST.get("level_id", None)
-    #series_name = request.POST.get("series_name", None)
-    #graph_name = request.POST.get("graph_name", None)
-    #from_date = request.POST.get("from_date")
-    #to_date = request.POST.get("to_date")
 
-    #text = 'added new annotation'
-    #epoch = '12345876543223456'
-    #key = 'DD#null#null#prod_widg'
-    #widget_name = Widgets.objects.all()[0]
-    #project = Project.objects.all()[0]
-    #center = Center.objects.all()[0]
-    #dt_created = datetime.datetime.now()
-
-    """
-    if not level_name or not level_id or not graph_name or not from_date or not to_date:
-
-        return HttpResponse(json.dumps({"status": "error", "message": "Invalid params"}), "error")
-
-    from_date = from_date + "-00-00-00"
-
-    to_date = to_date + "-23-59-59"
-
-    from_date = datetime.datetime.strptime(from_date, '%Y-%m-%d-%H-%M-%S').replace(tzinfo=utc)
-
-    from_date = from_date.strftime('%s') + "000"
-
-    to_date = datetime.datetime.strptime(to_date, '%Y-%m-%d-%H-%M-%S').replace(tzinfo=utc)
-
-    to_date = to_date.strftime('%s') + "000"
-    """
-
-    #annotations = Annotation.objects.filter(level_name=level_name, level_id=level_id, series_name=series_name, epoch__gte=from_date).filter(epoch__lte=to_date)
     annotations = Annotation.objects.filter(key__contains=series_name)
 
     annotations_data = []
@@ -4982,29 +4950,24 @@ def get_annotations(request):
     return HttpResponse(annotations_data)
 
 def add_annotation(request):
+
     anno_id = request.POST.get('id')
     epoch = request.POST.get("epoch")
     text = request.POST.get("text")
     graph_name = request.POST.get("graph_name")
-    #level_name = request.POST.get("level_name")
-    #level_id = request.POST.get("level_id")
     series_name = request.POST.get("series_name")
     key = request.POST.get("series_name")
     key = key + '<##>' + anno_id
     widget_name = request.POST.get("widget_name")
-    #dt_added = datetime.datetime.utcnow().replace(tzinfo=utc)
-    #dt_updated = datetime.datetime.utcnow().replace(tzinfo=utc)
     created_by = request.user
-    #center = request.POST.get('center')
-    #project = request.POST.get('project')
     dt_created = datetime.datetime.now()
 
     prj_obj = Project.objects.filter(name='Probe')
-    center = Center.objects.filter(name='Salem') 
+    center = Center.objects.filter(name='Salem')
     widget_obj = Widgets.objects.filter(config_name=graph_name)[0]
-    annotation = Annotation.objects.create(epoch=epoch, text=text, key=key, widget_name=widget_obj,\
+    annotation = Annotation.objects.create(epoch=epoch, text=text, key=key, project=prj_obj[0],\
                                             dt_created=dt_created, created_by=created_by,\
-                                            center=center[0], project=prj_obj[0])
+                                            center=center[0], chart_type_name=widget_obj.chart_type_name)
 
 
     if not graph_name:
@@ -5023,6 +4986,7 @@ def add_annotation(request):
     return HttpResponse(entity_json)
 
 def update_annotation(request):
+
     action = request.POST.get("action", "update")
     epoch = request.POST.get("epoch")
     annotation_id = request.POST.get("id")

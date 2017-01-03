@@ -1263,6 +1263,7 @@
                             self.high_data_gener.push(final_data_gener);
                             self.top_employee_details =  result.result.top_five_employee_details;
                             self.top_five = result.result.only_top_five;
+
                             angular.extend(self.chartOptions, {
 
                                 xAxis: {
@@ -1271,6 +1272,7 @@
                                         text: '',
                                     }
                                 },
+
                                 plotOptions: {
 
                                      series : {
@@ -1286,33 +1288,49 @@
                                              }
 
                                              var chart_name = 'productivity_chart';
+
                                              var is_drill = self.list_object[chart_name].is_drilldown;
+
                                              if (is_drill){
-                                             var addition = '&project=' +pro + '&center=' +loc;
-                                             console.log(e.target.series.name);
-                                             var productivity_graph ='/api/chart_data/?'
-                                             var packet_clicked = e.target.series.name;
-                                             var is_exist = packet_clicked.indexOf('&');
-                                             if (is_exist > 0){
-                                                packet_clicked = packet_clicked.replace(' & ',' and ')
-                                             }
-                            $http.get( productivity_graph+ 'packet=' + packet_clicked + '&date=' + e.target.category +
-                            '&type=' + 'Production Trends' + addition).success(
-                            function(data, status)
-                                {
-                                    $('#myModal').modal('show');
-                                    self.names = data.result.data;
-                                    var proj = data.result.project;
-                                    var pro_drill = data.result.table_headers;
-                                    //var pro_drill = drilldown_config[proj];
-                                    var chart_type = data.result.type;
-                                    self.fields_list_drilldown = pro_drill;
-                                    //self.fields_list_drilldown = pro_drill[chart_type];
-                                    //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
-                                    self.chart_type = data.result.type;
-                                    console.log(self.names);
-                                }).error(function(error){ console.log("error")});
-                                }
+
+                                               var addition = '&project=' +pro + '&center=' +loc;
+
+                                               console.log(e.target.series.name);
+
+                                               var productivity_graph ='/api/chart_data/?';
+
+                                               var packet_clicked = e.target.series.name;
+
+                                               var is_exist = packet_clicked.indexOf('&');
+
+                                               if (is_exist > 0){
+
+                                                 packet_clicked = packet_clicked.replace(' & ',' and ')
+                                               }
+
+                                               $http.get( productivity_graph+ 'packet=' + packet_clicked + '&date=' + e.target.category +
+                                                    '&type=' + 'Production Trends' + addition).success(
+
+                                                    function(data, status){
+
+                                                        $('#myModal').modal('show');
+
+                                                        self.names = data.result.data;
+
+                                                        var proj = data.result.project;
+
+                                                        var pro_drill = data.result.table_headers;
+
+                                                        var chart_type = data.result.type;
+
+                                                        self.fields_list_drilldown = pro_drill;
+
+                                                        self.chart_type = data.result.type;
+
+                                                        console.log(self.names);
+
+                                                    }).error(function(error){ console.log("error")});
+                                         }
                         }, click : function (e) {
 
 
@@ -1367,94 +1385,7 @@
                  }
                }
              });
-             /*
-             var query_dict = {};
-             self.series = null;
-             var chart_data = self.chartOptions
-             for (var i in self.chartOptions.series){
-                self.series = self.chartOptions.series[i];
-                (function(){
 
-                    $http({method:"GET", url:"/api/annotations/?series_name="+self.series.name}).success(function(annotations){
-                        annotations = _.sortBy(annotations, function(annotation){ return annotation.epoch });
-                        $.each(annotations, function(j, annotation){
-                            if(annotation.epoch){
-                                var a = new Annotation("productivity_chart", $(self.chartOptions.chart.renderTo.innerHTML)
-                                    ,self.chartOptions,annotation.epoch, annotation);
-
-                                console.log(a);
-
-                                }
-                            })
-                    })
-                }());
-             }*/
-
-
-
-                            /*angular.extend(self.chartOptions22, {
-                                xAxis: {
-                                    categories: self.high_data_gener[0].data.date,
-                                    title: {
-                                        text: '',
-                                    }
-                                },
-                                plotOptions: {
-                                    series : {
-                                        allowPointSelect: true,
-                                        cursor: 'pointer',
-                                        point: {
-                                            events:{
-                                             select: function(e) {
-                                             var chart_name = 'top_employee_performance_details';
-                                             var is_drill = self.list_object[chart_name].is_drilldown;
-                                             if (is_drill){
-                                             var addition = '&project=' +pro + '&center=' +loc;
-                                             console.log(e.target.series.name);
-                                             var productivity_graph ='/api/chart_data/?'
-                                             var packet_clicked = e.target.series.name;
-                                             var is_exist = packet_clicked.indexOf('&');
-                                             if (is_exist > 0){
-                                                packet_clicked = packet_clicked.replace(' & ',' and ')
-                                             }
-                            $http.get( productivity_graph+ 'packet=' + packet_clicked + '&date=' + e.target.category +
-                            '&type=' + 'Top Employee Performance Details' + addition).success(
-                            function(data, status)
-                                {
-                                    $('#myModal').modal('show');
-                                    self.names = data.result.data;
-                                    var proj = data.result.project;
-                                    var pro_drill = data.result.table_headers;
-                                    //var pro_drill = drilldown_config[proj];
-                                    var chart_type = data.result.type;
-                                    self.fields_list_drilldown = pro_drill;
-                                    //self.fields_list_drilldown = pro_drill[chart_type];
-                                    //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
-                                    self.chart_type = data.result.type;
-                                    console.log(self.names);
-                                }).error(function(error){ console.log("error")});
-                                }
-                        }
-                    }
-                    }
-                },
-                bar: {
-                 dataLabels: {
-                 enabled: true
-                 }
-                }
-               },
-               series: self.high_data_gener[0].only_top_five
-             });
-
-
-                            angular.extend(self.chartOptions22, {
-                            xAxis: {
-                                categories: self.high_data_gener[0].data.date,
-                                title: {
-                                    text: '',
-                                }
-                            },*/
 
                             angular.extend(self.chartOptions9_2.yAxis,{
                                 min:result.result.min_external_time_line,
@@ -1649,46 +1580,107 @@ plotOptions: {
                             });
 
                             angular.extend(self.chartOptions10, {
+
+                            plotOptions:{
+
+                                series:{
+                                    allowPointSelect: true,
+                                    cursor: 'pointer',
+                                point: {
+                                    events:{
+                                        select: function(e) {
+
+                                if ($("body").hasClass("add_annotation")) {
+
+                                    return;
+                                }
+
+                              var chart_name = 'productivity_bar_graph';
+
+                              var is_drill = self.list_object[chart_name].is_drilldown;
+
+                                if (is_drill){
+
+                                  var addition = '&project=' + pro + '&center=' + loc; 
+
+                                  console.log(e.target.name);
+
+                                  var productivity_bar_graph ='/api/chart_data/?';
+
+                                  var packet_clicked = e.target.series.name;
+
+                                  var is_exist = packet_clicked.indexOf('&');
+
+                                  if (is_exist > 0){
+
+                                    packet_clicked = packet_clicked.replace(' & ',' and ')
+
+                                  }
+
+                                  var dates_list = self.get_date();
+
+                                  $http.get( productivity_bar_graph + 'packet=' + packet_clicked + '&date=' + e.target.category
+                                        + '&type=' + 'Production Chart'+addition).success(
+
+                                        function(data, status){
+
+                                            $('#myModal').modal('show');
+
+                                            self.names = data.result.data;
+
+                                            var proj = data.result.project;
+
+                                            var pro_drill = data.result.table_headers;
+
+                                            var chart_type = data.result.type;
+
+                                            self.fields_list_drilldown = pro_drill;
+
+                                            self.chart_type = data.result.type;
+
+                                            console.log(self.names);
+
+                                       }).error(function(error){ console.log("error")});
+                                }
+                                }, click: function (e) {
+
+                                    if (!$("body").hasClass("add_annotation")) {
+
+                                        return;
+                                    }
+                                    return new Annotation("productivity_bar_graph", $(e.currentTarget), e.point.series.chart, e.point);
+                                }
+
+                                    }
+                                }
+                                }
+                            },
+
                             xAxis: {
+
                                 categories: self.high_data_gener[0].data.date
                             },
-                            series: self.high_data_gener[0].productivity_data
-                            });
-                            angular.extend(self.chartOptions10.plotOptions.series.point.events,{
-                            select: function(e) {
-                            var chart_name = 'productivity_bar_graph';
-                            var is_drill = self.list_object[chart_name].is_drilldown;
-                            if (is_drill){
-                            var addition = '&project=' + pro + '&center=' + loc;
-                            console.log(e.target.name);
-                            var productivity_bar_graph ='/api/chart_data/?';
-                                                 var packet_clicked = e.target.series.name;
-                                                 var is_exist = packet_clicked.indexOf('&');
-                                                 if (is_exist > 0){
-                                                    packet_clicked = packet_clicked.replace(' & ',' and ')
-                                                 }
 
-                            var dates_list = self.get_date();
-                            //var dates_list = [self.start,self.end];
-                            $http.get( productivity_bar_graph + 'packet=' + packet_clicked + '&date=' + e.target.category
-                             + '&type=' + 'Production Chart'+addition).success(
-                            function(data, status)
-                                {
-                                    $('#myModal').modal('show');
-                                    self.names = data.result.data;
-                                    var proj = data.result.project;
-                                    var pro_drill = data.result.table_headers;
-                                    //var pro_drill = drilldown_config[proj];
-                                    var chart_type = data.result.type;
-                                    self.fields_list_drilldown = pro_drill;
-                                    //self.fields_list_drilldown = pro_drill[chart_type];
-                                    //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
-                                    self.chart_type = data.result.type;
-                                    console.log(self.names);
-                                }).error(function(error){ console.log("error")});
-                                }
+                            series: self.high_data_gener[0].productivity_data,
+
+                            onComplete: function(chart) {
+
+                                 var series = null;
+
+                                 var chart_data = chart.series;
+
+                                 for(var i in chart_data){
+                                    
+
+                                    }
+
+                                debugger;
+
                             }
+
                             });
+
+
                             angular.extend(self.chartOptions17, {
                             xAxis: {
                                 categories: self.high_data_gener[0].data.date,
@@ -2476,7 +2468,7 @@ angular.extend(self.chartOptions18, {
                 enabled: false
                },
             };
-            self.chartOptions10 = {
+            /*self.chartOptions10 = {
             chart: {
                 type: 'column',
                 backgroundColor: "transparent"
@@ -2504,7 +2496,21 @@ angular.extend(self.chartOptions18, {
                 }
                 }
             }
+            };*/
+            self.chartOptions10 = {
+            chart: {
+                type: 'column',
+                backgroundColor: "transparent"
+             },
+            yAxis: {
+                gridLineColor: 'a2a2a2',
+                min: 0,
+                title: {
+                    text: ''
+                }
+            }
             };
+
             self.chartOptions9 = {
                 chart : {
                  backgroundColor: "transparent"

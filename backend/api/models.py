@@ -49,6 +49,25 @@ class Customer(models.Model):
         user_obj = User.objects.filter(id=self.name_id).values_list('username',flat=True)
         return user_obj[0]
 
+class ChartType(models.Model):
+    chart_type = models.CharField(max_length=512)
+
+    class Meta:
+        db_table = u'chart_type'
+
+    def __unicode__(self):
+        return self.chart_type
+
+class ChartType(models.Model):
+    name = models.CharField(max_length=512)
+
+    class Meta:
+        db_table = u'chart_type'
+
+    def __unicode__(self):
+        return self.name
+
+
 class Widgets(models.Model):
     config_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
@@ -58,6 +77,8 @@ class Widgets(models.Model):
     id_num = models.IntegerField(max_length=125)
     day_type_widget = models.BooleanField(default=None)
     priority = models.IntegerField(max_length=125,null=True, blank=True)
+    chart_type_name = models.ForeignKey(ChartType, null=True)
+
 
     class Meta:
         db_table = u'widgets'
@@ -403,18 +424,16 @@ class Color_Mapping(models.Model):
 class Annotation(models.Model):
     epoch = models.CharField(max_length=40,verbose_name='selected_date')
     text = models.TextField()
-    #key = models.CharField(max_length=255, unique=True)
-    #key = models.TextField()
-    key = models.CharField(max_length=512)
-    widget_name = models.ForeignKey(Widgets)
+    key = models.CharField(max_length=512, null=True)
+    #widget_name = models.ForeignKey(Widgets)
     dt_created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User)
     center = models.ForeignKey(Center)
     project = models.ForeignKey(Project)
+    chart_type_name = models.ForeignKey(ChartType, null=True)
 
     class Meta:
         db_table = u'annotations'
-        #unique_together = (('project', 'center'),('key','epoch'),)
 
     def __unicode__(self):
         return self.epoch
