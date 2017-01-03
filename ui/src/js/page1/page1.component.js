@@ -1648,6 +1648,7 @@ plotOptions: {
 
                                         return;
                                     }
+
                                     return new Annotation("productivity_bar_graph", $(e.currentTarget), e.point.series.chart, e.point);
                                 }
 
@@ -1670,15 +1671,34 @@ plotOptions: {
                                  var chart_data = chart.series;
 
                                  for(var i in chart_data){
-                                    
 
-                                    }
+                                   series = chart_data[i];
 
-                                debugger;
+                                   (function(series){
 
-                            }
+                                     $http({method:"GET", url:"/api/annotations/?series_name="+series.name}).success(function(annotations){
 
-                            });
+                                       annotations = _.sortBy(annotations.result, function(annotation){ return annotation.epoch });
+
+                                       $.each(annotations, function(j, annotation){
+
+                                         var point = _.filter(series.points, function(point){ return point.x == annotation.epoch});
+
+                                         point = point[0];
+
+                                         if(annotation.epoch){
+                                           var a = new Annotation("productivity_bar_graph", $(self.chartOptions.chart.renderTo.innerHTML),
+                                                chart, point, annotation);
+
+                                           console.log(a);
+                                           }
+                                       })
+
+                                     })
+                                   }(series));
+                                 }
+                               }
+                             });
 
 
                             angular.extend(self.chartOptions17, {

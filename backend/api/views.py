@@ -4934,8 +4934,7 @@ def get_annotations(request):
         for annotation in annotations:
 
             final_data = {}
-
-            final_data['widget_name_id'] = annotation.widget_name_id
+            final_data['chart_type_name_id'] = annotation.chart_type_name_id
             final_data['center_id'] = annotation.center_id
             final_data['text'] = annotation.text
             final_data['epoch'] = annotation.epoch

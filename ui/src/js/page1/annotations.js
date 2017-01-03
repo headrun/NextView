@@ -56,7 +56,21 @@
             data["series_name"] = point.series.name;
         }
 
-        var instance = chart.renderer.image('/img/marker.png',
+        if(graph_name == 'productivity_bar_graph'){
+
+            var instance = chart.renderer.image('/img/marker.png',
+                                                point.plotX + point.barX - 35,
+                                                point.plotY - 15,
+                                                20,
+                                                24)
+                                         .attr({
+                                                "zIndex": 10,
+                                                "class": "annotation-marker",
+                                                "id": "annotation-" + data.id
+                                              });
+        }
+        else {
+               var instance = chart.renderer.image('/img/marker.png',
                                             point.plotX + chart.plotLeft - 10,
                                             point.plotY + chart.plotTop -30,
                                             20,
@@ -66,6 +80,8 @@
                                             "class": "annotation-marker",
                                             "id": "annotation-" + data.id
                                           });
+
+        }
 
         if($("body").hasClass("hide-annotations")){
 
