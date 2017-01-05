@@ -2755,7 +2755,6 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
         result_dict['volume_graphs']['line_data'] = graph_data_alignment(volume_graph['line_data'], name_key='data')
         #import pdb;pdb.set_trace()
         productivity_utilization_data = main_productivity_data(center, prj_id, dwm_dict['day'], level_structure_key)
-        #import pdb;pdb.set_trace()
         result_dict['original_productivity_graph'] = graph_data_alignment_color(productivity_utilization_data['productivity'], 'data', level_structure_key, prj_id, center)
         result_dict['original_utilization_graph'] = graph_data_alignment_color(productivity_utilization_data['utilization'], 'data', level_structure_key, prj_id, center)
         productivity_min_max = adding_min_max('original_productivity_graph',productivity_utilization_data['productivity'])
@@ -3750,24 +3749,24 @@ def from_to(request):
             a1['rank'] = a2
             table_headers = ['Rank', 'Employee Name', 'Productivity', 'Packet']
     utilization_data_details = utilization_data(center, prj_id, employe_dates)
-    utilization_fte_details = utilization_work_packet(center, prj_id, employe_dates)
-    utilization_operational_details = utilization_operational(center, prj_id, employe_dates)
-    monthly_volume_graph_details = Monthly_Volume_graph(date_list,prj_id,center,work_packet,level_structure_key)
+    #utilization_fte_details = utilization_work_packet(center, prj_id, employe_dates)
+    #utilization_operational_details = utilization_operational(center, prj_id, employe_dates)
+    #monthly_volume_graph_details = Monthly_Volume_graph(date_list,prj_id,center,work_packet,level_structure_key)
     final_result_dict = day_week_month(request,dwm_dict,prj_id,center,work_packet,level_structure_key)
     final_result_dict['top_five_employee_details'] = top_five_employee_details
     final_result_dict['only_top_five'] = only_top_five
     volumes_graphs_details = volumes_graphs_data(date_list,prj_id,center,level_structure_key)
     final_result_dict['volumes_graphs_details'] = volumes_graphs_details
     final_result_dict['utilization_data_details'] = utilization_data_details
-    final_result_dict['monthly_volume_graph_details'] = graph_data_alignment_color(monthly_volume_graph_details, 'data', level_structure_key, prj_id, center)
+    #final_result_dict['monthly_volume_graph_details'] = graph_data_alignment_color(monthly_volume_graph_details, 'data', level_structure_key, prj_id, center)
     #final_result_dict['utilization_fte_details'] = utilization_fte_details
     #final_result_dict['utilization_operational_details'] = utilization_operational_details
-    final_result_dict['utilization_fte_details'] = graph_data_alignment_color(utilization_fte_details,'data', level_structure_key,prj_id, center)
-    final_result_dict['utilization_operational_details'] = graph_data_alignment_color(utilization_operational_details, 'data',level_structure_key,prj_id, center)
-    utili_fte_min_max = adding_min_max('utilization_fte_details', utilization_fte_details)
-    final_result_dict.update(utili_fte_min_max)
-    utili_operational_min_max = adding_min_max('utilization_operational_details', utilization_operational_details)
-    final_result_dict.update(utili_operational_min_max)
+    #final_result_dict['utilization_fte_details'] = graph_data_alignment_color(utilization_fte_details,'data', level_structure_key,prj_id, center)
+    #final_result_dict['utilization_operational_details'] = graph_data_alignment_color(utilization_operational_details, 'data',level_structure_key,prj_id, center)
+    #utili_fte_min_max = adding_min_max('utilization_fte_details', utilization_fte_details)
+    #final_result_dict.update(utili_fte_min_max)
+    #utili_operational_min_max = adding_min_max('utilization_operational_details', utilization_operational_details)
+    #final_result_dict.update(utili_operational_min_max)
     internal_error_types = internal_extrnal_error_types(request, employe_dates['days'], prj_id, center, level_structure_key,"Internal")
     external_error_types = internal_extrnal_error_types(request, employe_dates['days'], prj_id, center,level_structure_key, "External")
     final_result_dict['internal_errors_types'] = graph_data_alignment_color(internal_error_types,'y',level_structure_key,prj_id,center)
@@ -4848,6 +4847,7 @@ def main_productivity_data(center,prj_id,date_list,level_structure_key):
         utilization_date_values = {}
         query_set = query_set_generation(prj_id[0], center[0], level_structure_key, date_list)
         volume_list = workpackets_list(level_structure_key, 'Headcount', query_set)
+        final_work_packet = ''
         for date_value in date_list:
             total_done_value = RawTable.objects.filter(project=prj_id, center=center[0], date=date_value).aggregate(Max('per_day'))
             if total_done_value['per_day__max'] > 0:
@@ -4887,17 +4887,18 @@ def main_productivity_data(center,prj_id,date_list,level_structure_key):
                         utilization_date_values[final_work_packet].append(final_utilization_value)
                     else:
                         utilization_date_values[final_work_packet] = [final_utilization_value]
-        
-        total = 0
-        for i in range(len(utilization_date_values[final_work_packet])):
-            packet_sum = 0
-            for key in utilization_date_values.keys():
-                packet_sum += utilization_date_values[key][i]
-            final_prodictivity['utilization']['utilization'].append(packet_sum)
-            total = total + 1
-        final_prodictivity['productivity'] = product_date_values
+        if len(final_work_packet)>0:
+            total = 0
+            for i in range(len(utilization_date_values[final_work_packet])):
+                packet_sum = 0
+                for key in utilization_date_values.keys():
+                    packet_sum += utilization_date_values[key][i]
+                final_prodictivity['utilization']['utilization'].append(packet_sum)
+                total = total + 1
+            final_prodictivity['productivity'] = product_date_values
         #final_prodictivity['utilization'] = utilization_date_values
-
+    if not final_prodictivity.has_key('productivity'):
+        final_prodictivity['productivity'] = {}
     return final_prodictivity
 
 def utilization_data(center,prj_id,dwm_dict):
@@ -4919,6 +4920,7 @@ def utilization_data(center,prj_id,dwm_dict):
 
 
 
+"""
 def utilization_work_packet(center,prj_id,dwm_dict):
     data_values = {}
     data_values['total_utilization'] = [] 
@@ -4952,7 +4954,6 @@ def utilization_work_packet(center,prj_id,dwm_dict):
         count = count + 1
     return data_values
 
-
 def utilization_operational(center,prj_id,dwm_dict):
     data_values = {}
     data_values['total_utilization'] = []
@@ -4983,6 +4984,7 @@ def utilization_operational(center,prj_id,dwm_dict):
         count = count + 1
     return data_values
 
+"""
 
 def previous_sum(volumes_dict):
     new_dict = {}
@@ -5185,7 +5187,6 @@ def yesterdays_data(request):
     return HttpResponse(result)
 
 def get_annotations(request):
-
     series_name = request.GET['series_name']
 
     annotations = Annotation.objects.filter(key__contains=series_name)
@@ -5247,32 +5248,32 @@ def add_annotation(request):
     return HttpResponse(entity_json)
 
 def update_annotation(request):
-
     action = request.POST.get("action", "update")
     epoch = request.POST.get("epoch")
     annotation_id = request.POST.get("id")
+    series = request.POST.get('series_name')
+    text = request.POST.get("text")
 
+    if series is not None:
+        series = series.split('<##>')[0]
+        annotation = Annotation.objects.filter(epoch=epoch,created_by=request.user,key__contains=series)
+        annotation = annotation[0]
+        annotation.text = text
+        annotation.save()
+        return HttpResponse(json.dumps({"status": "success", "message": "successfully updated"}))
+
+    """
     if not annotation_id:
 
         return HttpResponse(json.dumps({"status": "error", "message": "Invalid ID"}), "error")
-
-    annotation = Annotation.objects.filter(epoch=epoch,created_by=request.user)
 
     if not annotation:
 
         return HttpResponse(json.dumps({"status": "error", "message": "Permission Denied!"}))
 
-    annotation = annotation[0]
 
     if action == "delete":
         annotation.delete()
 
         return HttpResponse(json.dumps({"status": "success", "message": "deleted successfully"}))
-
-    text = request.POST.get("text")
-
-    annotation.text = text
-
-    annotation.save()
-
-    return HttpResponse(json.dumps({"status": "success", "message": "successfully updated"}))
+    """

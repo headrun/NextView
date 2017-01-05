@@ -13,6 +13,12 @@
 
              self.hideLoading();
 
+             $("#data").click(function() {
+
+                self.showLoading();
+
+             });
+
             }],
 
             "bindings": {

@@ -1370,7 +1370,7 @@
 
                        $.each(annotations, function(j, annotation){
 
-                         var point = _.filter(series.points, function(point){ return point.x == annotation.epoch});
+                         var point = _.filter(series.points, function(point){ return point.category == annotation.epoch});
 
                          point = point[0];
 
@@ -1684,7 +1684,7 @@ plotOptions: {
 
                                        $.each(annotations, function(j, annotation){
 
-                                         var point = _.filter(series.points, function(point){ return point.x == annotation.epoch});
+                                         var point = _.filter(series.points, function(point){ return point.category == annotation.epoch});
 
                                          point = point[0];
 
@@ -2710,7 +2710,7 @@ angular.extend(self.chartOptions18, {
                             enabled: true,
                             format: '<b>{point.name}</b>: {point.y} ',
                             style: {
-                                color:(Highcharts.theme && Highcharts.theme.background2) || '#EEE'
+                                color:(Highcharts.theme && Highcharts.theme.background2) || '#696969'
                                }
                             }
                         }
@@ -2776,7 +2776,7 @@ angular.extend(self.chartOptions18, {
                             enabled: true,
                             format: '<b>{point.name}</b>: {point.y} ',
                             style: {
-                                color:(Highcharts.theme && Highcharts.theme.background2) || '#EEE'
+                                color:(Highcharts.theme && Highcharts.theme.background2) || '#696969'
                                }
                             }
                         }

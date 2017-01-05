@@ -40,6 +40,7 @@
     // The Annotation constructor
     var Annotation = buzz_data.Annotation = function(graph_name, $graph, chart, point, data){
 
+
         graph_name = graph_name || "overview";
 
         var that = this;
@@ -51,16 +52,15 @@
             data = {"id": _.uniqueId("annotation-")};
 
             data["text"] = "";
-            data["epoch"] = point.x;
+            data["epoch"] = point.category;
             data["graph_name"] = graph_name;
             data["series_name"] = point.series.name;
         }
-
         if(graph_name == 'productivity_bar_graph'){
 
             var instance = chart.renderer.image('/img/marker.png',
-                                                point.plotX + point.barX - 35,
-                                                point.plotY - 15,
+                                                point.plotX + chart.plotLeft - 10,
+                                                point.plotY + chart.plotTop - 30,
                                                 20,
                                                 24)
                                          .attr({
@@ -70,6 +70,7 @@
                                               });
         }
         else {
+
                var instance = chart.renderer.image('/img/marker.png',
                                             point.plotX + chart.plotLeft - 10,
                                             point.plotY + chart.plotTop -30,
@@ -157,7 +158,6 @@
 
             data.text = text;
             that.text = text;
-
             if(that.created){
                that.update(data, function(){
 
