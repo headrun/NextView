@@ -54,7 +54,7 @@
                 }
 
 
-              $http({method:"GET", url:project}).success(function(result){
+              $http({method:"GET", url:project}).then(function(result){
 
                 if (result.result.role == "customer") {
                     if (result.result.list[0] == "none") {
