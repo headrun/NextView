@@ -49,7 +49,38 @@
 
         if(new_annotation){
 
-            data = {"id": _.uniqueId("annotation-")};
+            if (graph_name.indexOf("Week") > 0) {
+
+                if (graph_name.indexOf("bar") > 0) {
+
+                    data = {"id": _.uniqueId("annotation-week-bar-")};
+                }
+
+                else {
+
+                    data = {"id": _.uniqueId("annotation-week-")};
+                }
+            }
+            else {
+
+                if (graph_name.indexOf("bar") > 0) {
+
+                    data = {"id": _.uniqueId("annotation-bar-")};
+                }
+
+                else {
+
+                    var key_used = point.series.name + point.category;
+
+                    key_used = key_used.replace(' ','');
+
+                    key_used = key_used.replace('&','and')
+
+                    key_used = 'annotation-' + key_used;
+                    debugger;
+                    data = {"id": _.uniqueId(key_used)};
+                }
+            }
 
             data["text"] = "";
             data["epoch"] = point.category;
@@ -59,8 +90,8 @@
         if(graph_name == 'productivity_bar_graph'){
 
             var instance = chart.renderer.image('/img/marker.png',
-                                                point.plotX + chart.plotLeft - 10,
-                                                point.plotY + chart.plotTop - 30,
+                                                point.barX + 45,
+                                                point.plotY - 15,
                                                 20,
                                                 24)
                                          .attr({
