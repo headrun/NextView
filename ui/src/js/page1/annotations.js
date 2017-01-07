@@ -72,12 +72,17 @@
 
                     var key_used = point.series.name + point.category;
 
-                    key_used = key_used.replace(' ','');
+                    key_used = key_used.split(' ').join('');
 
-                    key_used = key_used.replace('&','and')
+                    if (key_used.indexOf("&") > 0) {
+
+                        key_used = key_used.replace('&','and');
+                    }
 
                     key_used = 'annotation-' + key_used;
+
                     debugger;
+
                     data = {"id": _.uniqueId(key_used)};
                 }
             }
@@ -101,7 +106,7 @@
                                               });
         }
         else {
-
+               if (point) {
                var instance = chart.renderer.image('/img/marker.png',
                                             point.plotX + chart.plotLeft - 10,
                                             point.plotY + chart.plotTop -30,
@@ -112,7 +117,19 @@
                                             "class": "annotation-marker",
                                             "id": "annotation-" + data.id
                                           });
-
+            }
+            else {
+                           var instance = chart.renderer.image('/img/marker.png',
+                                            chart.plotLeft - 10,
+                                            chart.plotTop -30,
+                                            20,
+                                            24)
+                                     .attr({
+                                            "zIndex": 10,
+                                            "class": "annotation-marker",
+                                            "id": "annotation-" + data.id
+                                          });
+            }
         }
 
         if($("body").hasClass("hide-annotations")){

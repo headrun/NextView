@@ -1333,7 +1333,7 @@
                                         cursor: 'pointer',
                                         point: {
                                             events:{
-                                             select: function(e) {
+                                             /*select: function(e) {
 
                                              if ($("body").hasClass("add_annotation")) {
 
@@ -1386,12 +1386,14 @@
                                          }
                         }, click : function (e) {
 
-
                           if (!$("body").hasClass("add_annotation")) {
 
                             return;
                           }
                           return new Annotation("productivity_chart", $(e.currentTarget), e.point.series.chart, e.point);
+                        }*/
+                        click: function (e) {
+                            console.log(' click');
                         }
                     }
                     }

@@ -4,6 +4,7 @@ import xlrd
 from xlrd import open_workbook
 from glob import glob
 #from django.conf import settings
+import pdb;pdb.set_trace()
 from api.models import *
 
 #import pdb;pdb.set_trace()
@@ -36,7 +37,6 @@ def run():
                 if sh_name in excel_sheet_names:
                     sheet_index_dict[sh_name] = open_book.sheet_names().index(sh_name)
 
-        import pdb;pdb.set_trace()
         file_sheet_name = Authoringtable.objects.values_list('sheet_name',flat=True).distinct()
 
 
