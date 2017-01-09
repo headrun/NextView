@@ -22,23 +22,26 @@ div {
 }
 #page-content-wrapper {
 
-    margin-top: 0px;
+    margin-top: -2%;
 }
 
 a.active{
 
-    background-color: #d3d3d3;
+    background-color: #f1f1f1;
 }
+/*#content {
+    margin-top: 5%;
+}*/
 </style>
 <head>
 <title>NextView</title>
 </head>
 <body>
     <div class="container">
-        <div class="row">
+        <div class="row" style="margin-top: 5%;">
             <div id='content' class='row-fluid col-md-3'>
                 <div class='span2 sidebar'>
-                    <ul class="nav nav-tabs">
+                    <ul class="nav nav-tabs" style="border-bottom: none;">
                         <li><a href="" id="Abt" class="active">About NextWealth</a></li>
                         <li><a href="" id="Ser">Services Of NextWealth</a></li>
                         <li><a href="" id="Wid">Widgets Of NextPulse</a></li>
@@ -50,10 +53,10 @@ a.active{
                 <div class="container-fluid xyz">
                     <section id="About">
                         <h2>NextWealth</h2>
-                        <!--<h3>About NextWealth</h3>-->
                         <p>NextWealth Entrepreneurs Private Limited (NextWealth) is a  IT Services company founded by four accomplished industry veterans and is based in Bangalore, India.</p>
                         <p>NextWealth is created grounds up to meet the needs of Digital Enterprises using information based strategies and ride on accelerated rate at which people, places and things are becoming digitally interconnected.Digital Enterprises utilize IT and digital technologies as the foundation of their products and services and would like to improve. NextWealth’s business model assists Digital Enterprises in this journey.</p>
                         <p>NextWealth establishes delivery centers in locations where cost of living is low, talent sources are present in the vicinity and required infrastructure like bandwidth are readily available resulting in reduced cost of operations by an order of magnitude.</p>
+                        <img src="/img/about.png" alt="Nexwealth">
                     </section>
                     <section id="Services">
                         <h3>Services Of NextWealth</h3>
@@ -65,6 +68,7 @@ a.active{
                             <li>Tech Support</li>
                             <li>Healthcare RCM</li>
                         </ul>
+                        <img src="/img/services.jpg" alt="Services" style="width:120%;margin-top:6%;margin-left:-10%;">
                     </section>
                     <section id="Widgets">
                         <h2>NextPulse</h2>
@@ -99,9 +103,8 @@ a.active{
                     <section id="Projects">
                         <h3>The Projects under NextPulse are:</h3>
                         <ol>
-                            <!--<a href="/#!/page1" ng-repeat="item in $ctrl.mapping_list" ng-click="$ctrl.clickFun(item)"><li>{{$ctrl.pro_cen_nam}}</li></a>-->
-                            <a href="/#!/page1" ng-repeat="item in $ctrl.mapping_list"><li>{{item}}</li></a>
-
+                            <a href="/#!/page1"><li>{{$ctrl.pro_cen_nam}}</li></a>
+                            <!--<a href="/#!/page1" ng-repeat="item in $ctrl.mapping_list"><li>{{item}}</li></a>-->
                         </ol>
                         <!--<a href="/#!/page1" class="btn btn-info" role="button" id="data">Go To Dashboard</a>-->
                     </section>
