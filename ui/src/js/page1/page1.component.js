@@ -604,7 +604,7 @@
             self.dateType = function(key,all_data,name,button_clicked){
                 self.showLoading();
                 self.day_type = key;
-                var obj = {"self.chartOptions":self.chartOptions,"self.chartOptions9":self.chartOptions9,"self.chartOptions9_2":self.chartOptions9_2,"self.chartOptions10":self.chartOptions10,"self.chartOptions15":self.chartOptions15,"self.chartOptions16":self.chartOptions16,"self.chartOptions16_2":self.chartOptions16_2,"self.chartOptions17":self.chartOptions17,"self.chartOptions18":self.chartOptions18,"self.chartOptions19":self.chartOptions19,"self.chartOptions20":self.chartOptions20,'self.chartOptions21':self.chartOptions21,'self.chartOptions24':self.chartOptions24,'self.chartOptions25':self.chartOptions25}
+                var obj = {"self.chartOptions":self.chartOptions,"self.chartOptions9":self.chartOptions9,"self.chartOptions9_2":self.chartOptions9_2,"self.chartOptions10":self.chartOptions10,"self.chartOptions15":self.chartOptions15,"self.chartOptions16":self.chartOptions16,"self.chartOptions16_2":self.chartOptions16_2,"self.chartOptions17":self.chartOptions17,"self.chartOptions18":self.chartOptions18,"self.chartOptions19":self.chartOptions19,"self.chartOptions20":self.chartOptions20,'self.chartOptions21':self.chartOptions21,'self.chartOptions24':self.chartOptions24,'self.chartOptions25':self.chartOptions25,'self.chartOptions26':self.chartOptions26}
                 self.render_data = obj[all_data];
                 self.high_data = [];
                 self.button_clicked = button_clicked;
@@ -642,7 +642,7 @@
                             cursor: 'pointer',
                             point: {
                                 events:{
-                                select: function(e) {
+                                click : function() {
 
                                 if ($("body").hasClass("add_annotation")) {
 
@@ -653,14 +653,13 @@
                                 var is_drill = self.list_object[chart_name].is_drilldown;
                                 if (is_drill){
                                 var addition = '&project=' +self.project + '&center=' +self.location;
-                                console.log(e.target.series.name);
                                 var productivity_graph ='/api/chart_data/?'
-                                self.packet_clicked = e.target.series.name;
+                                self.packet_clicked = this.series.name;
                                 var is_exist = self.packet_clicked.indexOf('&');
                                 if (is_exist > 0){
                                 self.packet_clicked = self.packet_clicked.replace(' & ',' and ')
                                 }
-                                $http.get( productivity_graph+ 'packet=' + self.packet_clicked + '&date=' + e.target.category +
+                                $http.get( productivity_graph+ 'packet=' + self.packet_clicked + '&date=' + this.category +
                                 '&type=' + 'Production Trends' + addition).success(
                                 function(data, status)
                                         {
@@ -676,14 +675,14 @@
                                             console.log(self.names);
                                         }).error(function(error){ console.log("error")});
                                         }
-                                },click: function(e){
+                                },contextmenu: function(){
 
-                                    if (!$("body").hasClass("add_annotation")) {
+                                    /*if (!$("body").hasClass("add_annotation")) {
 
                                         return;
-                                    }
+                                    }*/
 
-                                    return new Annotation("productivity_chart<##>Week", $(e.currentTarget), e.point.series.chart, e.point);
+                                    return new Annotation("productivity_chart<##>Week", $(event.currentTarget),this.series.chart, this);
 
                                     }
                             }
@@ -896,8 +895,63 @@
                },
                series: self.high_data_gener[0].utilization_operational_details
                      });
-             }
 
+}
+
+
+          if (name === 'chartOptions26'){
+                            angular.extend(self.render_data, {
+               xAxis: {
+                 categories: self.high_data_gener[0].data.date,
+                 title: {
+                  text: '',
+                 }
+               },
+               plotOptions: {
+                series : {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    point: {
+                        events:{
+                        select: function(e) {
+                        var chart_name = 'monthly_volume widget';
+                        var is_drill = self.list_object[chart_name].is_drilldown;
+                        if (is_drill){
+                        var addition = '&project=' +self.project + '&center=' +self.location;
+                        console.log(e.target.series.name);
+                        var productivity_graph ='/api/chart_data/?'
+                        self.packet_clicked = e.target.series.name;
+                        var is_exist = self.packet_clicked.indexOf('&');
+                        if (is_exist > 0){
+                        self.packet_clicked = self.packet_clicked.replace(' & ',' and ')
+                        }
+                        $http.get( productivity_graph+ 'packet=' + self.packet_clicked + '&date=' + e.target.category +
+                        '&type=' + 'Monthly Volume' + addition).success(
+                        function(data, status)
+                                {
+                                    $('#myModal').modal('show');
+                                    self.names = data.result.data;
+                                    var proj = data.result.project;
+                                    var pro_drill = drilldown_config[proj];
+                                    var chart_type = data.result.type;
+                                    self.fields_list_drilldown = pro_drill[chart_type];
+                                    self.chart_type = data.result.type;
+                                    console.log(self.names);
+                                }).error(function(error){ console.log("error")});
+                                }
+               }
+                    }
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               }
+               },
+               series: self.high_data_gener[0].monthly_volume_graph_details
+                     });
+             } 
 
 
            if (name === 'chartOptions24'){
@@ -1740,8 +1794,8 @@ plotOptions: {
                             series: self.high_data_gener[0].external_pareto_graph_data
                             });
 
-                            
-                            /*angular.extend(self.chartOptions10, {
+
+                            angular.extend(self.chartOptions10, {
 
                             plotOptions:{
 
@@ -1750,7 +1804,7 @@ plotOptions: {
                                     cursor: 'pointer',
                                 point: {
                                     events:{
-                                        select: function(e) {
+                                        click: function() {
 
                                 if ($("body").hasClass("add_annotation")) {
 
@@ -1765,11 +1819,9 @@ plotOptions: {
 
                                   var addition = '&project=' + pro + '&center=' + loc; 
 
-                                  console.log(e.target.name);
-
                                   var productivity_bar_graph ='/api/chart_data/?';
 
-                                  var packet_clicked = e.target.series.name;
+                                  var packet_clicked = this.series.name;
 
                                   var is_exist = packet_clicked.indexOf('&');
 
@@ -1781,7 +1833,7 @@ plotOptions: {
 
                                   var dates_list = self.get_date();
 
-                                  $http.get( productivity_bar_graph + 'packet=' + packet_clicked + '&date=' + e.target.category
+                                  $http.get( productivity_bar_graph + 'packet=' + packet_clicked + '&date=' + this.category
                                         + '&type=' + 'Production Chart'+addition).success(
 
                                         function(data, status){
@@ -1804,14 +1856,14 @@ plotOptions: {
 
                                        }).error(function(error){ console.log("error")});
                                 }
-                                }, click: function (e) {
+                                }, contextmenu: function () {
 
-                                    if (!$("body").hasClass("add_annotation")) {
+                                    /*if (!$("body").hasClass("add_annotation")) {
 
                                         return;
-                                    }
+                                    }*/
 
-                                    return new Annotation("productivity_bar_graph", $(e.currentTarget), e.point.series.chart, e.point);
+                                    return new Annotation("productivity_bar_graph", $(event.currentTarget), this.series.chart, this);
                                 }
 
                                     }
@@ -1860,7 +1912,7 @@ plotOptions: {
                                    }(series));
                                  }
                                }
-                             });*/
+                             });
 
 
                             angular.extend(self.chartOptions17, {

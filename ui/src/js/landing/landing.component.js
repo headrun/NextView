@@ -21,11 +21,23 @@
 
              $('#Projects').hide();
 
-             $("#pro_loading").click(function() {
+             /*$(".pro_loading").click(function() {
 
                 self.showLoading();
 
-             });
+             });*/
+
+              self.clickPro = function(val){
+
+                self.showLoading();
+
+                //self.cen_pro_name['state'] = val;
+
+                //val = '';
+
+                //self.updateState({'state':self.cen_pro_name, 'pageName':'page1'});
+
+              }
 
             $("#Ser").click(function() {
 
@@ -92,40 +104,45 @@
 
             $http({method:"GET", url:project}).success(function(result){
 
-                self.pro_cen_nam = result.result.list[1]
+                self.pro_cen_nam = result.result.list[1];
 
-                /*if (result.result.role == "customer") {
+                if (result.result.role == "customer") {
 
-                    var map_list = result.result.list;
+                    //var map_list = result.result.list;
 
-                    self.mapping_list = map_list[1];
+                    //self.mapping_list = map_list[1];
+                    //
+                    self.mapping_list = [];
+                    self.mapping_list.push(result.result.list[1]);
 
-                }*/
+                }
 
 
-                /*if (result.result.role == "team_lead") {
+                if (result.result.role == "team_lead") {
 
-                    var map_list = result.result.list;
+                    //var map_list = result.result.list;
 
-                    self.mapping_list = map_list[1];
+                    //self.mapping_list = map_list[1];
+                    self.mapping_list = []
+                    self.mapping_list.push(result.result.list[1]);
 
-                }*/
+                }
 
-                /*if (result.result['role'] == "center_manager") {
+                if (result.result['role'] == "center_manager") {
 
                     var map_list = result.result.list;
 
                     self.mapping_list = map_list;
 
-                    }*/
+                    }
 
-                /*if (result.result['role'] == "nextwealth_manager") {
+                if (result.result['role'] == "nextwealth_manager") {
 
                       var map_list = result.result.list;
 
                       self.mapping_list = map_list;
 
-                       }*/
+                       }
             });
 
          }],

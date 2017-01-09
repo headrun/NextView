@@ -3029,7 +3029,7 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
             vol_graph_bar_data[month_name] = volume_graph['bar_data']
 
             utilization_operational_details = utilization_operational_data(center, prj_id, month_dates, level_structure_key)
-            utilization_operational_dt[month_name] = utilization_operational_details
+            utilization_operational_dt[month_name] = utilization_operational_details['utilization']
             utilization_fte_details = utilization_work_packet_data(center, prj_id, month_dates, level_structure_key)
             utilization_fte_dt[month_name] = utilization_fte_details['utilization']
             monthly_volume_graph_details = Monthly_Volume_graph(month_dates, prj_id, center, level_structure_key)
@@ -3201,7 +3201,7 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
                     productivity_list[week_name] = {}
                     week_num = week_num + 1
                 utilization_operational_details = utilization_operational_data(center, prj_id, week,level_structure_key)
-                utilization_operational_dt[week_name] = utilization_operational_details
+                utilization_operational_dt[week_name] = utilization_operational_details['utilization']
                 utilization_fte_details = utilization_work_packet_data(center, prj_id, week,level_structure_key)
                 utilization_fte_dt[week_name] = utilization_fte_details['utilization']
                 monthly_volume_graph_details = Monthly_Volume_graph(week, prj_id, center,level_structure_key)
@@ -5046,6 +5046,7 @@ def utilization_work_packet_data(center,prj_id,date_list,level_structure_key):
     packet_names = Headcount.objects.filter(project=prj_id, center=center, date__range=[date_list[0],date_list[-1]]).values('sub_project', 'work_packet', 'sub_packet').distinct()
     count = 0
     for i in packet_names:
+        print "utilization_work_packet_data",center,prj_id
         if all(value == '' for value in i.values()):
             count = count+1
     status = 0
@@ -5179,7 +5180,6 @@ def utilization_operational_data(center,prj_id,date_list,level_structure_key):
         status = 1
     elif level_structure_key.get('sub_project','') == '' and level_structure_key.get('work_packet','') == 'All':
         status = 1
-
 
     if status and count:
         final_prodictivity = {}
@@ -5672,6 +5672,13 @@ def update_annotation(request):
     series = request.POST.get('series_name')
     text = request.POST.get("text")
 
+    if action == "delete":
+        anno = Annotation.objects.filter(key__contains = request.POST['id'])
+        if anno:
+            anno = anno[0]
+            anno.delete()
+        return HttpResponse(json.dumps({"status": "success", "message": "deleted successfully"}))
+
     if series is not None:
         series = series.split('<##>')[0]
         annotation = Annotation.objects.filter(epoch=epoch,created_by=request.user,key__contains=series)
@@ -5680,7 +5687,7 @@ def update_annotation(request):
         annotation.save()
         return HttpResponse(json.dumps({"status": "success", "message": "successfully updated"}))
 
-    
+"""
     if not annotation_id:
 
         return HttpResponse(json.dumps({"status": "error", "message": "Invalid ID"}), "error")
@@ -5688,9 +5695,4 @@ def update_annotation(request):
     if not annotation:
 
         return HttpResponse(json.dumps({"status": "error", "message": "Permission Denied!"}))
-
-
-    if action == "delete":
-        annotation.delete()
-
-        return HttpResponse(json.dumps({"status": "success", "message": "deleted successfully"}))
+"""
