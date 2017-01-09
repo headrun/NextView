@@ -81,8 +81,6 @@
 
                     key_used = 'annotation-' + key_used;
 
-                    debugger;
-
                     data = {"id": _.uniqueId(key_used)};
                 }
             }
