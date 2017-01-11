@@ -7,9 +7,9 @@
          .component("page1", {
 
            "templateUrl": "/js/page1/page1.html",
-           "controller": ['$http','$scope','$rootScope',
+           "controller": ['$http','$scope','$rootScope', '$state', 
 
-           function ($http,$scope,$rootScope) {
+           function ($http,$scope,$rootScope,$state) {
              var self = this;
              var color = $rootScope.color;
              var from_to = '/api/from_to/?'
@@ -30,6 +30,7 @@
              var project = 'api/project/';
              var drop_down_link = '/api/dropdown_data/';
 
+             //self.sell_proo = $state.params.selpro;
              self.annotations_data = {};
 
              $('#annotation_button').click(function(){
@@ -60,7 +61,7 @@
                 /*self.list_object = result.result.lay[0];*/
                 if((result.result.role === 'customer') || (result.result.role === 'team_lead') || (result.result.role === 'center_manager') || (result.result.role === 'nextwealth_manager'))
                 {
-                    var pro_cen_nam = result.result.list[1]
+                    var pro_cen_nam = $state.params.selpro;
                     self.first = result.result.dates.from_date;
                     self.lastDate = self.first;
                     self.last = result.result.dates.to_date;
@@ -554,6 +555,7 @@
                         $('#1').remove();
                         $('#2').remove();*/
                         //$('')
+
                         self.sub_pro_sel = document.getElementById("0");
                         self.removeOptions(self.sub_pro_sel);
                         self.wor_pac_sel = document.getElementById("1");
@@ -627,7 +629,7 @@
                             var final_data_gener = result.result;
                             self.high_data_gener.push(final_data_gener);
                 if (name === 'chartOptions'){
-
+            
                   angular.extend(self.render_data, {
 
                       xAxis: {
@@ -669,6 +671,7 @@
                                             //var pro_drill = drilldown_config[proj];
                                             var pro_drill = data.result.table_headers;
                                             var chart_type = data.result.type;
+
                                             //self.fields_list_drilldown = pro_drill[chart_type];
                                             self.fields_list_drilldown = pro_drill;
                                             self.chart_type = data.result.type;
@@ -676,13 +679,8 @@
                                         }).error(function(error){ console.log("error")});
                                         }
                                 },contextmenu: function(){
-
-                                    /*if (!$("body").hasClass("add_annotation")) {
-
-                                        return;
-                                    }*/
-
-                                    return new Annotation("productivity_chart<##>Week", $(event.currentTarget),this.series.chart, this);
+                                
+                                return new Annotation("productivity_chart<##>Week", $(event.currentTarget),this.series.chart, this);
 
                                     }
                             }
@@ -708,7 +706,7 @@
 
                            (function(series){
 
-                             $http({method:"GET", url:"/api/annotations/?series_name="+series.name+'&type=week'}).success(function(annotations){
+                             $http({method:"GET", url:"/api/annotations/?series_name="+series.name+'&type=week'+'&chart_name='+'productivity_chart'}).success(function(annotations){
 
                                annotations = _.sortBy(annotations.result, function(annotation){ return annotation.epoch });
 
@@ -746,19 +744,19 @@
                     cursor: 'pointer',
                     point: {
                         events:{
-                        select: function(e) {
+                        click: function() {
                         var chart_name = 'productivity_bar_graph';
                         var is_drill = self.list_object[chart_name].is_drilldown;
                         if (is_drill){
                         var addition = '&project=' +self.project + '&center=' +self.location;
-                        console.log(e.target.series.name);
+                        //console.log(e.target.series.name);
                         var productivity_graph ='/api/chart_data/?'
-                        self.packet_clicked = e.target.series.name;
+                        self.packet_clicked = this.series.name;
                         var is_exist = self.packet_clicked.indexOf('&');
                         if (is_exist > 0){
                         self.packet_clicked = self.packet_clicked.replace(' & ',' and ')
                         }
-                        $http.get( productivity_graph+ 'packet=' + self.packet_clicked + '&date=' + e.target.category +
+                        $http.get( productivity_graph+ 'packet=' + self.packet_clicked + '&date=' + this.category +
                         '&type=' + 'Production Chart' + addition).success(
                         function(data, status)
                                 {
@@ -1243,19 +1241,19 @@
                     cursor: 'pointer',
                     point: {
                         events:{
-                            select: function(e) {
+                            click: function() {
                             var chart_name = 'internal_accuracy_timeline';
                             var is_drill = self.list_object[chart_name].is_drilldown;
                             if (is_drill){
                             var addition = '&project=' + self.project + '&center=' + self.location;
-                            console.log(e.target.series.name);
+                            //console.log(e.target.series.name);
                             var productivity_graph ='/api/chart_data/?'
-                                                 self.packet_clicked = e.target.series.name;
+                                                 self.packet_clicked = this.series.name;
                                                  var is_exist = self.packet_clicked.indexOf('&');
                                                  if (is_exist > 0){
                                                     self.packet_clicked = self.packet_clicked.replace(' & ',' and ')
                                                  }
-                            $http.get( productivity_graph+ 'packet=' + self.packet_clicked + '&date=' + e.target.category +
+                            $http.get( productivity_graph+ 'packet=' + self.packet_clicked + '&date=' + this.category +
                              '&type=' + 'Internal Accuracy Trends' + addition).success(
                             function(data, status)
                                 {
@@ -1355,19 +1353,19 @@
                     cursor: 'pointer',
                     point: {
                         events:{
-                            select: function(e) {
+                            click: function() {
                             var chart_name = 'external_accuracy_timeline';
                             var is_drill = self.list_object[chart_name].is_drilldown;
                             if (is_drill){
                             var addition = '&project=' + self.project + '&center=' + self.location;
-                            console.log(e.target.series.name);
+                            //console.log(e.target.series.name);
                             var productivity_graph ='/api/chart_data/?'
-                                                 self.packet_clicked = e.target.series.name;
+                                                 self.packet_clicked = this.series.name;
                                                  var is_exist = self.packet_clicked.indexOf('&');
                                                  if (is_exist > 0){
                                                     self.packet_clicked = self.packet_clicked.replace(' & ',' and ')
                                                  }
-                            $http.get( productivity_graph+ 'packet=' + self.packet_clicked + '&date=' + e.target.category +
+                            $http.get( productivity_graph+ 'packet=' + self.packet_clicked + '&date=' + this.category +
                              '&type=' + 'External Accuracy Trends' + addition).success(
                             function(data, status)
                                 {
@@ -1577,7 +1575,7 @@
 
                    (function(series){
 
-                     $http({method:"GET", url:"/api/annotations/?series_name="+series.name}).success(function(annotations){
+                     $http({method:"GET", url:"/api/annotations/?series_name="+series.name+"&chart_name="+'productivity_chart'}).success(function(annotations){
 
                        annotations = _.sortBy(annotations.result, function(annotation){ return annotation.epoch });
 
@@ -1588,7 +1586,7 @@
                          point = point[0];
 
                          if(annotation.epoch){
-                           var a = new Annotation("productivity_chart", $(self.chartOptions.chart.renderTo.innerHTML),
+                           var a = new Annotation("productivity_chart", $(self.chartOptions.chart.renderTo),
                                 chart, point, annotation);
 
                            console.log(a);
@@ -1622,20 +1620,20 @@ plotOptions: {
                     cursor: 'pointer',
                     point: {
                         events:{
-                            select: function(e) {
+                            click: function() {
                             var chart_name = 'external_accuracy_timeline';
                             var is_drill = self.list_object[chart_name].is_drilldown;
                             if (is_drill){
                             var addition = '&project=' + pro + '&center=' + loc;
-                            console.log(e.target.series.name);
+                            //console.log(e.target.series.name);
                             var productivity_graph ='/api/chart_data/?'
-                                                 var packet_clicked = e.target.series.name;
+                                                 var packet_clicked = this.series.name;
                                                  var is_exist = packet_clicked.indexOf('&');
                                                  if (is_exist > 0){
                                                     packet_clicked = packet_clicked.replace(' & ',' and ')
                                                  }
 
-                            $http.get( productivity_graph+ 'packet=' + packet_clicked + '&date=' + e.target.category +
+                            $http.get( productivity_graph+ 'packet=' + packet_clicked + '&date=' + this.category +
                              '&type=' + 'External Accuracy Trends' + addition).success(
                             function(data, status)
                                 {
@@ -1643,11 +1641,8 @@ plotOptions: {
                                     self.names = data.result.data;
                                     var proj = data.result.project;
                                     var pro_drill = data.result.table_headers;
-                                    //var pro_drill = drilldown_config[proj];
                                     var chart_type = data.result.type;
                                     self.fields_list_drilldown = pro_drill;
-                                    //self.fields_list_drilldown = pro_drill[chart_type];
-                                    //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
@@ -1677,26 +1672,31 @@ plotOptions: {
                                 }
                             },
 
-plotOptions: {
+                plotOptions: {
                 series : {
                     allowPointSelect: true,
                     cursor: 'pointer',
                     point: {
                         events:{
-                            select: function(e) {
+                            click: function() {
+                                             if ($("body").hasClass("add_annotation")) {
+
+                                                return;
+                                             }
+
                             var chart_name = 'internal_accuracy_timeline';
                             var is_drill = self.list_object[chart_name].is_drilldown;
                             if (is_drill){
                             var addition = '&project=' + pro + '&center=' + loc;
-                            console.log(e.target.series.name);
+                            //console.log(e.target.series.name);
                             var productivity_graph ='/api/chart_data/?'
-                                                 var packet_clicked = e.target.series.name;
+                                                 var packet_clicked = this.series.name;
                                                  var is_exist = packet_clicked.indexOf('&');
                                                  if (is_exist > 0){
                                                     packet_clicked = packet_clicked.replace(' & ',' and ')
                                                  }
 
-                            $http.get( productivity_graph+ 'packet=' + packet_clicked + '&date=' + e.target.category +
+                            $http.get( productivity_graph+ 'packet=' + packet_clicked + '&date=' + this.category +
                              '&type=' + 'Internal Accuracy Trends' + addition).success(
                             function(data, status)
                                 {
@@ -1713,6 +1713,9 @@ plotOptions: {
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
                                 }
+                        }, contextmenu: function () {
+
+                          return new Annotation("internal_accuracy_timeline", $(event.currentTarget), this.series.chart, this);
                         }
                     }
                     }
@@ -1723,7 +1726,42 @@ plotOptions: {
                  }
                 }
                },
-                            series: self.high_data_gener[0].internal_time_line
+                            series: self.high_data_gener[0].internal_time_line,
+               onComplete: function(chart){
+
+                 var series = null;
+
+                 var chart_data = chart.series;
+
+                 for(var i in chart_data){
+
+                   series = chart_data[i];
+
+                   (function(series){
+
+                     $http({method:"GET", url:"/api/annotations/?series_name="+series.name+"&chart_name="+'internal_accuracy_timeline'}).success(function(annotations){
+
+                       annotations = _.sortBy(annotations.result, function(annotation){ return annotation.epoch });
+
+                       $.each(annotations, function(j, annotation){
+
+                         var point = _.filter(series.points, function(point){ return point.category == annotation.epoch});
+
+                         point = point[0];
+
+                         if(annotation.epoch){
+                           var a = new Annotation("internal_accuracy_timeline", $(self.chartOptions9.chart.renderTo),
+                                chart, point, annotation);
+
+                           console.log(a);
+                           }
+                       })
+
+                     })
+                   }(series));
+                 }
+               }
+
                             });
 
                             angular.extend(self.chartOptions19.yAxis,{
@@ -1858,12 +1896,7 @@ plotOptions: {
                                 }
                                 }, contextmenu: function () {
 
-                                    /*if (!$("body").hasClass("add_annotation")) {
-
-                                        return;
-                                    }*/
-
-                                    return new Annotation("productivity_bar_graph", $(event.currentTarget), this.series.chart, this);
+                                    return new Annotation("productivity_bar_graph", $(event), this.series.chart, this);
                                 }
 
                                     }
@@ -1890,7 +1923,7 @@ plotOptions: {
 
                                    (function(series){
 
-                                     $http({method:"GET", url:"/api/annotations/?series_name="+series.name}).success(function(annotations){
+                                     $http({method:"GET", url:"/api/annotations/?series_name="+series.name+"&chart_name="+'productivity_chart'}).success(function(annotations){
 
                                        annotations = _.sortBy(annotations.result, function(annotation){ return annotation.epoch });
 
@@ -1901,7 +1934,7 @@ plotOptions: {
                                          point = point[0];
 
                                          if(annotation.epoch){
-                                           var a = new Annotation("productivity_bar_graph", $(self.chartOptions.chart.renderTo.innerHTML),
+                                           var a = new Annotation("productivity_bar_graph", $(self.chartOptions10.chart.renderTo),
                                                 chart, point, annotation);
 
                                            console.log(a);
@@ -2170,16 +2203,16 @@ plotOptions: {
                                 text: ''
                             });
                             angular.extend(self.chartOptions4.plotOptions.series.point.events,{
-                            select: function(e) {
+                            click: function() {
                             var chart_name = 'internal_error_accuracy';
                             var is_drill = self.list_object[chart_name].is_drilldown;
                             if (is_drill){
                             var addition = '&project=' + pro + '&center=' + loc;
-                            console.log(e.target.name);
+                            
                             var internal_bar_graph ='/api/chart_data/?';
                             var dates_list = self.get_date();
                             //var dates_list = [self.start,self.end];
-                            var packet_clicked = e.target.name;
+                            var packet_clicked = this.name;
                             var is_exist = packet_clicked.indexOf('&');
                             if (is_exist > 0){
                                 packet_clicked = packet_clicked.replace(' & ',' and ')
@@ -2219,14 +2252,14 @@ plotOptions: {
                                 max:result.result.int_max_value
                             });
                             angular.extend(self.chartOptions6.plotOptions.series.point.events,{
-                select: function(e) {
+                click: function() {
                 var chart_name = 'external_error_accuracy';
                 var is_drill = self.list_object[chart_name].is_drilldown;
                 if (is_drill){
                 var addition = '&project=' + pro + '&center=' + loc;
-                        console.log(e);
+                        
                             var external_bar_graph ='/api/chart_data/?';
-                            var packet_clicked = e.target.name;
+                            var packet_clicked = this.name;
                             var is_exist = packet_clicked.indexOf('&');
                             if (is_exist > 0){
                                 packet_clicked = packet_clicked.replace(' & ',' and ')

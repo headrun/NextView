@@ -14,9 +14,9 @@ class Center(models.Model):
 
 class Project(models.Model):
     name    = models.CharField(max_length=255)
-    code    = models.IntegerField(max_length=255, unique=True)
+    #code    = models.IntegerField(max_length=255, unique=True)
     center  = models.ForeignKey(Center, null=True)
-    layout  = models.CharField(max_length=512, default='')
+    #layout  = models.CharField(max_length=512, default='')
     project_db_handlings_choices = (('update','Update'),('aggregate','Aggregate'),('ignore','Ignore'),)
     project_db_handling = models.CharField(max_length=30,choices=project_db_handlings_choices,default='ignore',) 
 
@@ -36,19 +36,6 @@ class TeamLead(models.Model):
         user_obj = User.objects.filter(id=self.name_id).values_list('username',flat=True)
         return user_obj[0]
 
-class Customer(models.Model):
-    name    = models.ForeignKey(User, null=True)
-    center  = models.ManyToManyField(Center, null=True)
-    project = models.ManyToManyField(Project, null=True)
-    layout = models.CharField(max_length=512, default='')
-    is_drilldown = models.BooleanField(default=None)
-
-    class Meta:
-        db_table = u'customer'
-    def __unicode__(self):
-        user_obj = User.objects.filter(id=self.name_id).values_list('username',flat=True)
-        return user_obj[0]
-
 class ChartType(models.Model):
     chart_type = models.CharField(max_length=512)
 
@@ -58,15 +45,18 @@ class ChartType(models.Model):
     def __unicode__(self):
         return self.chart_type
 
-class ChartType(models.Model):
-    name = models.CharField(max_length=512)
+class Customer(models.Model):
+    name    = models.ForeignKey(User, null=True)
+    center  = models.ManyToManyField(Center, null=True)
+    project = models.ManyToManyField(Project, null=True)
+    #layout = models.CharField(max_length=512, default='')
+    is_drilldown = models.BooleanField(default=None)
 
     class Meta:
-        db_table = u'chart_type'
-
+        db_table = u'customer'
     def __unicode__(self):
-        return self.name
-
+        user_obj = User.objects.filter(id=self.name_id).values_list('username',flat=True)
+        return user_obj[0]
 
 class Widgets(models.Model):
     config_name = models.CharField(max_length=255)
@@ -78,7 +68,6 @@ class Widgets(models.Model):
     day_type_widget = models.BooleanField(default=None)
     priority = models.IntegerField(max_length=125,null=True, blank=True)
     chart_type_name = models.ForeignKey(ChartType, null=True)
-
 
     class Meta:
         db_table = u'widgets'
@@ -96,11 +85,11 @@ class Widget_Mapping(models.Model):
         db_table = u'widget_mapping'
     def __unicode__(self):
         return u''
-
 class Headcount(models.Model):
-    date = models.DateField()
+    #from_date = models.DateField()
+    date   = models.DateField()
     sub_project = models.CharField(max_length=255, blank=True)
-    work_packet = models.CharField(max_length=255)
+    work_packet = models.CharField(max_length=255,blank=True)
     sub_packet = models.CharField(max_length=255, blank=True)
     center = models.ForeignKey(Center, null=True)
     project = models.ForeignKey(Project, null=True)
@@ -110,7 +99,7 @@ class Headcount(models.Model):
     buffer_support = models.IntegerField(max_length=125)
     non_billable_support_others = models.IntegerField(max_length=125)
     support_others_managers = models.IntegerField(max_length=125)
-    total = models.IntegerField(max_length=125)
+    total = models.IntegerField(max_length=125,default = "")
 
     class Meta:
         db_table = u'headcount_table'
@@ -133,10 +122,13 @@ class HeadcountAuthoring(models.Model):
     support_others_managers = models.CharField(max_length=255, blank=True)
     total = models.CharField(max_length=125, blank=True)
     sheet_name = models.CharField(max_length=255, default='')
+
     class Meta:
         db_table = u'headcount_authoring'
     def __unicode__(self):
         return self.work_packet
+
+
 
 class Centermanager(models.Model):
     name    = models.ForeignKey(User, null=True)
@@ -227,6 +219,7 @@ class InternalerrorsAuthoring(models.Model):
     sub_project = models.CharField(max_length=255, blank=True)
     work_packet = models.CharField(max_length=255)
     sub_packet = models.CharField(max_length=255, blank=True)
+    #error_name = models.CharField(max_length=255, blank=True)
     #error_type1 = models.CharField(max_length=255, blank=True)
     #error_type2 = models.CharField(max_length=255, blank=True)
     #error_type3 = models.CharField(max_length=255, blank=True)
@@ -279,6 +272,7 @@ class ExternalerrorsAuthoring(models.Model):
     sub_project = models.CharField(max_length=255, blank=True)
     work_packet = models.CharField(max_length=255)
     sub_packet = models.CharField(max_length=255, blank=True)
+    #error_name = models.CharField(max_length=255, blank=True)
     #error_type1 = models.CharField(max_length=255, blank=True)
     #error_type2 = models.CharField(max_length=255, blank=True)
     #error_type3 = models.CharField(max_length=255, blank=True)
@@ -357,7 +351,7 @@ class TargetsAuthoring(models.Model):
     work_packet = models.CharField(max_length=255)
     sub_packet  = models.CharField(max_length=255, blank=True)
     target      = models.CharField(max_length=125)
-    fte_target = models.CharField(max_length=125)
+    fte_target = models.CharField(max_length=125, blank=True)
     center = models.ForeignKey(Center, null=True)
     project = models.ForeignKey(Project, null=True)
     sheet_name = models.CharField(max_length=255, default='')
@@ -410,7 +404,7 @@ class WorktrackAuthoring(models.Model):
 
 class Color_Mapping(models.Model):
     sub_project = models.CharField(max_length=255, blank=True)
-    work_packet = models.CharField(max_length=255,blank=True)
+    work_packet = models.CharField(max_length=255, blank=True)
     sub_packet = models.CharField(max_length=255, blank=True)
     color_code = models.CharField(max_length=255)
     center = models.ForeignKey(Center, null=True)

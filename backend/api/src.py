@@ -8,6 +8,15 @@ from models import *
 @receiver(post_save, sender=TeamLead)
 def set_agent(sender, instance, **kwargs):
     print "here"
+    """
+    widgets_list = [ 'Productivity Trends', 'Internal Accuracy', 'External Accuracy', 'Internal Error Types', 'External Error Types' ]
+    widgets_objs = Widgets.objects.filter(name__in=widgets_list)
+    for obj in widgets_objs:
+        import pdb;pdb.set_trace()
+        a = Widget_Mapping(widget_priority=1,is_display=True,is_drilldown=False,widget_name_id=obj.id,user_name_id=instance.id)
+        a.save()
+        print 'added'+obj.name
+    """
     user_obj = User.objects.filter(username=instance.name).values_list('id', flat=True)
     group_obj = Group.objects.get(name='team_lead')
     group_obj.user_set.add(user_obj[0])

@@ -40,7 +40,6 @@
     // The Annotation constructor
     var Annotation = buzz_data.Annotation = function(graph_name, $graph, chart, point, data){
 
-
         graph_name = graph_name || "overview";
 
         var that = this;
@@ -70,7 +69,7 @@
 
                 else {
 
-                    var key_used = point.series.name + point.category;
+                    var key_used = point.series.name + point.category + graph_name
 
                     key_used = key_used.split(' ').join('');
 
@@ -151,14 +150,14 @@
         var get_xpos = function(){
 
             //xpos is graph xpos  - half popover width - popover borderwidth + x offset
-            return $graph.position().left + parseInt(that.$el.attr("x")) - that.$popover.width()/2 - 2 + 20;
+            return $graph.offset().left + parseInt(that.$el.attr("x")) - that.$popover.width()/2 - 2 + 20;
 
         }
 
         var get_ypos = function(){
 
             // ypos is graph ypos - popover height - popover worderwith + y offset
-            return $graph.position().top + parseInt(that.$el.attr("y")) - that.$popover.height() - 2 + 40;
+            return $graph.offset().top + parseInt(that.$el.attr("y")) - that.$popover.height() - 2 + 40;
         }
 
         var on_mouseenter = function(){

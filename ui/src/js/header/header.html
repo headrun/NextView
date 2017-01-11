@@ -46,7 +46,7 @@
     color:white;
 }
 img {
-    width:16%;
+    width:15%;
     margin-left:-3%;
  }
 .upload {
@@ -64,8 +64,9 @@ img {
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-          <a class="navbar-brand" style="font-size:2.0em;margin-left:-15px;font-weight:bold;color:black;">NextPulse </a>
-          <img src="/img/Nextwealth_Logo.png" alt="Nexwealth_Logo">
+          <!--<a class="navbar-brand" style="font-size:2.0em;margin-left:-15px;font-weight:bold;color:black;">NextPulse </a>-->
+          <img src="/img/Nextwealth_Logo.png" alt="Nexwealth_Logo" style="float:left;">
+          <a class="navbar-brand" style="font-size:2.0em;margin-left:-2%;font-weight:bold;color:black;">NextPulse </a> 
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
@@ -76,7 +77,8 @@ img {
                             <ul class="nav nav-pills left">
                                <li class="dropdown active span8">
                                   <a class="dropdown-toggle" id="inp_impact" data-toggle="dropdown" style="color:black;">
-                                      <span id="dropdown_title">{{$ctrl.select_option}}</span><span class="caret"></span>
+                                      <!--<span id="dropdown_title">{{$ctrl.select_option}}</span><span class="caret"></span>-->
+                                      <span id="dropdown_title"></span><span class="caret"></span>
                                   </a>
                                    <ul ID="divNewNotifications" class="dropdown-menu">
                                        <li >
@@ -89,7 +91,7 @@ img {
                      </div>
                         <li>
                             <div>
-                                <a href="http://nv.headrun.com:8188/admin/api" class="btn btn-info" style="padding:5px;margin-top:10px;margin-right:-5px;color:black;border-color:black;background-color:white;" role="button" target="_blank">Admin</a>
+                                <a href="http://dashboards.nextwealth.in:8188/admin" class="btn btn-info" id="admin_but" style="padding:5px;margin-top:10px;margin-right:-5px;color:black;border-color:black;background-color:white;" role="button" target="_blank">Admin</a>
                             </div>
                         </li>
                         <li>

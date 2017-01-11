@@ -160,7 +160,7 @@ table {
     border : none;
 }
 .row_name {
-   font-size: 15px;
+   font-size: 14px;
    margin-right: 0px;
    background-color: #ffffff;
    color: #000000;
@@ -250,6 +250,36 @@ table {
 </div>
 
 <div class="row">
+        <div class="col-md-6">
+            <div class="graph">
+                <div class="widget-title clearfix" title="Sample Widg">
+                    <h4>Volume Status</h4>
+                </div>
+                <table class="table table-bordered line body">
+                        <thead>
+                            <tr class="row_name">
+                                <th style="width:15%;">Date</th>
+                                <th style="width:12%;">Opening</th>
+                                <th style="width:13%;">Received</th>
+                                <th style="width:24%;">NonWorkableCount</th>
+                                <th style="width:14%;">Completed</th>
+                                <th style="width:22%;">Closing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="l in $ctrl.volume_graphs">
+                                <td style="width:16%;">{{l.date}}</td>
+                                <td style="width:12%;">{{l.opening}}</td>
+                                <td style="width:13%;">{{l.received}}</td>
+                                <td style="width:25%;">{{l.non_workable_count}}</td>
+                                <td style="width:14%;">{{l.completed}}</td>
+                                <td style="width:12%;">{{l.closing_balance}}</td>
+                            </tr>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
     <div class="col-md-6" id="emp_widget">
         <div class="graph">
             <div class="widget-title clearfix" title="Sample Widg">
@@ -275,11 +305,8 @@ table {
                 </table>
             </div>
         </div>
-    </div>
 
-
-    <div class="row">
-        <div class="col-md-6" id="emp_widget">
+        <!--<div class="col-md-6" id="emp_widget">
             <div class="graph">
                 <div class="widget-title clearfix" title="Sample Widg">
                     <h4>Volume Status</h4>
@@ -305,7 +332,7 @@ table {
                         </tbody>
                 </table>
             </div>
-        </div>
+        </div>-->
     </div>
 
 

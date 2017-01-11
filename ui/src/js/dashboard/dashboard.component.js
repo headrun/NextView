@@ -168,7 +168,7 @@
 
                $sp.state("dashboard." + page, {
 
-                 "url"     : page,
+                 "url"     : page + (page === "page1" ? "/*selpro" : "" ),
                  "template": template,
                  "authRequired": true
                });

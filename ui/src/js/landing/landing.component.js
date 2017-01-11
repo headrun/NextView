@@ -11,6 +11,8 @@
 
              var self = this;
 
+             $rootScope.sel_value = '';
+
              var project = 'api/project/';
 
              self.hideLoading();
@@ -21,15 +23,19 @@
 
              $('#Projects').hide();
 
+             $('.mythili').hide();
+
              /*$(".pro_loading").click(function() {
 
                 self.showLoading();
 
              });*/
 
-              self.clickPro = function(val){
+              self.clickPro = function(val, $rootScope){
 
                 self.showLoading();
+
+                $('#dropdown_title').text(val.split(' - ')[1]);
 
                 //self.cen_pro_name['state'] = val;
 
@@ -138,11 +144,13 @@
 
                 if (result.result['role'] == "nextwealth_manager") {
 
-                      var map_list = result.result.list;
+                    var map_list = result.result.list;
 
-                      self.mapping_list = map_list;
+                    self.mapping_list = map_list;
 
-                       }
+                    $('.mythili').show();
+
+                    }
             });
 
          }],
@@ -152,6 +160,6 @@
               "hideLoading": "&",
               "showLoading": "&"
             }
-         });
-
+         }); 
+ 
 }(window.angular));

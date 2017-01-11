@@ -21,7 +21,7 @@
                 }
                 if (this.user.roles.indexOf("center_manager") >= 0) {
                     $('#fileupload').hide();
-                    $('#admin_but').hide();
+                    $('#admin_but').show();
                     this.user.role = "Center Manager";
                 }
                 if (this.user.roles.indexOf("nextwealth_manager") >= 0) {

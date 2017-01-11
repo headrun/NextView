@@ -34,7 +34,7 @@ a.active{
 }*/
 </style>
 <head>
-<title>NextView</title>
+<title>NextPulse</title>
 </head>
 <body>
     <div class="container">
@@ -57,7 +57,7 @@ a.active{
                         <p>NextWealth Entrepreneurs Private Limited (NextWealth) is a  IT Services company founded by four accomplished industry veterans and is based in Bangalore, India.</p>
                         <p>NextWealth is created grounds up to meet the needs of Digital Enterprises using information based strategies and ride on accelerated rate at which people, places and things are becoming digitally interconnected.Digital Enterprises utilize IT and digital technologies as the foundation of their products and services and would like to improve. NextWealth’s business model assists Digital Enterprises in this journey.</p>
                         <p>NextWealth establishes delivery centers in locations where cost of living is low, talent sources are present in the vicinity and required infrastructure like bandwidth are readily available resulting in reduced cost of operations by an order of magnitude.</p>
-                        <img src="/img/about.png" alt="Nexwealth" style="width:595px; height:316px;float:right;margin-right:12%;">
+                        <img class="img-responsive" src="/img/about.png" alt="Nexwealth" style="width:595px; height:316px;float:right;margin-right:12%;">
                     </section>
                     <section id="Services">
                         <h3>Services Of NextWealth</h3>
@@ -108,8 +108,25 @@ a.active{
                             <a href="/#!/page1" ng-repeat="item in $ctrl.mapping_list"><li>{{item}}</li></a>
                          </ol>-->
                         <ol>
-                            <a href="/#!/page1" ng-repeat="item in $ctrl.mapping_list" ng-click="$ctrl.clickPro(item)"><li>{{item}}</li></a>
+                            <!--<a href="/#!/page1" 
+                                ng-repeat="item in $ctrl.mapping_list" 
+                                ng-click="$ctrl.clickPro(item)"
+                                update-state="$ctrl.updateState(pageName, item)"><li>{{item}}</li></a>-->
+                                <!--<a href="/#!/page1"
+                                ng-repeat="item in $ctrl.mapping_list"
+                                ng-click="$ctrl.clickPro(item)"><li>{{item}}</li></a>-->
+                          
+                                <a ng-repeat="item in $ctrl.mapping_list" 
+                                   ui-sref="dashboard.page1({'selpro': item})"
+                                   ng-click="$ctrl.clickPro(item)">
+                                    <li>{{item}}</li>
+                                </a>
+                                <li class="mythili" style="color:red;">Salem - IBM</li>
+                                <li class="mythili" style="color:red;">Salem - E4U</li>
+                                <li class="mythili" style="color:red;">Salem - Indix</li>
+                                <li class="mythili" style="color:red;">Salem - Bridgei2i</li>
                         </ol>
+                        
                         <!--<a href="/#!/page1" class="btn btn-info" role="button" id="data">Go To Dashboard</a>-->
                     </section>
                 </div>
