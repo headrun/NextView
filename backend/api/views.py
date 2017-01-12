@@ -3621,16 +3621,20 @@ def top_five_emp(center,prj_id,dwm_dict,level_key_structure):
     final_list = []
     emplyee_packet_query = query_set_generation(prj_id,center,level_key_structure,dwm_dict['days'])
     packets_list = RawTable.objects.filter(**emplyee_packet_query).values_list('work_packet',flat=True).distinct()
+    #import pdb;pdb.set_trace()
     for i in packets_list:
         dict_to_render = []
         employee_name = RawTable.objects.filter(project=prj_id,center=center,date__range=[dwm_dict['days'][0],dwm_dict['days'][-1:][0]],work_packet=i).values_list('employee_id').distinct()
+        employee_count = len(employee_name)
         for name in employee_name:
             values = RawTable.objects.filter(project=prj_id,center=center,date__range=[dwm_dict['days'][0],dwm_dict['days'][-1:][0]],work_packet=i,employee_id=name[0]).values_list('per_day','date')
             result = 0
             for val in values:
                 tar = Targets.objects.filter(project=prj_id,center=center,work_packet=i,from_date__lte=val[1],to_date__gte=val[1]).values_list('target',flat=True)
+                #total_tar = int(tar[0]) * employee_count
                 if tar:
                     productivity = float(val[0]) / int(tar[0])
+                    #productivity = float(val[0]) / total_tar
                     result = result + productivity
             result = float('%.2f' % round(result, 2))
             dict_to_render.append({'employee_id':name[0],'work_packet':i,'productivity':result})
@@ -4116,14 +4120,14 @@ def internal_bar_data(pro_id, cen_id, from_, to_, main_work_packet, chart_type,p
                 except:
                     per_day_value = 0
                 if per_day_value > 0:
-                    list_data.append({'name':i[0], 'date':str(i[1]), 'work_packet':i[2],'total_errors':i[3], 'productivity': per_day_value})
+                    list_data.append({'Name':i[0], 'Date':str(i[1]), 'work_packet':i[2],'Total Errors':i[3], 'Productivity': per_day_value})
                 for ans in list_data:
-                    if ans['productivity'] > 0:
-                        accuracy = 100 - ((float(ans['total_errors']) / float(ans['productivity']))) * 100
+                    if ans['Productivity'] > 0:
+                        accuracy = 100 - ((float(ans['Total Errors']) / float(ans['Productivity']))) * 100
                         accuracy_agg = float('%.2f' % round(accuracy, 2))
-                        ans['accuracy'] = accuracy_agg
+                        ans['Accuracy'] = accuracy_agg
             if len(list_data)>0:
-                table_headers = ['date','name', 'productivity', 'total_errors', 'accuracy']
+                table_headers = ['Date','Name', 'Productivity', 'Total Errors', 'Accuracy']
         final_internal_bar_drilldown['data'] = list_data
         final_internal_bar_drilldown['table_headers'] = table_headers
         return final_internal_bar_drilldown
@@ -4261,18 +4265,18 @@ def internal_bar_data(pro_id, cen_id, from_, to_, main_work_packet, chart_type,p
                     else:
                         list_of = Externalerrors.objects.filter(center=cen_id, project=pro_id, date=date,work_packet=packets_list[0]).values_list('employee_id','date','work_packet','audited_errors','total_errors')
         for i in list_of:
-            internal_bar_list.append({'name':i[0], 'date':str(i[1]), 'audited_count':i[3], 'total_errors':i[4]})
+            internal_bar_list.append({'Name':i[0], 'Date':str(i[1]), 'Audited':i[3], 'Total Errors':i[4]})
             for ans in internal_bar_list:
-                if ans['total_errors'] >0 and ans['audited_count']>0:
-                    accuracy = 100 - ((float(ans['total_errors']) / float(ans['audited_count']))) * 100
+                if ans['Total Errors'] >0 and ans['Audited']>0:
+                    accuracy = 100 - ((float(ans['Total Errors']) / float(ans['Audited']))) * 100
                     accuracy_agg = float('%.2f' % round(accuracy, 2))
-                    ans['accuracy'] = accuracy_agg
-                elif ans['total_errors']==0 and ans['audited_count']==0:
-                    ans['accuracy'] = 0
+                    ans['Accuracy'] = accuracy_agg
+                elif ans['Total Errors']==0 and ans['Audited']==0:
+                    ans['Accuracy'] = 0
                 else:
-                    ans['accuracy'] = 100
+                    ans['Accuracy'] = 100
     if len(internal_bar_list) > 0:
-        table_headers = ['date','name','audited_count', 'total_errors', 'accuracy']
+        table_headers = ['Date','Name','Audited', 'Total Errors', 'Accuracy']
     final_internal_bar_drilldown['data'] = internal_bar_list
     final_internal_bar_drilldown['project'] = project
     final_internal_bar_drilldown['table_headers'] = table_headers
@@ -4301,13 +4305,13 @@ def internal_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type,proje
             except:
                 per_day_value = 0
             if per_day_value > 0:
-                list_ext_data.append({'name': i[0],'date':str(i[3]),'work_packet': i[1],'total_errors': i[2],'productivity': per_day_value})
+                list_ext_data.append({'Name': i[0],'Date':str(i[3]),'Work Packet': i[1],'Total Errors': i[2],'Productivity': per_day_value})
             for ans in list_ext_data:
-                accuracy = 100 - ((float(ans['total_errors']) / float(ans['productivity']))) * 100
+                accuracy = 100 - ((float(ans['Total Errors']) / float(ans['Productivity']))) * 100
                 accuracy_agg = float('%.2f' % round(accuracy, 2))
-                ans['accuracy'] = accuracy_agg
+                ans['Accuracy'] = accuracy_agg
         if len(list_ext_data) > 0:
-                table_headers = ['date','name','productivity','total_errors', 'accuracy']
+                table_headers = ['Date','Name','Productivity','Total Errors', 'Accuracy']
         final_internal_drilldown['data'] = list_ext_data
         final_internal_drilldown['table_headers'] = table_headers
         return final_internal_drilldown
@@ -4349,13 +4353,13 @@ def internal_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type,proje
             except:
                 per_day_value = 0
             if per_day_value > 0:
-                list_ext_data.append({'name': i[0],'date':str(i[3]),'work_packet': i[1],'total_errors': i[2],'productivity': per_day_value})
+                list_ext_data.append({'Name': i[0],'Date':str(i[3]),'work_packet': i[1],'Total Errors': i[2],'Productivity': per_day_value})
             for ans in list_ext_data:
-                accuracy = 100 - ((float(ans['total_errors']) / float(ans['productivity']))) * 100
+                accuracy = 100 - ((float(ans['total_errors']) / float(ans['Productivity']))) * 100
                 accuracy_agg = float('%.2f' % round(accuracy, 2))
-                ans['accuracy'] = accuracy_agg
+                ans['Accuracy'] = accuracy_agg
         if len(list_ext_data) > 0:
-                table_headers = ['date','name','productivity','total_errors', 'accuracy']
+                table_headers = ['Date','Name','Productivity','Total Errors', 'Accuracy']
         final_internal_drilldown['data'] = list_ext_data
         final_internal_drilldown['table_headers'] = table_headers
         return final_internal_drilldown
@@ -4458,13 +4462,13 @@ def internal_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type,proje
     final_internal_drilldown['type'] = chart_type
 
     for i in list_of_internal:
-        internal_list.append({'name':i[0],'audited_count':i[1], 'total_errors':i[2],'date':str(i[3])})
+        internal_list.append({'Name':i[0],'Audited Count':i[1], 'Total Errors':i[2],'Date':str(i[3])})
         for ans in internal_list:
-            accuracy = 100 - ((float(ans['total_errors']) / float(ans['audited_count']))) * 100
+            accuracy = 100 - ((float(ans['Total Errors']) / float(ans['Audited Count']))) * 100
             accuracy_agg = float('%.2f' % round(accuracy, 2))
-            ans['accuracy'] = accuracy_agg
+            ans['Accuracy'] = accuracy_agg
     if len(internal_list) > 0:
-            table_headers = ['date','name','audited_count','total_errors', 'accuracy']
+            table_headers = ['Date','Name','Audited Count','Total Errors', 'Accuracy']
 
     final_internal_drilldown['data'] = internal_list
     final_internal_drilldown['table_headers'] = table_headers
@@ -4501,19 +4505,19 @@ def internal_chart_data(pro_id,cen_id,to_date,work_packet,chart_type,project):
             table_headers = []
             #import pdb;pdb.set_trace()
             for i in list_of_internal:
-                per_day_value = RawTable.objects.filter(employee_id=i[0],date=i[3],work_packet=i[1],sub_packet=i[4]).values_list('per_day')
+                per_day_value = RawTable.objects.filter(employee_id=i[0],date=i[3],work_packet=i[1]).values_list('per_day')
                 try:
                     per_day_value = per_day_value[0][0]
                 except:
                     per_day_value = 0
                 if per_day_value > 0:
-                    list_ext_data.append({'name': i[0],'date':str(i[3]),'work_packet': i[1],'total_errors': i[2],'productivity': per_day_value})
+                    list_ext_data.append({'Name': i[0],'Date':str(i[3]),'work_packet': i[1],'Total Errors': i[2],'Productivity': per_day_value})
                 for ans in list_ext_data:
-                    accuracy = 100 - ((float(ans['total_errors']) / float(ans['productivity']))) * 100
+                    accuracy = 100 - ((float(ans['Total Errors']) / float(ans['Productivity']))) * 100
                     accuracy_agg = float('%.2f' % round(accuracy, 2))
-                    ans['accuracy'] = accuracy_agg
+                    ans['Accuracy'] = accuracy_agg
                 if len(list_ext_data) >0:
-                    table_headers = ['date','name', 'productivity', 'total_errors', 'accuracy']
+                    table_headers = ['Date','Name', 'Productivity', 'Total Errors', 'Accuracy']
             final_internal_drilldown['data'] = list_ext_data
             final_internal_drilldown['table_headers'] = table_headers
             return final_internal_drilldown
@@ -4633,14 +4637,14 @@ def internal_chart_data(pro_id,cen_id,to_date,work_packet,chart_type,project):
     internal_list = []
     table_headers = []
     for i in list_of_internal:
-        internal_list.append({'name':i[0],'audited_count':i[1], 'total_errors':i[2],'date':str(i[3])})
+        internal_list.append({'Name':i[0],'Audited Count':i[1], 'Total Errors':i[2],'Date':str(i[3])})
         for ans in internal_list:
-            accuracy = 100 - ((float(ans['total_errors']) / float(ans['audited_count']))) * 100
+            accuracy = 100 - ((float(ans['Total Errors']) / float(ans['Audited Count']))) * 100
             accuracy_agg = float('%.2f' % round(accuracy, 2))
-            ans['accuracy'] = accuracy_agg
+            ans['Accuracy'] = accuracy_agg
 
         if len(internal_list)>0:
-            table_headers = ['date','name','audited_count','total_errors','accuracy']
+            table_headers = ['Date','Name','Audited Count','Total Errors','Accuracy']
     final_internal_drilldown['data'] = internal_list
     final_internal_drilldown['table_headers'] = table_headers
     return final_internal_drilldown
@@ -4710,13 +4714,13 @@ def productivity_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type,p
     for i in detail_list:
         if i[1]>0:
             if len(i) == 3:
-                packet_dict.append({'name':i[0],'done':i[1],'date': str(i[2])})
+                packet_dict.append({'Name':i[0],'Done':i[1],'Date': str(i[2])})
             else:
-                packet_dict.append({'name':i[0],'done':i[1],packets_list_type:i[2], 'date': str(i[3])})
+                packet_dict.append({'Name':i[0],'Done':i[1],packets_list_type:i[2], 'Date': str(i[3])})
         if len(packet_dict) > 0:
-            table_headers = ['date','name', 'done']
+            table_headers = ['Date','Name', 'Done']
             if len(packet_dict[0]) == 4:
-                table_headers = ['date','name', packets_list_type, 'done']
+                table_headers = ['Date','Name', packets_list_type, 'Done']
     final_productivity_drilldown['data'] = packet_dict
     final_productivity_drilldown['table_headers'] = table_headers
     return final_productivity_drilldown
@@ -4789,14 +4793,14 @@ def productivity_chart_data(pro_id,cen_id,to_date,work_packet,chart_type,project
         for i in detail_list:
             if i[1] > 0:
                 if len(i) == 2:
-                    packet_dict.append({'name':i[0],'done':i[1]})
+                    packet_dict.append({'Name':i[0],'Done':i[1]})
 
                 else:
-                    packet_dict.append({'name': i[0], 'done': i[1], packets_list_type: i[2]})
+                    packet_dict.append({'Name': i[0], 'Done': i[1], packets_list_type: i[2]})
         if len(packet_dict) > 0:
-            table_headers = ['name', 'done']
+            table_headers = ['Name', 'Done']
             if len(packet_dict[0])==3:
-                table_headers = ['name',packets_list_type, 'done']
+                table_headers = ['Name',packets_list_type, 'Done']
         final_productivity_drilldown['data'] = packet_dict
         final_productivity_drilldown['table_headers'] = table_headers
         return final_productivity_drilldown
