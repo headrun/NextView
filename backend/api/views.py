@@ -80,6 +80,7 @@ def project(request):
     except:
         manager_prj = ''
     user_group = request.user.groups.values_list('name', flat=True)[0]
+    #import pdb;pdb.set_trace()
     dict = {}
     list_wid = []
     layout_list = []
@@ -141,9 +142,7 @@ def project(request):
         center_name = Center.objects.filter(id=center).values_list('name', flat=True)[0]
         project_names = Project.objects.filter(center_id=center).values_list('name', flat=True)
         for project in project_names:
-            #lay_list = json.loads(str(Project.objects.filter(name=project).values_list('layout')[0][0]))
             vari = center_name + ' - ' + project
-            #layout_list.append({vari:lay_list})
             select_list.append(center_name + ' - ' + project)
         details['list'] = select_list
         details['role'] = 'center_manager'
@@ -332,7 +331,6 @@ def error_types_sum(error_list):
     return final_error_dict
 
 
-
 def internal_extrnal_error_types(request,date_list,prj_id,center_obj,level_structure_key,err_type):
     prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
     center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
@@ -358,10 +356,6 @@ def internal_extrnal_error_types(request,date_list,prj_id,center_obj,level_struc
         total_done_value = RawTable.objects.filter(project=prj_id, center=center_obj, date=date_va).aggregate(Max('per_day'))
         if total_done_value['per_day__max'] > 0:
             for vol_type in extr_volumes_list:
-                """for vol_keys, vol_values in vol_type.iteritems():
-                    if vol_values == '':
-                        vol_type[vol_keys] = 'NA'
-                work_packets = vol_type['sub_project'] + '_' + vol_type['work_packet'] + '_' + vol_type['sub_packet']"""
                 #work_packets = vol_type['work_packet']
                 final_work_packet = level_hierarchy_key(level_structure_key, vol_type)
                 if not final_work_packet:
@@ -410,6 +404,148 @@ def internal_extrnal_error_types(request,date_list,prj_id,center_obj,level_struc
                                         vol_audit_data[error_vol_type] = [int(value)]
     indicidual_error_calc = error_types_sum(all_error_types)
     return indicidual_error_calc
+
+
+def sample_pareto_analysis(request,date_list,prj_id,center_obj,level_structure_key,err_type):
+    prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
+    center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
+    query_set = query_set_generation(prj_id, center_obj, level_structure_key,date_list)
+    if err_type =='Internal' :
+        extr_volumes_list = Internalerrors.objects.filter(**query_set).values('sub_project','work_packet','sub_packet').distinct()
+        err_key_type = 'error'
+    if err_type == 'External':
+        extr_volumes_list = Externalerrors.objects.filter(**query_set).values('sub_project','work_packet','sub_packet').distinct()
+        err_key_type = 'externalerror'
+    conn = redis.Redis(host="localhost", port=6379, db=0)
+    # below variable for error graphs.
+    result = {}
+    vol_error_values = {}
+    vol_audit_data = {}
+    # below variable for external errors
+    extrnl_error_values = {}
+    extrnl_err_type = {}
+    extr_volumes_list_new=[]
+    all_error_types = []
+    #import pdb;pdb.set_trace()
+    for date_va in date_list:
+        count =0
+        total_done_value = RawTable.objects.filter(project=prj_id, center=center_obj, date=date_va).aggregate(Max('per_day'))
+        if total_done_value['per_day__max'] > 0:
+            for vol_type in extr_volumes_list:
+                #work_packets = vol_type['work_packet']
+                final_work_packet = level_hierarchy_key(level_structure_key, vol_type)
+                if not final_work_packet:
+                    final_work_packet = level_hierarchy_key(extr_volumes_list[count],vol_type)
+                count = count+1
+                extr_volumes_list_new.append(final_work_packet)
+                key_pattern = '{0}_{1}_{2}_{3}_{4}'.format(prj_name[0], str(center_name[0]), final_work_packet, date_va,err_key_type)
+                audit_key_list = conn.keys(pattern=key_pattern)
+                #import pdb;pdb.set_trace()
+                if not audit_key_list:
+                    if vol_error_values.has_key(final_work_packet):
+                        vol_error_values[final_work_packet].append("NA")
+                        vol_audit_data[final_work_packet].append("NA")
+                    else:
+                        vol_error_values[final_work_packet] = ["NA"]
+                        vol_audit_data[final_work_packet] = ["NA"]
+                for cur_key in audit_key_list:
+                    var = conn.hgetall(cur_key)
+                    for key, value in var.iteritems():
+                        if key == 'types_of_errors':
+                            all_error_types.append(value)
+                        else:
+                            if value == 'None':
+                                value = "NA"
+                            error_vol_type = final_work_packet
+                            if key == 'total_errors':
+                                if vol_error_values.has_key(error_vol_type):
+                                    if value =="NA":
+                                        vol_error_values[error_vol_type].append(value)
+                                    else:
+                                        vol_error_values[error_vol_type].append(int(value))
+                                else:
+                                    if value =="NA":
+                                        vol_error_values[error_vol_type] = [value]
+                                    else:
+                                        vol_error_values[error_vol_type] = [int(value)]
+                            else:
+                                if vol_audit_data.has_key(error_vol_type):
+                                    if value=="NA":
+                                        vol_audit_data[error_vol_type].append(value)
+                                    else:
+                                        vol_audit_data[error_vol_type].append(int(value))
+                                else:
+                                    if value=="NA":
+                                        vol_audit_data[error_vol_type] = [value]
+                                    else:
+                                        vol_audit_data[error_vol_type] = [int(value)]
+
+    accuracy_cate_dict = {}
+    accuracy_cate_list = []
+    final_external_pareto_data = {}
+    final_external_pareto_data['error_count'] = {}
+    final_external_pareto_data['error_count']['error_count'] = []
+    final_external_pareto_data['error_accuracy'] = {}
+    final_external_pareto_data['error_accuracy']['error_accuracy'] = []
+
+    indicidual_error_calc = error_types_sum(all_error_types)
+    error_cate_sum = sum(indicidual_error_calc.values())
+
+    """for key, value in indicidual_error_calc.iteritems():
+        accuracy = (float(float(value)/float(error_cate_sum)))*100
+        cate_accuracy_perc = float('%.2f' % round(accuracy, 2))
+        accuracy_cate_dict[key] = cate_accuracy_perc"""
+
+    error_list = []
+    cate_count = 0
+    new_cate_dict = {}
+    cate_data_values = []
+    #import pdb;pdb.set_trace()
+    for key, value in sorted(indicidual_error_calc.iteritems(), key=lambda (k, v): (-v, k)):
+        err_list = []
+        cate_count = cate_count + value
+        err_list.append(key)
+        err_list.append(cate_count)
+        cate_data_values.append(value)
+        error_list.append(err_list)
+    new_cate_dict.update(error_list)
+
+    final_external_pareto_data['error_count']['error_count'] = cate_data_values[:10]
+
+    cate_accuracy_list = []
+    final_cate_list = []
+    cate_accuracy_dict = {}
+    for key, value in new_cate_dict.iteritems():
+        accuracy = (float(float(value) / float(error_cate_sum))) * 100
+        accuracy_perc = float('%.2f' % round(accuracy, 2))
+        cate_accuracy_dict[key] = accuracy_perc
+
+    error_accuracy = []
+    final_cate_list = []
+    for key, value in sorted(cate_accuracy_dict.iteritems(), key=lambda (k, v): (v, k)):
+        acc_list = []
+        # acc_list.append(key)
+        final_cate_list.append(key)
+        # acc_list.append(value)
+        cate_accuracy_list.append(value)
+        # accuracy_list.append(acc_list)
+    final_external_pareto_data['error_accuracy']['error_accuracy'] = cate_accuracy_list[:10]
+    """for key, value in sorted(accuracy_cate_dict.iteritems(), key=lambda (k, v): (v, k)):
+        acc_cate_list = []
+        #acc_cate_list.append(key)
+        final_cate_list.append(key)
+        acc_cate_list.append(value)
+        cate_accuracy_list.append(value)
+        #accuracy_cate_list.append(acc_cate_list)
+    final_external_pareto_data['error_accuracy']['error_accuracy'] = cate_accuracy_list[:10]"""
+
+    final_external_data = pareto_graph_data(final_external_pareto_data)
+    result = {}
+    result['category_name'] = final_cate_list[:10]
+    result['category_pareto'] = final_external_data
+    return result
+
+
 
 def redis_insertion_final(prj_obj,center_obj,dates_list,key_type,level_structure):
     data_dict = {}
@@ -2405,12 +2541,6 @@ def agent_pareto_data_generation(request,date_list,prj_id,center_obj,level_struc
     center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
     query_set = query_set_generation(prj_id, center_obj, level_structure_key, date_list)
     extr_volumes_list = Internalerrors.objects.filter(**query_set).values_list('employee_id',flat=True).distinct()
-    '''if err_type =='Internal' :
-        extr_volumes_list = Internalerrors.objects.filter(**query_set).values_list('employee_id',flat=True).distinct()
-        err_key_type = 'error'
-    if err_type == 'External':
-        extr_volumes_list = Externalerrors.objects.filter(**query_set).values_list('employee_id',flat=True).distinct()
-        err_key_type = 'externalerror' '''
     agent_count = []
     agent_name = {}
     error_count = {}
@@ -2433,14 +2563,19 @@ def agent_pareto_data_generation(request,date_list,prj_id,center_obj,level_struc
     accuracy_list = []
     new_emp_list = []
     final_pareto_data = {}
-    final_pareto_data['error_count']=[]
-    final_pareto_data['error_accuracy'] = []
-
+    final_pareto_data['error_count']={}
+    final_pareto_data['error_count']['error_count'] =[]
+    final_pareto_data['error_accuracy'] = {}
+    final_pareto_data['error_accuracy']['error_accuracy'] = []
+    error_count_data = []
     for key,value in sorted(error_count.iteritems(), key=lambda (k, v): (-v, k)):
         data_values = []
         data_values.append(key)
         data_values.append(value)
+        error_count_data.append(value)
         new_emp_list.append(data_values)
+
+    final_pareto_data['error_count']['error_count'] = error_count_data[:10]
 
     emp_error_count = 0
     for key, value in sorted(error_count.iteritems(), key=lambda (k, v): (-v, k)):
@@ -2455,26 +2590,98 @@ def agent_pareto_data_generation(request,date_list,prj_id,center_obj,level_struc
         accuracy = (float(float(value)/float(error_sum)))*100
         accuracy_perc = float('%.2f' % round(accuracy, 2))
         accuracy_dict[key] = accuracy_perc
-
+    error_accuracy = []
+    final_emps = []
     for key, value in sorted(accuracy_dict.iteritems(), key=lambda (k, v): (v, k)):
         acc_list = []
-        acc_list.append(key)
-        acc_list.append(value)
-        accuracy_list.append(acc_list)
-    return accuracy_list,new_emp_list
+        #acc_list.append(key)
+        final_emps.append(key)
+        #acc_list.append(value)
+        error_accuracy.append(value)
+        #accuracy_list.append(acc_list)
+    final_pareto_data['error_accuracy']['error_accuracy'] = error_accuracy[:10]
+
+    final_data = pareto_graph_data(final_pareto_data)
+    result = {}
+    result['emp_names'] = final_emps[:10]
+    result ['agent_pareto_data'] = final_data
+
+    return result
 
 
+
+def agent_external_pareto_data_generation(request,date_list,prj_id,center_obj,level_structure_key):
+    prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
+    center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
+    query_set = query_set_generation(prj_id, center_obj, level_structure_key, date_list)
+    extrnal_volumes_list = Externalerrors.objects.filter(**query_set).values_list('employee_id',flat=True).distinct()
+    agent_count = []
+    extrnl_agent_name = {}
+    extrnl_error_count = {}
+    count = 0
+    for agent in extrnal_volumes_list:
+        total_errors = Externalerrors.objects.filter(project=prj_id, center=center_obj, employee_id=agent,date__range=[date_list[0], date_list[-1]]).aggregate(Sum('total_errors'))
+        if len(total_errors) > 0:
+            for key, value in total_errors.iteritems():
+                extrnl_agent_name[agent] = value
+        else:
+            extrnl_agent_name = 0
+        count = count + 1
+
+    extrnl_error_count = extrnl_agent_name
+    extrnl_error_sum = sum(extrnl_error_count.values())
+    new_list = []
+    new_extrnl_dict = {}
+    extrnl_accuracy_dict = {}
+    final_pareto_data = {}
+    final_pareto_data['error_count']={}
+    final_pareto_data['error_count']['error_count'] =[]
+    final_pareto_data['error_accuracy'] = {}
+    final_pareto_data['error_accuracy']['error_accuracy'] = []
+    extrnl_error_count_data = []
+    for key,value in sorted(extrnl_error_count.iteritems(), key=lambda (k, v): (-v, k)):
+        extrnl_error_count_data.append(value)
+
+    final_pareto_data['error_count']['error_count'] = extrnl_error_count_data[:10]
+
+    emp_error_count = 0
+    for key, value in sorted(extrnl_error_count.iteritems(), key=lambda (k, v): (-v, k)):
+        data_list = []
+        emp_error_count = emp_error_count +value
+        data_list.append(key)
+        data_list.append(emp_error_count)
+        new_list.append(data_list)
+    new_extrnl_dict.update(new_list)
+
+    for key, value in new_extrnl_dict.iteritems():
+        accuracy = (float(float(value)/float(extrnl_error_sum)))*100
+        accuracy_perc = float('%.2f' % round(accuracy, 2))
+        extrnl_accuracy_dict[key] = accuracy_perc
+    extrnl_error_accuracy = []
+    final_emps = []
+    for key, value in sorted(extrnl_accuracy_dict.iteritems(), key=lambda (k, v): (v, k)):
+        final_emps.append(key)
+        extrnl_error_accuracy.append(value)
+
+    final_pareto_data['error_accuracy']['error_accuracy'] = extrnl_error_accuracy[:10]
+    final_data = pareto_graph_data(final_pareto_data)
+    result_dict = {}
+    result_dict['emp_names'] = final_emps[:10]
+    result_dict ['agent_pareto_data'] = final_data
+    return result_dict
 
 def category_pareto_data_generation(request,date_list,prj_id,center_obj,level_structure_key):
     prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
     center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
     query_set = query_set_generation(prj_id, center_obj, level_structure_key, date_list)
     extr_volumes_list = Internalerrors.objects.filter(**query_set).values_list('error_types',flat=True).distinct()
+    split_list = []
+    #import pdb;pdb.set_trace()
     agent_count = []
     category_name = {}
     category_error_count = {}
     count = 0
-    #import pdb;pdb.set_trace()
+
     for category in extr_volumes_list:
         total_errors = Internalerrors.objects.filter(project=prj_id, center=center_obj, error_types=category,date__range=[date_list[0], date_list[-1]]).aggregate(Sum('total_errors'))
         if len(total_errors) > 0:
@@ -2530,12 +2737,9 @@ def external_internal_without_audit_graph(request,date_list,prj_id,center_obj,pa
     query_set = query_set_generation(prj_id, center_obj, level_structure_key,date_list)
 
     if err_type == 'Internal':
-        #extr_volumes_list = Internalerrors.objects.filter(**query_set).values('sub_project','work_packet','sub_packet').distinct()
         extr_volumes_list = worktrack_internal_external_workpackets_list(level_structure_key, 'Internalerrors', query_set)
         err_key_type = 'error'
-    #import pdb;pdb.set_trace()
     if err_type == 'External':
-        #extr_volumes_list = Externalerrors.objects.filter(**query_set).values('sub_project', 'work_packet','sub_packet').distinct()
         extr_volumes_list = worktrack_internal_external_workpackets_list(level_structure_key, 'Externalerrors', query_set)
         err_key_type = 'externalerror'
     extr_volumes_list_new = []
@@ -2900,7 +3104,6 @@ def pareto_graph_data(pareto_dict):
                 single_dict['yAxis'] = 1
             final_list.append(single_dict)
     return final_list
-
 
 def week_month_pareto_calc(week_names,pareto_error_count,accuracy_timeline):
     final_pareto_error_count = prod_volume_week(week_names, pareto_error_count, {})
@@ -3987,18 +4190,21 @@ def from_to(request):
     #volumes_graphs_details = volumes_graphs_data(date_list,prj_id,center,level_structure_key)
     #final_result_dict['volumes_graphs_details'] = volumes_graphs_details
     agent_internal_pareto_data = agent_pareto_data_generation(request,date_list,prj_id,center,level_structure_key)
-    final_result_dict['Pareto_data'] = agent_internal_pareto_data
     category_internal_pareto_data = category_pareto_data_generation(request, date_list, prj_id, center, level_structure_key)
     final_result_dict['Pareto_data'] = category_internal_pareto_data
-    #internal_error_types = internal_extrnal_error_types(request, employe_dates['days'], prj_id, center, level_structure_key,"Internal")
-    #external_error_types = internal_extrnal_error_types(request, employe_dates['days'], prj_id, center,level_structure_key, "External")
-    #final_result_dict['internal_errors_types'] = graph_data_alignment_color(internal_error_types,'y',level_structure_key,prj_id,center)
-    #final_result_dict['external_errors_types'] = graph_data_alignment_color(external_error_types,'y',level_structure_key,prj_id,center)
+    internal_error_types = internal_extrnal_error_types(request, employe_dates['days'], prj_id, center, level_structure_key,"Internal")
+    external_error_types = internal_extrnal_error_types(request, employe_dates['days'], prj_id, center,level_structure_key, "External")
+    final_result_dict['internal_errors_types'] = graph_data_alignment_color(internal_error_types,'y',level_structure_key,prj_id,center)
+    final_result_dict['external_errors_types'] = graph_data_alignment_color(external_error_types,'y',level_structure_key,prj_id,center)
+    extrnl_agent_pareto_data = agent_external_pareto_data_generation(request, date_list, prj_id, center, level_structure_key)
     #final_result_dict['days_type'] = type
-    if len(agent_internal_pareto_data) >= 7:
-        only_top_agents = agent_internal_pareto_data[:7]
-    else:
-        only_top_agents = agent_internal_pareto_data
+    category_error_count = sample_pareto_analysis(request, date_list, prj_id, center, level_structure_key,"Internal")
+    extrnl_category_error_count = sample_pareto_analysis(request, date_list, prj_id, center, level_structure_key, "External")
+    final_result_dict['Internal_Error_Category'] = category_error_count
+    #import pdb;pdb.set_trace()
+    final_result_dict['External_Error_Category'] = extrnl_category_error_count
+    final_result_dict['External_Pareto_data'] = extrnl_agent_pareto_data
+    final_result_dict['Pareto_data'] = agent_internal_pareto_data
 
     return HttpResponse(final_result_dict)
 
