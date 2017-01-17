@@ -22,6 +22,7 @@ import json
 from django.apps import apps
 from collections import OrderedDict
 
+
 def error_insert(request):
     pass
 def get_order_of_headers(open_sheet, Default_Headers, mandatory_fileds=[]):
@@ -80,33 +81,77 @@ def project(request):
     except:
         manager_prj = ''
     user_group = request.user.groups.values_list('name', flat=True)[0]
-    #import pdb;pdb.set_trace()
+    user_group_id = Group.objects.filter(name=user_group).values_list('id', flat=True)
     dict = {}
     list_wid = []
     layout_list = []
     final_dict = {}
-    widgets_id = Widget_Mapping.objects.filter(user_name_id=request.user.id).values('widget_priority', 'is_drilldown','is_display', 'widget_name')
-    for data in widgets_id:
-        if data['is_display'] == True:
-            widgets_data = Widgets.objects.filter(id=data['widget_name']).values('config_name', 'name', 'id_num', 'col','opt', 'day_type_widget', 'api')
-            wid_dict = widgets_data[0]
-            wid_dict['widget_priority'] = data['widget_priority']
-            wid_dict['is_drilldown'] = data['is_drilldown']
-            list_wid.append(wid_dict)
-    sorted_dict = sorted(list_wid, key=lambda k: k['widget_priority'])
-    lay_out_order = []
-    for i in sorted_dict:
-        config_name = i.pop('config_name')
-        lay_out_order.append(config_name)
-        final_dict[config_name] = i
-    layout_list.append(final_dict)
-    layout_list.append({'layout': lay_out_order})
+    #import pdb;pdb.set_trace()
+    if 'team_lead' in user_group:
+        center_list = TeamLead.objects.filter(name_id=request.user.id).values_list('center')
+        project_list = TeamLead.objects.filter(name_id=request.user.id).values_list('project')
+
+    if 'customer' in user_group:
+        center_list = Customer.objects.filter(name_id=request.user.id).values_list('center')
+        project_list = Customer.objects.filter(name_id=request.user.id).values_list('project')
+
+    #import pdb;pdb.set_trace()
+
+    if 'nextwealth_manager' in user_group:
+        center_name = Nextwealthmanager.objects.filter(name_id=request.user.id).values_list('center',flat=True)
+        if len(center_name) < 2:
+            center_list_id = str(Center.objects.filter(id=center_name[0][0])[0])
+            center_list = Center.objects.filter(name = center_list_id)[0].id
+            project_name = Project.objects.filter(center_id = center_list)
+            for project in project_name:
+                project_list_id = str(project)
+                project_list = Project.objects.filter(name=project_list_id).values_list('id')
+
+        elif len(center_name) >= 2:
+            for center in center_name:
+                center_list_id = str(Center.objects.filter(id=center_name[0])[0])
+                center_list = Center.objects.filter(name=center_list_id)[0].id
+                project_name = Project.objects.filter(center_id = center_list)
+                for project in project_name:
+                    project_list_id = str(project)
+                    project_list = Project.objects.filter(name=project_list_id).values_list('id')
+
+    if 'center_manager' in user_group:
+        center = Centermanager.objects.filter(name_id=request.user.id).values_list('center', flat=True)[0]
+        center_list = Center.objects.filter(id=center).values_list('name', flat=True)[0]
+        project_names = Project.objects.filter(center_id=center).values_list('name', flat=True)
+        if len(project_names) > 1:
+            if manager_prj:
+                project_list = Project.objects.filter(name=manager_prj).values_list('id',flat=True)
+            else:
+                project_list = Project.objects.filter(name=project_names[1]).values_list('id',flat=True)
+
+    if user_group in ['nextwealth_manager','center_manager']:
+        if manager_prj:
+            widgets_id = Widgets_group.objects.filter(User_Group_id=user_group_id,project=project_list,center=center_list).values('widget_priority', 'is_drilldown','is_display', 'widget_name')
+    else:
+        widgets_id = Widgets_group.objects.filter(User_Group_id=user_group_id, project=project_list,center=center_list).values('widget_priority', 'is_drilldown','is_display', 'widget_name')
+    #widgets_id = Widgets_group.objects.filter(User_Group_id=user_group_id).values('widget_priority', 'is_drilldown','is_display', 'widget_name')
+        for data in widgets_id:
+            if data['is_display'] == True:
+                widgets_data = Widgets.objects.filter(id=data['widget_name']).values('config_name', 'name', 'id_num', 'col','opt', 'day_type_widget', 'api')
+                wid_dict = widgets_data[0]
+                wid_dict['widget_priority'] = data['widget_priority']
+                wid_dict['is_drilldown'] = data['is_drilldown']
+                list_wid.append(wid_dict)
+        sorted_dict = sorted(list_wid, key=lambda k: k['widget_priority'])
+        lay_out_order = []
+        for i in sorted_dict:
+            config_name = i.pop('config_name')
+            lay_out_order.append(config_name)
+            final_dict[config_name] = i
+        layout_list.append(final_dict)
+        layout_list.append({'layout': lay_out_order})
 
     if 'team_lead' in user_group:
         final_details = {}
         details = {}
         select_list = []
-        #layout_list = []
         center_list = TeamLead.objects.filter(name_id=request.user.id).values_list('center')
         project_list = TeamLead.objects.filter(name_id=request.user.id).values_list('project')
         if (len(center_list) & len(project_list)) == 1:
@@ -115,9 +160,7 @@ def project(request):
             center_name = str(Center.objects.filter(id=center_list[0][0])[0])
             for project in project_list:
                 project_name = str(Project.objects.filter(id=project[0])[0])
-                #lay_list = json.loads(str(Project.objects.filter(id=project[0]).values_list('layout')[0][0]))
                 vari = center_name + ' - ' + project_name
-                #layout_list.append({vari:lay_list})
                 select_list.append(vari)
         elif len(center_list) >= 2:
             for center in center_list:
@@ -137,7 +180,6 @@ def project(request):
         final_details = {}
         details = {}
         select_list = []
-        #layout_list = []
         center = Centermanager.objects.filter(name_id=request.user.id).values_list('center', flat=True)[0]
         center_name = Center.objects.filter(id=center).values_list('name', flat=True)[0]
         project_names = Project.objects.filter(center_id=center).values_list('name', flat=True)
@@ -159,11 +201,11 @@ def project(request):
         details['dates'] = new_dates
         return HttpResponse(details)
 
+    #import pdb;pdb.set_trace()
     if 'nextwealth_manager' in user_group:
         final_details = {}
         details = {}
         select_list = []
-        #layout_list = []
         center_list = Nextwealthmanager.objects.filter(name_id=request.user.id).values_list('center')
         if len(center_list) < 2:
             center_name = str(Center.objects.filter(id=center_list[0][0])[0])
@@ -176,10 +218,7 @@ def project(request):
                 except:
                     lay_list = ''
                 vari = center_name + ' - ' + project_name
-                #vari = project_name
-                #layout_list.append({vari:lay_list})
                 select_list.append(center_name + ' - ' + project_name)
-                #select_list.append(project_name)
 
         elif len(center_list) >= 2:
             for center in center_list:
@@ -193,10 +232,8 @@ def project(request):
                     except:
                         lay_list = ''
                     vari = center_name + ' - ' + project_name
-                    #vari = project_name
                     layout_list.append({vari:lay_list})
                     select_list.append(center_name + ' - ' + project_name)
-                    #select_list.append(project_name)
 
         details['list'] = select_list
         details['role'] = 'nextwealth_manager'
@@ -219,43 +256,16 @@ def project(request):
         final_details = {}
         details = {}
         select_list = []
-        #layout_list = []
-        #lay_list = json.loads(str(Customer.objects.filter(name_id=request.user.id).values_list('layout')[0][0]))
-        #layout_list.append({'layout': lay_list})
 
         center_list = Customer.objects.filter(name_id=request.user.id).values_list('center')
         project_list = Customer.objects.filter(name_id=request.user.id).values_list('project')
-        #customer_id = Customer.objects.filter(name_id=request.user.id).values_list('id', flat=True)
-        """
-        widgets_id = Widget_Mapping.objects.filter(user_name_id=request.user.id).values('widget_priority', 'is_drilldown','is_display', 'widget_name')
-        list_wid = []
-        wid_dict = {}
-        final_dict = {}
-        for data in widgets_id:
-            if data['is_display'] == True:
-                widgets_data = Widgets.objects.filter(id=data['widget_name']).values('config_name', 'name', 'id_num','col', 'opt', 'day_type_widget','api')
-                wid_dict = widgets_data[0]
-                wid_dict['widget_priority'] = data['widget_priority']
-                wid_dict['is_drilldown'] = data['is_drilldown']
-                list_wid.append(wid_dict)
-        sorted_dict = sorted(list_wid, key=lambda k: k['widget_priority'])
-        lay_out_order = []
-        for i in sorted_dict:
-            config_name = i.pop('config_name')
-            lay_out_order.append(config_name)
-            final_dict[config_name] = i
-        layout_list.append(final_dict)
-        layout_list.append({'layout': lay_out_order})
-        """
         if (len(center_list) & len(project_list)) == 1:
             select_list.append('none')
         if len(center_list) < 2:
             center_name = str(Center.objects.filter(id=center_list[0][0])[0])
             for project in project_list:
                 project_name = str(Project.objects.filter(id=project[0])[0])
-                #lay_list = json.loads(str(Project.objects.filter(id=project[0]).values_list('layout')[0][0]))
                 vari = center_name + ' - ' + project_name
-                #layout_list.append({vari:lay_list})
                 select_list.append(vari)
         elif len(center_list) >= 2:
             for center in center_list:
@@ -279,6 +289,7 @@ def project(request):
         details['dates'] = new_dates
 
         details['dates'] = new_dates
+
         return HttpResponse(details)
 
 def latest_dates(request,prj_id):
@@ -417,22 +428,18 @@ def sample_pareto_analysis(request,date_list,prj_id,center_obj,level_structure_k
         extr_volumes_list = Externalerrors.objects.filter(**query_set).values('sub_project','work_packet','sub_packet').distinct()
         err_key_type = 'externalerror'
     conn = redis.Redis(host="localhost", port=6379, db=0)
-    # below variable for error graphs.
     result = {}
     vol_error_values = {}
     vol_audit_data = {}
-    # below variable for external errors
     extrnl_error_values = {}
     extrnl_err_type = {}
     extr_volumes_list_new=[]
     all_error_types = []
-    #import pdb;pdb.set_trace()
     for date_va in date_list:
         count =0
         total_done_value = RawTable.objects.filter(project=prj_id, center=center_obj, date=date_va).aggregate(Max('per_day'))
         if total_done_value['per_day__max'] > 0:
             for vol_type in extr_volumes_list:
-                #work_packets = vol_type['work_packet']
                 final_work_packet = level_hierarchy_key(level_structure_key, vol_type)
                 if not final_work_packet:
                     final_work_packet = level_hierarchy_key(extr_volumes_list[count],vol_type)
@@ -440,7 +447,6 @@ def sample_pareto_analysis(request,date_list,prj_id,center_obj,level_structure_k
                 extr_volumes_list_new.append(final_work_packet)
                 key_pattern = '{0}_{1}_{2}_{3}_{4}'.format(prj_name[0], str(center_name[0]), final_work_packet, date_va,err_key_type)
                 audit_key_list = conn.keys(pattern=key_pattern)
-                #import pdb;pdb.set_trace()
                 if not audit_key_list:
                     if vol_error_values.has_key(final_work_packet):
                         vol_error_values[final_work_packet].append("NA")
@@ -490,17 +496,10 @@ def sample_pareto_analysis(request,date_list,prj_id,center_obj,level_structure_k
 
     indicidual_error_calc = error_types_sum(all_error_types)
     error_cate_sum = sum(indicidual_error_calc.values())
-
-    """for key, value in indicidual_error_calc.iteritems():
-        accuracy = (float(float(value)/float(error_cate_sum)))*100
-        cate_accuracy_perc = float('%.2f' % round(accuracy, 2))
-        accuracy_cate_dict[key] = cate_accuracy_perc"""
-
     error_list = []
     cate_count = 0
     new_cate_dict = {}
     cate_data_values = []
-    #import pdb;pdb.set_trace()
     for key, value in sorted(indicidual_error_calc.iteritems(), key=lambda (k, v): (-v, k)):
         err_list = []
         cate_count = cate_count + value
@@ -524,21 +523,9 @@ def sample_pareto_analysis(request,date_list,prj_id,center_obj,level_structure_k
     final_cate_list = []
     for key, value in sorted(cate_accuracy_dict.iteritems(), key=lambda (k, v): (v, k)):
         acc_list = []
-        # acc_list.append(key)
         final_cate_list.append(key)
-        # acc_list.append(value)
         cate_accuracy_list.append(value)
-        # accuracy_list.append(acc_list)
     final_external_pareto_data['error_accuracy']['error_accuracy'] = cate_accuracy_list[:10]
-    """for key, value in sorted(accuracy_cate_dict.iteritems(), key=lambda (k, v): (v, k)):
-        acc_cate_list = []
-        #acc_cate_list.append(key)
-        final_cate_list.append(key)
-        acc_cate_list.append(value)
-        cate_accuracy_list.append(value)
-        #accuracy_cate_list.append(acc_cate_list)
-    final_external_pareto_data['error_accuracy']['error_accuracy'] = cate_accuracy_list[:10]"""
-
     final_external_data = pareto_graph_data(final_external_pareto_data)
     result = {}
     result['category_name'] = final_cate_list[:10]
@@ -2546,7 +2533,6 @@ def agent_pareto_data_generation(request,date_list,prj_id,center_obj,level_struc
     error_count = {}
     count = 0
     for agent in extr_volumes_list:
-        #total_errors = Internalerrors.objects.filter(project=prj_id,center=center_obj,employee_id=agent,date__range =[date_list[0],date_list[-1]]).values_list('total_errors',flat=True).distinct()
         total_errors = Internalerrors.objects.filter(project=prj_id, center=center_obj, employee_id=agent,date__range=[date_list[0], date_list[-1]]).aggregate(Sum('total_errors'))
         if len(total_errors) > 0:
             for key, value in total_errors.iteritems():
@@ -2676,7 +2662,6 @@ def category_pareto_data_generation(request,date_list,prj_id,center_obj,level_st
     query_set = query_set_generation(prj_id, center_obj, level_structure_key, date_list)
     extr_volumes_list = Internalerrors.objects.filter(**query_set).values_list('error_types',flat=True).distinct()
     split_list = []
-    #import pdb;pdb.set_trace()
     agent_count = []
     category_name = {}
     category_error_count = {}
@@ -2716,7 +2701,6 @@ def category_pareto_data_generation(request,date_list,prj_id,center_obj,level_st
         data_cate_list.append(cate_error_count)
         new_category_list.append(data_cate_list)
     new_cate_dict.update(new_category_list)
-    #import pdb;pdb.set_trace()
     for key, value in new_cate_dict.iteritems():
         accuracy = (float(float(value)/float(error_cate_sum)))*100
         cate_accuracy_perc = float('%.2f' % round(accuracy, 2))
@@ -3135,18 +3119,18 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
         utilization_fte_details = utilization_work_packet_data(center, prj_id, dwm_dict['day'], level_structure_key)
         utilization_operational_details = utilization_operational_data(center, prj_id, dwm_dict['day'], level_structure_key)
 
-        monthly_volume_graph_details = Monthly_Volume_graph(dwm_dict['day'], prj_id, center, level_structure_key)
-        result_dict['monthly_volume_graph_details'] = graph_data_alignment_color(monthly_volume_graph_details,'data', level_structure_key,prj_id, center)
+        #monthly_volume_graph_details = Monthly_Volume_graph(dwm_dict['day'], prj_id, center, level_structure_key)
+        #result_dict['monthly_volume_graph_details'] = graph_data_alignment_color(monthly_volume_graph_details,'data', level_structure_key,prj_id, center)
 
         result_dict['utilization_fte_details'] = graph_data_alignment_color(utilization_fte_details['utilization'], 'data',level_structure_key, prj_id, center)
         result_dict['utilization_operational_details'] = graph_data_alignment_color(utilization_operational_details['utilization'], 'data',level_structure_key, prj_id, center)
         result_dict['original_productivity_graph'] = graph_data_alignment_color(productivity_utilization_data['productivity'], 'data', level_structure_key, prj_id, center)
-        result_dict['original_utilization_graph'] = graph_data_alignment_color(productivity_utilization_data['utilization'], 'data', level_structure_key, prj_id, center)
+        #result_dict['original_utilization_graph'] = graph_data_alignment_color(productivity_utilization_data['utilization'], 'data', level_structure_key, prj_id, center)
         result_dict['utilization_fte_graph'] = graph_data_alignment_color(productivity_utilization_data, 'data', level_structure_key, prj_id, center)
         productivity_min_max = adding_min_max('original_productivity_graph',productivity_utilization_data['productivity'])
-        utilization_min_max = adding_min_max('original_utilization_graph', productivity_utilization_data['utilization'])
+        #utilization_min_max = adding_min_max('original_utilization_graph', productivity_utilization_data['utilization'])
         result_dict.update(productivity_min_max)
-        result_dict.update(utilization_min_max)
+        #result_dict.update(utilization_min_max)
         fte_graph_data = fte_calculation(request, prj_id, center, dwm_dict['day'], level_structure_key)
         result_dict['fte_calc_data'] = {}
         result_dict['fte_calc_data']['total_fte'] = graph_data_alignment_color(fte_graph_data['total_fte'], 'data',level_structure_key, prj_id, center)
@@ -3453,8 +3437,7 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
             volume_new_data.append(error_graph)
 
         # result_dict['productivity_data']= graph_data_alignment(final_productivity,name_key='data')
-        result_dict['productivity_data'] = graph_data_alignment_color(final_productivity, 'data', level_structure_key,
-                                                                      prj_id, center)
+        result_dict['productivity_data'] = graph_data_alignment_color(final_productivity, 'data', level_structure_key,prj_id, center)
         result_dict['volumes_data'] = {}
         result_dict['volumes_data']['volume_new_data'] = volume_new_data
         for error_key, error_value in all_internal_error_accuracy.iteritems():

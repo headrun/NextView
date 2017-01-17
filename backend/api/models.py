@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 from django.contrib.auth.models import User
 from django.db import models
+from django.contrib.auth.models import User, Group
 
 
 # Create your models here.
@@ -49,25 +50,6 @@ class Customer(models.Model):
         user_obj = User.objects.filter(id=self.name_id).values_list('username',flat=True)
         return user_obj[0]
 
-class ChartType(models.Model):
-    chart_type = models.CharField(max_length=512)
-
-    class Meta:
-        db_table = u'chart_type'
-
-    def __unicode__(self):
-        return self.chart_type
-
-class ChartType(models.Model):
-    name = models.CharField(max_length=512)
-
-    class Meta:
-        db_table = u'chart_type'
-
-    def __unicode__(self):
-        return self.name
-
-
 class Widgets(models.Model):
     config_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
@@ -77,15 +59,13 @@ class Widgets(models.Model):
     id_num = models.IntegerField(max_length=125)
     day_type_widget = models.BooleanField(default=None)
     priority = models.IntegerField(max_length=125,null=True, blank=True)
-    chart_type_name = models.ForeignKey(ChartType, null=True)
-
 
     class Meta:
         db_table = u'widgets'
     def __unicode__(self):
         return self.name
 
-class Widget_Mapping(models.Model):
+'''class Widget_Mapping(models.Model):
     user_name = models.ForeignKey(User, null=True)
     widget_name = models.ForeignKey(Widgets, null=True)
     widget_priority = models.IntegerField(max_length=125)
@@ -94,6 +74,20 @@ class Widget_Mapping(models.Model):
 
     class Meta:
         db_table = u'widget_mapping'
+    def __unicode__(self):
+        return u'' '''
+
+class Widgets_group(models.Model):
+    User_Group = models.ForeignKey(Group)
+    project = models.ForeignKey(Project, null=True)
+    center = models.ForeignKey(Center, null=True)
+    widget_name = models.ForeignKey(Widgets, null=True)
+    widget_priority = models.IntegerField(max_length=125)
+    is_display = models.BooleanField(default=None)
+    is_drilldown = models.BooleanField(default=None)
+
+    class Meta:
+        db_table = u'Widgets_group'
     def __unicode__(self):
         return u''
 
@@ -133,6 +127,7 @@ class HeadcountAuthoring(models.Model):
     support_others_managers = models.CharField(max_length=255, blank=True)
     total = models.CharField(max_length=125, blank=True)
     sheet_name = models.CharField(max_length=255, default='')
+
     class Meta:
         db_table = u'headcount_authoring'
     def __unicode__(self):
@@ -196,9 +191,6 @@ class RawtableAuthoring(models.Model):
     
     def __unicode__(self):
         return self.work_packet
-
-
-
 
 
 class Internalerrors(models.Model):
@@ -357,7 +349,7 @@ class TargetsAuthoring(models.Model):
     work_packet = models.CharField(max_length=255)
     sub_packet  = models.CharField(max_length=255, blank=True)
     target      = models.CharField(max_length=125)
-    fte_target = models.CharField(max_length=125)
+    fte_target = models.CharField(max_length=125, default=0)
     center = models.ForeignKey(Center, null=True)
     project = models.ForeignKey(Project, null=True)
     sheet_name = models.CharField(max_length=255, default='')
@@ -420,20 +412,3 @@ class Color_Mapping(models.Model):
 
     def __unicode__(self):
         return self.work_packet
-
-class Annotation(models.Model):
-    epoch = models.CharField(max_length=40,verbose_name='selected_date')
-    text = models.TextField()
-    key = models.CharField(max_length=512, null=True)
-    #widget_name = models.ForeignKey(Widgets)
-    dt_created = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(User)
-    center = models.ForeignKey(Center)
-    project = models.ForeignKey(Project)
-    chart_type_name = models.ForeignKey(ChartType, null=True)
-
-    class Meta:
-        db_table = u'annotations'
-
-    def __unicode__(self):
-        return self.epoch
