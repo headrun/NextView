@@ -28,6 +28,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'yeswanth@headrun.com'
+EMAIL_HOST_PASSWORD = 'engaptrea'
 
 # Application definition
 
@@ -83,7 +88,7 @@ DATABASES = {
            'init_command': 'SET storage_engine=INNODB,character_set_connection=utf8,collation_connection=utf8_unicode_ci',
            'charset' : 'utf8',
         },
-        'NAME': 'nextview',
+        'NAME': 'nexttview_new',
         'USER': 'root',
         'PASSWORD': 'hdrn59!',
         'HOST': 'localhost',

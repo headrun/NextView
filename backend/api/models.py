@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 from django.contrib.auth.models import User
 from django.db import models
-
+from django.contrib.auth.models import User, Group
 
 # Create your models here.
 class Center(models.Model):
@@ -45,6 +45,16 @@ class ChartType(models.Model):
     def __unicode__(self):
         return self.chart_type
 
+"""class ChartType(models.Model):
+    name = models.CharField(max_length=512)
+
+    class Meta:
+        db_table = u'chart_type'
+
+    def __unicode__(self):
+        return self.name"""
+
+
 class Customer(models.Model):
     name    = models.ForeignKey(User, null=True)
     center  = models.ManyToManyField(Center, null=True)
@@ -73,7 +83,7 @@ class Widgets(models.Model):
         db_table = u'widgets'
     def __unicode__(self):
         return self.name
-
+'''
 class Widget_Mapping(models.Model):
     user_name = models.ForeignKey(User, null=True)
     widget_name = models.ForeignKey(Widgets, null=True)
@@ -85,6 +95,23 @@ class Widget_Mapping(models.Model):
         db_table = u'widget_mapping'
     def __unicode__(self):
         return u''
+'''
+
+class Widgets_group(models.Model):
+    User_Group = models.ForeignKey(Group)
+    project = models.ForeignKey(Project, null=True)
+    center = models.ForeignKey(Center, null=True)
+    widget_name = models.ForeignKey(Widgets, null=True)
+    widget_priority = models.IntegerField(max_length=125)
+    is_display = models.BooleanField(default=None)
+    is_drilldown = models.BooleanField(default=None)
+
+    class Meta:
+        db_table = u'Widgets_group'
+    def __unicode__(self):
+        return u''
+
+
 class Headcount(models.Model):
     #from_date = models.DateField()
     date   = models.DateField()
@@ -99,7 +126,7 @@ class Headcount(models.Model):
     buffer_support = models.IntegerField(max_length=125)
     non_billable_support_others = models.IntegerField(max_length=125)
     support_others_managers = models.IntegerField(max_length=125)
-    total = models.IntegerField(max_length=125,default = "")
+    total = models.IntegerField(max_length=125,default = 0)
 
     class Meta:
         db_table = u'headcount_table'

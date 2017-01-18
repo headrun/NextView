@@ -43,10 +43,17 @@ class WidgetsAdmin(admin.ModelAdmin):
     list_display = ['config_name','name','col','api','opt','id_num','day_type_widget','priority']
 admin.site.register(Widgets,WidgetsAdmin)
 
+'''
 class Widget_MappingAdmin(admin.ModelAdmin):
     list_display = ['widget_name','user_name','widget_priority','is_display','is_drilldown']
     list_filter = ['user_name']
 admin.site.register(Widget_Mapping,Widget_MappingAdmin)
+'''
+
+class Widgets_groupAdmin(admin.ModelAdmin):
+    list_display = ['User_Group','widget_name','widget_priority','is_display','is_drilldown','project']
+    list_filter = ['User_Group','project']
+admin.site.register(Widgets_group,Widgets_groupAdmin)
 
 class RawtableAuthoringAdmin(admin.ModelAdmin):
     list_display = ['sub_project','work_packet','sub_packet','employee_id','per_day','norm','date','project','center','sheet_name']
