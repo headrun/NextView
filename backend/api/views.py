@@ -22,6 +22,7 @@ import json
 from django.apps import apps
 from collections import OrderedDict
 from django.utils.timezone import utc
+from django.utils.encoding import smart_str, smart_unicode
 
 def error_insert(request):
     pass
@@ -65,6 +66,7 @@ def validate_sheet(open_sheet, request, SOH_XL_HEADERS, SOH_XL_MAN_HEADERS):
 def get_cell_data(open_sheet, row_idx, col_idx):
     try:
         cell_data = open_sheet.cell(row_idx, col_idx).value
+        cell_data = smart_str(cell_data)
         cell_data = str(cell_data)
         if isinstance(cell_data, str):
             cell_data = cell_data.strip()
@@ -76,10 +78,13 @@ def get_cell_data(open_sheet, row_idx, col_idx):
 
 def project(request):
     try:
-        manager_prj =  request.GET.get('name','')
-        manager_prj = manager_prj.strip(' -')
-    except: 
-        manager_prj = ''
+        #multi_project,mutli_center =  request.GET.get('name','')
+        #manager_prj = manager_prj.strip(' -')
+        multi_center, multi_project = request.GET.get('name').split(' - ')
+    except:
+        #manager_prj = ''
+        #multi_project,multi_center = ''
+        multi_center, multi_project = '',''
     user_group = request.user.groups.values_list('name', flat=True)[0]
     user_group_id = Group.objects.filter(name=user_group).values_list('id', flat=True)
     dict = {}
@@ -97,6 +102,7 @@ def project(request):
 
     if 'nextwealth_manager' in user_group:
         select_list = []
+        details = {}
         #layout_list = []
         center_list = Nextwealthmanager.objects.filter(name_id=request.user.id).values_list('center')
         if len(center_list) < 2:
@@ -117,9 +123,11 @@ def project(request):
                     project_name = str(project)
                     select_list.append(project_name)
 
+        details['list'] = select_list
+
         if len(select_list) > 1:
-            if manager_prj:
-                prj_id = Project.objects.filter(name=manager_prj).values_list('id','center_id')
+            if multi_project:
+                prj_id = Project.objects.filter(name=multi_project).values_list('id','center_id')
             else:
                 prj_name = select_list[1]
                 #prj_name = select_list[1]
@@ -128,6 +136,7 @@ def project(request):
 
     if 'center_manager' in user_group:
         select_list = []
+        details = {}
         center_list = Centermanager.objects.filter(name_id=request.user.id).values_list('center')
         if len(center_list) < 2:
             center_name = str(Center.objects.filter(id=center_list[0][0])[0])
@@ -146,13 +155,14 @@ def project(request):
                     project_name = str(project)
                     select_list.append(project_name)
 
+        details['list'] = select_list
+
         if len(select_list) > 1:
-            if manager_prj:
-                prj_id = Project.objects.filter(name=manager_prj).values_list('id','center_id')
+            if multi_project:
+                prj_id = Project.objects.filter(name=multi_project).values_list('id','center_id')
             else:
                 prj_name = select_list[1]
                 prj_id = Project.objects.filter(name=prj_name).values_list('id','center_id') 
-
 
     if user_group in ['nextwealth_manager','center_manager']:
         widgets_id = Widgets_group.objects.filter(User_Group_id=user_group_id, project=prj_id[0][0],center=prj_id[0][1]).values('widget_priority', 'is_drilldown','is_display', 'widget_name')
@@ -225,8 +235,8 @@ def project(request):
         details['lay'] = layout_list
         details['final'] = final_details
         if len(project_names) > 1: 
-            if manager_prj:
-                prj_id = Project.objects.filter(name=manager_prj).values_list('id',flat=True)
+            if multi_project:
+                prj_id = Project.objects.filter(name=multi_project).values_list('id',flat=True)
             else:
                 prj_id = Project.objects.filter(name=project_names[1]).values_list('id',flat=True)
             new_dates = latest_dates(request, prj_id)
@@ -279,8 +289,8 @@ def project(request):
         details['lay'] = layout_list
         details['final'] = final_details
         if len(select_list) > 1:
-            if manager_prj:
-                prj_id = Project.objects.filter(name=manager_prj).values_list('id',flat=True)
+            if multi_project:
+                prj_id = Project.objects.filter(name=multi_project).values_list('id',flat=True)
             else:
                 prj_name = select_list[1].split('- ')[1].strip()
                 #prj_name = select_list[1]
@@ -380,7 +390,10 @@ def different_error_type(total_error_types):
     new_all_errors = {}
     if len(total_error_types) > 0:
         for error_dict in total_error_types:
-            error_names= error_dict['error_types'].split('#<>#')
+            try:
+                error_names= error_dict['error_types'].split('#<>#')
+            except:
+                import pdb;pdb.set_trace()
             error_values = error_dict['error_values'].split('#<>#')
             for er_key,er_value in zip(error_names,error_values):
                 if all_errors.has_key(er_key):
@@ -389,7 +402,11 @@ def different_error_type(total_error_types):
                     if er_key != '':
                         all_errors[er_key] = [int(er_value)]
         for error_type,error_value in all_errors.iteritems():
-            new_all_errors[str(error_type)] = sum(error_value)
+            try:
+                new_all_errors[str(error_type)] = sum(error_value)
+            except:
+                error_type = smart_str(error_type)
+                new_all_errors[error_type] = sum(error_value)
     return new_all_errors
 
 
@@ -536,6 +553,7 @@ def redis_insertion_final(prj_obj,center_obj,dates_list,key_type,level_structure
                 total_audit = Internalerrors.objects.filter(**query_set).values_list('audited_errors').aggregate(Sum('audited_errors'))
                 total_errors = Internalerrors.objects.filter(**query_set).values_list('total_errors').aggregate(Sum('total_errors'))
                 error_types = Internalerrors.objects.filter(**query_set).values('error_types','error_values')
+                #error_types = smart_str(error_types)
                 total_error_types = different_error_type(error_types)
                 value_dict['total_audit'] = str(total_audit['audited_errors__sum'])
                 value_dict['total_errors'] = str(total_errors['total_errors__sum'])
@@ -547,6 +565,7 @@ def redis_insertion_final(prj_obj,center_obj,dates_list,key_type,level_structure
                 total_audit = Externalerrors.objects.filter(**query_set).values_list('audited_errors').aggregate(Sum('audited_errors'))
                 total_errors = Externalerrors.objects.filter(**query_set).values_list('total_errors').aggregate(Sum('total_errors'))
                 error_types = Externalerrors.objects.filter(**query_set).values('error_types', 'error_values')
+                #error_types = smart_str(error_types)
                 total_error_types = different_error_type(error_types)
                 value_dict['total_audit'] = str(total_audit['audited_errors__sum'])
                 value_dict['total_errors'] = str(total_errors['total_errors__sum'])
@@ -887,6 +906,8 @@ def target_table_query_insertion(customer_data,prj_obj,center_obj,teamleader_obj
 
     return prod_date_list
 
+def error_handler(err_str):
+    pass
 
 def upload(request):
     teamleader_obj_name = TeamLead.objects.filter(name_id=request.user.id)[0]
@@ -897,12 +918,13 @@ def upload(request):
     fname = request.FILES['myfile']
     var = fname.name.split('.')[-1].lower()
     if var not in ['xls', 'xlsx', 'xlsb']:
-        return HttpResponse("Invalid File")
+        return HttpResponse(data)
     else:
         try:
             open_book = open_workbook(filename=None, file_contents=fname.read())
             #open_sheet = open_book.sheet_by_index(0)
         except:
+            data = error_handler("Invalid File")
             return HttpResponse("Invalid File")
         excel_sheet_names = open_book.sheet_names()
         file_sheet_names = Authoringtable.objects.filter(project=prj_obj,center=center_obj).values_list('sheet_name',flat=True).distinct()
@@ -1160,6 +1182,7 @@ def upload_new(request):
     fname = request.FILES['myfile']
     var = fname.name.split('.')[-1].lower()
     if var not in ['xls', 'xlsx', 'xlsb']:
+        data = error_handler("Invalid File")
         return HttpResponse("Invalid File")
     else:
         try:
@@ -2610,8 +2633,6 @@ def agent_external_pareto_data_generation(request,date_list,prj_id,center_obj,le
     return result_dict
 
 
-
-
 def sample_pareto_analysis(request,date_list,prj_id,center_obj,level_structure_key,err_type):
     prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
     center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
@@ -2917,7 +2938,7 @@ def internal_extrnal_graphs(request,date_list,prj_id,center_obj,packet_sum_data,
         final_internal_data.update(final_external_data)
         return final_internal_data
 
-    elif prj_name[0] in ['Probe','Ujjivan']:
+    elif prj_name[0] in ['Probe','Ujjivan','IBM']:
         #final_internal_data = internal_extrnal_graphs_same_formula(request, date_list, prj_id, center_obj,level_structure_key, err_type='Internal')
         final_external_data = externalerror_graph(request, date_list, prj_id, center_obj,packet_sum_data,level_structure_key)
         final_internal_data.update(final_external_data)
@@ -3787,7 +3808,7 @@ def fte_calculation_sub_project_sub_packet(prj_id,center_obj,work_packet_query,l
     return result
 
 
-
+'''
 def fte_calculation(request,prj_id,center_obj,date_list,level_structure_key):
     query_set = {} 
     query_set['project'] = prj_id
@@ -3931,6 +3952,154 @@ def fte_calculation(request,prj_id,center_obj,date_list,level_structure_key):
     fte_high_charts['work_packet_fte'] = graph_data_alignment_color(final_fte, 'data', level_structure_key, prj_id, center_obj)
     fte_high_charts['work_packet_fte'] =final_fte
     #fte_high_charts['fte_date_list'] = new_date_list
+    return fte_high_charts
+'''
+
+
+def fte_calculation(request,prj_id,center_obj,date_list,level_structure_key):
+    query_set = {} 
+    query_set['project'] = prj_id
+    query_set['center'] = center_obj
+    prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
+    center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
+    work_packet_query =  query_set_generation(prj_id,center_obj,level_structure_key,[])
+    #work_packets = Targets.objects.filter(**work_packet_query).values('sub_project','work_packet','sub_packet','fte_target').distinct()
+    work_packets = Targets.objects.filter(**work_packet_query).values('sub_project', 'work_packet', 'sub_packet','target').distinct()
+    sub_packet_query = query_set_generation(prj_id,center_obj,level_structure_key,[])
+    sub_packets = filter(None,Targets.objects.filter(**sub_packet_query).values_list('sub_packet',flat=True).distinct())
+    conn = redis.Redis(host="localhost", port=6379, db=0)
+    new_date_list = []
+    status = 0
+    if len(sub_packets) == 0:
+        #work_packets = Targets.objects.filter(**work_packet_query).values('sub_project', 'work_packet', 'sub_packet','fte_target').distinct()
+        work_packets = Targets.objects.filter(**work_packet_query).values('sub_project', 'work_packet', 'sub_packet','target').distinct()
+        date_values = {}
+        volumes_dict = {}
+        result = {}
+        for date_va in date_list:
+            total_done_value = RawTable.objects.filter(project=prj_id, center=center_obj, date=date_va).aggregate(Max('per_day'))
+            print total_done_value['per_day__max']
+            if total_done_value['per_day__max'] > 0:
+                new_date_list.append(date_va)
+                for wp_packet in work_packets:
+                    final_work_packet = level_hierarchy_key(level_structure_key, wp_packet)
+                    date_pattern = '{0}_{1}_{2}_{3}'.format(prj_name[0], str(center_name[0]), str(final_work_packet),date_va)
+                    key_list = conn.keys(pattern=date_pattern)
+                    #if wp_packet['fte_target'] >0:
+                    if wp_packet['target'] > 0:
+                        if not key_list:
+                            if date_values.has_key(final_work_packet):
+                                date_values[final_work_packet].append(0)
+                            else:
+                                date_values[final_work_packet] = [0]
+                        for cur_key in key_list:
+                            var = conn.hgetall(cur_key)
+                            employee_names = RawTable.objects.filter(project=prj_id, center=center_obj, date=date_va,work_packet=var.items()[0][0]).values_list('employee_id',flat=True).distinct()
+                            employee_count = len(employee_names)
+                            #import pdb;pdb.set_trace()
+                            for key, value in var.iteritems():
+                                if value == 'None':
+                                    value = 0
+                                if date_values.has_key(key):
+                                    if len(employee_names) > 0:
+                                    #fte_sum = float(value) / int(wp_packet['fte_target'])
+                                        fte_sum = float(float(value) / float((wp_packet['target'])*employee_count))
+                                        final_fte = float('%.2f' % round(fte_sum, 2))
+                                        date_values[key].append(final_fte)
+                                    else:
+                                        date_values[key].append(0)
+                                else:
+                                    #fte_sum = float(value) / int(wp_packet['fte_target'])
+                                    if len(employee_names) > 0:
+                                        fte_sum = float(value) / int((wp_packet['target'])*employee_count)
+                                        final_fte = float('%.2f' % round(fte_sum, 2))
+                                        date_values[key] = [final_fte]
+                                    else:
+                                        date_values[key] = [0]
+                        volumes_dict['data'] = date_values
+                        volumes_dict['date'] = date_list
+                        result['data'] = volumes_dict
+    else:
+        if level_structure_key.get('sub_project','')=='All':
+            sub_projects = filter(None, Targets.objects.filter(**sub_packet_query).values_list('sub_project',flat=True).distinct())
+            final_fte = {}
+            for sub_project in sub_projects:
+                sub_project_query = {}
+                sub_project_query['project'] = prj_id
+                sub_project_query['center'] = center_obj
+                sub_project_query['sub_project'] = sub_project
+                new_level_structu_key = {}
+                new_level_structu_key['sub_project'] = sub_project
+                new_level_structu_key['work_packet'] = 'All'
+                new_level_structu_key['sub_packet'] = 'All'
+                result = fte_calculation_sub_project_sub_packet(prj_id, center_obj, sub_project_query, new_level_structu_key,date_list)
+                print result
+                sub_packet_data = fte_calculation_sub_project_work_packet(result, new_level_structu_key)
+                if sub_packet_data :
+                    wp_total_data = fte_wp_total(sub_packet_data)
+                    if len(wp_total_data['wp_fte']) > 0:
+                        final_fte[sub_project] = wp_total_data['wp_fte']
+        else:
+            result = fte_calculation_sub_project_sub_packet(prj_id,center_obj,work_packet_query,level_structure_key,date_list)
+
+    count = 0
+    if (len(sub_packets) == 0) :
+        final_fte = {}
+        if result.has_key('data'):
+            final_fte= result['data']['data']
+            for wp_key, wp_value in final_fte.iteritems():
+                final_fte[wp_key] = [float('%.2f' % round(wp_values, 2)) for wp_values in wp_value]
+
+    else :
+        if level_structure_key.get('sub_project', '') != 'All':
+            final_fte = {}
+            if result.has_key('data'):
+                new_date_list = result['new_date_list']
+                wp_subpackets = result['wp_subpackets']
+                for date_va in new_date_list:
+                    for wp_key_new, wp_name in wp_subpackets.iteritems():
+                        local_sum = 0
+                        for sub_packet in wp_name:
+                            new_level_structu_key = {}
+                            if level_structure_key.has_key('sub_project'):
+                                new_level_structu_key['sub_project']=level_structure_key['sub_project']
+                            new_level_structu_key['work_packet'] = wp_key_new
+                            new_level_structu_key['sub_packet'] = sub_packet
+                            final_work_packet = level_hierarchy_key(level_structure_key, new_level_structu_key)
+
+                            if result['data']['data'].has_key(final_work_packet):
+                                local_sum = local_sum + result['data']['data'][final_work_packet][count]
+                            else:
+                                local_sum = local_sum
+                            if level_structure_key.get('work_packet','') != 'All' :
+                                if final_fte.has_key(final_work_packet):
+                                    final_fte_sum = float('%.2f' % round(local_sum, 2))
+                                    final_fte[final_work_packet].append(final_fte_sum)
+                                else:
+                                    final_fte_sum = float('%.2f' % round(local_sum, 2))
+                                    final_fte[final_work_packet] = [final_fte_sum]
+                        if level_structure_key.get('work_packet','') == 'All' :
+                            new_wp_level_structu_key = {}
+                            if level_structure_key.has_key('sub_project'):
+                                new_wp_level_structu_key['sub_project']=level_structure_key['sub_project']
+                            new_wp_level_structu_key['work_packet'] = wp_key_new
+                            wp_final_work_packet = level_hierarchy_key(level_structure_key, new_wp_level_structu_key)
+                            if final_fte.has_key(wp_final_work_packet):
+                                final_fte_sum = float('%.2f' % round(local_sum, 2))
+                                final_fte[wp_final_work_packet].append(final_fte_sum)
+                            else:
+                                final_fte_sum = float('%.2f' % round(local_sum, 2))
+                                final_fte[wp_final_work_packet] = [final_fte_sum]
+                    count =count+1
+
+    work_packet_fte = {}
+    work_packet_fte['total_fte'] = {}
+    work_packet_fte['total_fte'] = [sum(i) for i in zip(*final_fte.values())]
+    work_packet_fte['total_fte'] = [float('%.2f' % round(wp_values, 2)) for wp_values in work_packet_fte['total_fte']]
+    fte_high_charts = {}
+    fte_high_charts['total_fte'] = work_packet_fte
+    fte_high_charts['work_packet_fte'] = graph_data_alignment_color(final_fte, 'data', level_structure_key, prj_id, center_obj)
+    fte_high_charts['work_packet_fte'] =final_fte
     return fte_high_charts
 
 
@@ -4409,7 +4578,7 @@ def accuracy_query_generations(pro_id,cen_id,date,main_work_packet):
 
 
 def internal_bar_data(pro_id, cen_id, from_, to_, main_work_packet, chart_type,project):
-    if (project == "Probe" and chart_type == 'External Accuracy') or (project == 'Ujjivan' and chart_type in ['External Accuracy','Internal Accuracy']):
+    if (project == "Probe" and chart_type == 'External Accuracy') or (project == 'Ujjivan' and chart_type in ['External Accuracy','Internal Accuracy']) or (project == "IBM" and chart_type == 'External Accuracy'):
         date_range = num_of_days(to_, from_)
         final_internal_bar_drilldown = {} 
         final_internal_bar_drilldown['type'] = chart_type
@@ -4419,9 +4588,9 @@ def internal_bar_data(pro_id, cen_id, from_, to_, main_work_packet, chart_type,p
         for date in date_range:
             accuracy_query_set = accuracy_query_generations(pro_id,cen_id,date,main_work_packet)
             if chart_type == 'External Accuracy':
-                list_of = Externalerrors.objects.filter(**accuracy_query_set).values_list('employee_id','date','work_packet','total_errors','sub_packet')
+                list_of = Externalerrors.objects.filter(**accuracy_query_set).values_list('employee_id','date','work_packet','total_errors')
             elif project == 'Ujjivan' and chart_type == 'Internal Accuracy':
-                list_of = Internalerrors.objects.filter(**accuracy_query_set).values_list('employee_id', 'date','work_packet','total_errors','sub_packet')
+                list_of = Internalerrors.objects.filter(**accuracy_query_set).values_list('employee_id', 'date','work_packet','total_errors')
             for i in list_of:
                 per_day_value = RawTable.objects.filter(employee_id=i[0],date=i[1],work_packet=i[2]).values_list('per_day')
                 try: 
@@ -4592,7 +4761,7 @@ def internal_bar_data(pro_id, cen_id, from_, to_, main_work_packet, chart_type,p
 
 
 def internal_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type,project):
-    if (project == 'Probe' and chart_type == 'External Accuracy Trends') or (project == 'Ujjivan' and chart_type == 'External Accuracy Trends'):
+    if (project == 'Probe' and chart_type == 'External Accuracy Trends') or (project == 'Ujjivan' and chart_type == 'External Accuracy Trends') or (project == 'IBM' and chart_type == 'External Accuracy Trends'):
         final_internal_drilldown = {}
         final_internal_drilldown['type'] = chart_type
         final_internal_drilldown['project'] = project
@@ -4786,7 +4955,7 @@ def internal_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type,proje
 
 
 def internal_chart_data(pro_id,cen_id,to_date,work_packet,chart_type,project):
-    if (project == 'Probe' and chart_type == 'External Accuracy Trends') or (project == "Ujjivan" and chart_type in ['External Accuracy Trends','Internal Accuracy Trends']):
+    if (project == 'Probe' and chart_type == 'External Accuracy Trends') or (project == "Ujjivan" and chart_type in ['External Accuracy Trends','Internal Accuracy Trends']) or (project == 'IBM' and chart_type == 'External Accuracy Trends'):
         if len(to_date) == 2:
             final_internal_drilldown = {}
             final_val_res = internal_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type,project)
@@ -4796,7 +4965,7 @@ def internal_chart_data(pro_id,cen_id,to_date,work_packet,chart_type,project):
             final_internal_drilldown['table_headers'] = final_val_res['table_headers']
             return final_internal_drilldown
         else:
-            #import pdb;pdb.set_trace()
+            import pdb;pdb.set_trace()
             packets_list = work_packet.split('_')
             packets_list_type = ''
             accuracy_query_set = accuracy_query_generations(pro_id, cen_id, to_date[0], work_packet)
@@ -5370,6 +5539,154 @@ def main_productivity_data(center,prj_id,date_list,level_structure_key):
         final_prodictivity['productivity'] = product_date_values
         #final_prodictivity['utilization'] = utilization_date_values
     return final_prodictivity
+
+
+'''
+def main_productivity_data(center,prj_id,date_list,level_structure_key):
+    work_packet_dict = {}
+    final_prodictivity = {}
+    final_data = []
+    final_prodictivity['utilization'] = {}
+    final_prodictivity['utilization']['utilization']= []
+    packet_names = Headcount.objects.filter(project=prj_id, center=center, date__range=[date_list[0],date_list[-1]]).values('sub_project', 'work_packet', 'sub_packet').distinct()
+    count = 0
+    prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
+    if prj_name[0] in ['Probe']:
+        count = count+1
+    for i in packet_names:
+        if all(value == '' for value in i.values()):
+            count = count+1
+    status = 0
+    if level_structure_key.get('sub_project','') == 'All':
+        status = 1
+    elif level_structure_key.get('sub_project','') == '' and level_structure_key.get('work_packet','') == 'All':
+        status = 1
+    final_work_packet = ''
+    if status and count:
+        final_prodictivity = {}
+        product_date_values = {}
+        utilization_date_values = {}
+        product_date_values['total_prodictivity'] = []
+        utilization_date_values['total_utilization'] = []
+        for date_value in date_list:
+            total_done_value = RawTable.objects.filter(project=prj_id, center=center, date=date_value).aggregate(Max('per_day'))
+            if total_done_value['per_day__max'] > 0:
+                billable_agent_count = Headcount.objects.filter(project=prj_id, center=center, date=date_value).values_list('billable_agent', flat=True)
+                billable_emp_count = Headcount.objects.filter(project=prj_id, center=center, date=date_value).values_list('buffer_agent','billable_support','buffer_support','non_billable_support_others','support_others_managers').distinct()
+                total_work_done = RawTable.objects.filter(project=prj_id, center=center, date=date_value).values_list('per_day').aggregate(Sum('per_day'))
+                total_work_done = total_work_done.get('per_day__sum')
+                # below code for productivity
+
+                if len(billable_agent_count) > 0:
+                    productivity_value = float(total_work_done / float(billable_agent_count[0]))
+                else:
+                    productivity_value = 0
+                final_prodictivity_value = float('%.2f' % round(productivity_value, 2))
+                product_date_values['total_prodictivity'].append(final_prodictivity_value)
+                # below code for utilization
+                new_billable_count = []
+                if len(billable_emp_count) >= 2:
+                    for b_count in billable_emp_count:
+                        if len(new_billable_count) == 0:
+                            new_billable_count.append(b_count[0])
+                            new_billable_count.append(b_count[1])
+                        else:
+                            new_billable_count[0] = b_count[0] + new_billable_count[0]
+                            new_billable_count[1] = b_count[1] + new_billable_count[1]
+                    billable_emp_count = [tuple(new_billable_count)]
+                import pdb;pdb.set_trace()
+                for i in billable_emp_count:
+                    if i[0] > 0:
+                        utilization_value = (float(float(i[0]) / float(i[1] + i[2] + i[3] + i[4] + i[5]))) * 100
+                        final_utilization_value = float('%.2f' % round(utilization_value, 2))
+                    else:
+                        final_utilization_value = 0
+                    utilization_date_values['total_utilization'].append(final_utilization_value) 
+        final_prodictivity['productivity'] = product_date_values
+        final_prodictivity['utilization'] = utilization_date_values
+    else:
+        new_date_list = []
+        product_date_values = {}
+        utilization_date_values = {}
+        query_set = query_set_generation(prj_id[0], center[0], level_structure_key, date_list)
+        volume_list = workpackets_list(level_structure_key, 'Headcount', query_set)
+        for date_value in date_list:
+            packet_count = 0
+            total_done_value = RawTable.objects.filter(project=prj_id, center=center[0], date=date_value).aggregate(Max('per_day'))
+            if total_done_value['per_day__max'] > 0:
+                for vol_type in volume_list:
+                    if level_structure_key.has_key('sub_project'):
+                        local_level_hierarchy_key = vol_type
+                    else:
+                        local_level_hierarchy_key = level_structure_key
+                    final_work_packet = level_hierarchy_key(local_level_hierarchy_key, vol_type)
+                    total_work_query_set = {}
+                    total_work_query_set['project'] = prj_id[0]
+                    total_work_query_set['center'] = center[0]
+                    total_work_query_set['date'] = date_value
+                    for vol_key, vol_value in vol_type.iteritems():
+                        total_work_query_set[vol_key] = vol_value
+                    billable_agent_count = Headcount.objects.filter(**total_work_query_set).values_list('billable_agent',flat=True)
+                    billable_emp_count = Headcount.objects.filter(**total_work_query_set).values_list('billable_agent','buffer_agent','billable_support','buffer_support','non_billable_support_others','support_others_managers').distinct()
+                    total_work_done = RawTable.objects.filter(**total_work_query_set).values_list('per_day').aggregate(Sum('per_day'))
+                    total_work_done = total_work_done.get('per_day__sum')
+
+                    if len(billable_agent_count) > 0 and total_work_done != None:
+                        productivity_value = float(total_work_done / float(billable_agent_count[0]))
+                    else:
+                        productivity_value = 0
+                    final_prodictivity_value = float('%.2f' % round(productivity_value, 2))
+
+                    if product_date_values.has_key(final_work_packet):
+                        product_date_values[final_work_packet].append(final_prodictivity_value)
+                    else:
+                        product_date_values[final_work_packet] = [final_prodictivity_value]
+
+                    for i in billable_emp_count:
+                        if i[0] > 0:
+                            utilization_value = (float(float(i[0]) / float(i[1] + i[2] + i[3] + i[4] + i[5]))) * 100
+                            final_utilization_value = float('%.2f' % round(utilization_value, 2))
+                        else:
+                            final_utilization_value = 0
+                        utilization_date_values['total_utilization'].append(final_utilization_value)
+
+                    packet_count += 1
+
+                    if utilization_date_values.has_key(final_work_packet):
+                        utilization_date_values[final_work_packet].append(final_utilization_value)
+                    else:
+                        utilization_date_values[final_work_packet] = [final_utilization_value]
+
+        total = 0
+        if len(utilization_date_values) > 0:
+            first_key = utilization_date_values[utilization_date_values.keys()[0]]
+            packet_count = len(utilization_date_values.keys())
+        else:
+            first_key = ''
+
+        for i in range(len(first_key)):
+            packet_sum = 0
+            zero_packet_count = 0
+            for key in utilization_date_values.keys():
+                packet_value = utilization_date_values[key][i]
+                if packet_value == 0:
+                    zero_packet_count = zero_packet_count + 1
+                packet_sum += utilization_date_values[key][i]
+            final_data.append(packet_sum)
+            total = total + 1
+            if packet_count > 0:
+                local_packet_count = packet_count - zero_packet_count
+                if local_packet_count > 0:
+                    packet_data = float(final_data[i]) / local_packet_count
+                else:
+                    packet_data = 0
+            else:
+                packet_data = 0
+            final_packet_data = float('%.2f' % round(packet_data, 2))
+            final_prodictivity['utilization']['utilization'].append(final_packet_data)
+        final_prodictivity['productivity'] = product_date_values
+    return final_prodictivity
+'''
 
 
 def utilization_work_packet_data(center,prj_id,date_list,level_structure_key):
