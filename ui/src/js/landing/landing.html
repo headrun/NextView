@@ -14,18 +14,18 @@ h2 {
 }
 .second {
     float: right;
-    margin-top: -29%;
+    margin-top: -22.5%;
     margin-right: 40%;
 }
 div {
     font-family: serif;
 }
-#page-content-wrapper {
+/* #page-content-wrapper {
 
     margin-top: -2%;
-}
+} */
 
-a.active{
+a.active {
 
     background-color: #f1f1f1;
 }
@@ -34,29 +34,30 @@ a.active{
 }*/
 </style>
 <head>
-<title>NextView</title>
+<title>NextPulse</title>
 </head>
 <body>
     <div class="container">
-        <div class="row" style="margin-top: 5%;">
-            <div id='content' class='row-fluid col-md-3'>
+        <!--div class="row" style="margin-top: 5%;">-->
+            <!--<div id='content' class='row-fluid'>
                 <div class='span2 sidebar'>
                     <ul class="nav nav-tabs" style="border-bottom: none;">
-                        <li><a href="" id="Abt" class="active">About NextWealth</a></li>
-                        <li><a href="" id="Ser">Services Of NextWealth</a></li>
-                        <li><a href="" id="Wid">Widgets Of NextPulse</a></li>
-                        <li><a href="" id="Proj">Projects Under NextPulse</a></li>
+                        <li><a href="" id="Abt" class="active">About</a></li>
+                        <li><a href="" id="Ser">Services</a></li>
+                        <li><a href="" id="Wid">Features</a></li>
+                        <li><a href="" id="Proj">Customer Projects Under NextPulse</a></li>
                     </ul>
                 </div>
-            </div>
-            <div id="page-content-wrapper" class="col-md-9">
+            </div>-->
+            <div id="page-content-wrapper" class="col-md-12">
                 <div class="container-fluid xyz">
                     <section id="About">
                         <h2>NextWealth</h2>
+                        <!--<h3>About NextWealth</h3>-->
                         <p>NextWealth Entrepreneurs Private Limited (NextWealth) is a  IT Services company founded by four accomplished industry veterans and is based in Bangalore, India.</p>
                         <p>NextWealth is created grounds up to meet the needs of Digital Enterprises using information based strategies and ride on accelerated rate at which people, places and things are becoming digitally interconnected.Digital Enterprises utilize IT and digital technologies as the foundation of their products and services and would like to improve. NextWealth’s business model assists Digital Enterprises in this journey.</p>
                         <p>NextWealth establishes delivery centers in locations where cost of living is low, talent sources are present in the vicinity and required infrastructure like bandwidth are readily available resulting in reduced cost of operations by an order of magnitude.</p>
-                        <img src="/img/about.png" alt="Nexwealth">
+                        <img class="img-responsive" src="/img/about.png" alt="Nexwealth" style="width:595px; height:316px;float:right;margin-right:12%;">
                     </section>
                     <section id="Services">
                         <h3>Services Of NextWealth</h3>
@@ -68,7 +69,7 @@ a.active{
                             <li>Tech Support</li>
                             <li>Healthcare RCM</li>
                         </ul>
-                        <img src="/img/services.jpg" alt="Services" style="width:120%;margin-top:6%;margin-left:-10%;">
+                        <img src="/img/services.jpg" alt="Services" style="width:120%;margin-top:6%;margin-left:-12%;">
                     </section>
                     <section id="Widgets">
                         <h2>NextPulse</h2>
@@ -103,13 +104,21 @@ a.active{
                     <section id="Projects">
                         <h3>The Projects under NextPulse are:</h3>
                         <ol>
-                            <a href="/#!/page1"><li>{{$ctrl.pro_cen_nam}}</li></a>
-                            <!--<a href="/#!/page1" ng-repeat="item in $ctrl.mapping_list"><li>{{item}}</li></a>-->
+                            <a ng-repeat="item in $ctrl.mapping_list"
+                                   ui-sref="dashboard.page1({'selpro': item})"
+                                   ng-click="$ctrl.clickPro(item)">
+                                    <li>{{item}}</li>
+                                </a>
+                                <li class="mythili" style="color:red;">Salem - IBM</li>
+                                <li class="mythili" style="color:red;">Salem - E4U</li>
+                                <li class="mythili" style="color:red;">Salem - Indix</li>
+                                <li class="mythili" style="color:red;">Salem - Bridgei2i</li>
                         </ol>
+                        
                         <!--<a href="/#!/page1" class="btn btn-info" role="button" id="data">Go To Dashboard</a>-->
                     </section>
                 </div>
             </div>
-        </div>
+        <!--</div>-->
     </div>
 </body>

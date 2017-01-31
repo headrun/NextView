@@ -45,64 +45,79 @@
     border-color:white;
     color:white;
 }
-
+img {
+    width:15%;
+    margin-left:-3%;
+ }
+.upload {
+    cursor: pointer;
+}
 
 </style>
 
 <nav class="navbar navbar-default navbar-fixed-top" style="position: initial;">
 
-        <div class="navbar-header">
+        <div class="navbar-header" style="margin-right:14%;">
             <button type="button" class="navbar-toggle collapsed"  data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-          <a class="navbar-brand" style="font-size:2.0em;margin-left:-15px;font-weight:bold;color:black;">NextPulse</a>
+            <img src="/img/Nextwealth_Logo.png" alt="Nexwealth_Logo" style="float:left;">
+            <a class="navbar-brand" style="font-size:2.0em;margin-left:-2%;font-weight:bold;color:black;">NextPulse </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-              <div class=""style="font-size:1.2em;padding-right:15px;">
-                  <ul class="nav navbar-nav pull-right">
-                  <li>
-                     <div class="dropdown" id="select_dropdown">
-                            <ul class="nav nav-pills left">
-                               <li class="dropdown active span8">
-                                  <a class="dropdown-toggle" id="inp_impact" data-toggle="dropdown" style="color:black;">
-                                      <span id="dropdown_title">{{$ctrl.select_option}}</span><span class="caret"></span>
-                                  </a>
-                                   <ul ID="divNewNotifications" class="dropdown-menu">
-                                       <li >
-                                           <a href="" ng-repeat="item in $ctrl.mapping_list" ng-click="$ctrl.clickFun(item)">{{item}}</a>
-                                       </li>
+            <div class="data">
+              <ul class="nav nav-tabs" style="border-bottom: none;">
+                  <li><a href="" id="Abt">About</a></li>
+                  <li><a href="" id="Ser">Services</a></li>
+                  <li><a href="" id="Wid">Features</a></li>
+                  <li><a href="" id="Proj" class="active">Customers</a></li>
+              </ul>
+            </div>
+              <ul class="nav navbar-nav navbar-right" style="margin-top:-50px;">
+                  <div class=""style="font-size:1.2em;padding-right:15px;">
+                      <ul class="nav navbar-nav pull-right">
+                      <li>
+                         <div class="dropdown" id="select_dropdown">
+                                <ul class="nav nav-pills left">
+                                   <li class="dropdown active span8">
+                                      <a class="dropdown-toggle" id="inp_impact" data-toggle="dropdown" style="color:black;">
+                                          <span id="dropdown_title">{{$ctrl.select_option}}</span><span class="caret"></span>
+                                      </a>
+                                       <ul ID="divNewNotifications" class="dropdown-menu">
+                                           <li >
+                                               <a href="" ng-repeat="item in $ctrl.mapping_list" ng-click="$ctrl.clickFun(item)">{{item}}</a>
+                                           </li>
 
-                                   </ul>
-                               </li>
-                            </ul>
-                     </div>
-                        <li>
+                                       </ul>
+                                   </li>
+                                </ul>
+                         </div>
+                          <li>
                             <div>
-                                <a href="http://nv.headrun.com:8188/admin/api" class="btn btn-info" style="padding:5px;margin-top:10px;margin-right:-5px;color:black;border-color:black;background-color:white;" role="button" target="_blank">Admin</a>
+                                <a href="http://nv.headrun.com:8188/admin/api" id="admin_but" class="btn btn-info" style="padding:5px;margin-top:10px;margin-right:-5px;color:black;border-color:black;background-color:white;" role="button" target="_blank">Admin</a>
                             </div>
-                        </li>
-                        <li>
-                            <div id="fileupload" class="upload">
-                                <span>Upload</span>
-                            </div>
-                        </li>
+                          </li>
+                          <li>
+                              <div id="fileupload" class="upload">
+                                  <span>Upload</span>
+                              </div>
+                          </li>
 
-              <li class="dropdown user">
-                  <a href="" class="dropdown-toggle color-out" data-toggle="dropdown" style="padding:0px;margin-left:10px;">
-                      <b><span style="float:right;margin-right:-18px;"><i class="fa fa-user name"></i>{{ $ctrl.user.userName }} <i class="fa fa-angle-down"></i></span></b>
-                      <br>
-                      <span style="font-size:15px;">{{ $ctrl.user.role }}</span>
-                  </a>
+                    <li class="dropdown user">
+                      <a href="" class="dropdown-toggle color-out" data-toggle="dropdown" style="padding:0px;margin-left:10px;">
+                          <b><span style="float:right;margin-right:-18px;"><i class="fa fa-user name"></i>{{ $ctrl.user.userName }} <i class="fa fa-angle-down"></i></span></b>
+                          <br>
+                          <span style="font-size:15px;">{{ $ctrl.user.role }}</span>
+                      </a>
 
-                  <ul class="dropdown-menu sym-log" style="text-align:left;padding-top:0px;padding-bottom:0px;padding-left:10px;">
-                      <li><logout></logout></li>
-                  </ul>
-              </li>
-                  </ul>
+                      <ul class="dropdown-menu sym-log" style="text-align:left;padding-top:0px;padding-bottom:0px;padding-left:10px;">
+                          <li><logout></logout></li>
+                      </ul>
+                  </li>
+                      </ul>
               </div>
           </ul>
         </div>     <!--/.nav-collapse -->
@@ -118,10 +133,25 @@
           fileName:"myfile",
           dragDrop: false,
           onSuccess:function(files,data,xhr,pd){
+             debugger;
+             var file_name = files[0];
+             var str_to_display = "You have uploaded a wrong file format!";
+             str_to_display  += file_name;
              console.log(data.result);
-             if (data.result == 'Duplicate Sheet'){
-                     alert('Duplicate Sheet');
-                 }
+             if (data.result == 'Invalid File') {
+                sweetAlert("Oops...", str_to_display, "error");
+             }
+             else if (data.result.indexOf('sheet name error') !== -1) {
+                var wrong_names = data.result.split('[')[1];
+                sweetAlert("Wrong Sheet Tabs", wrong_names, "error");
+             }
+             else if (data.result.includes('Date')) {
+                var date = data.result
+                sweetAlert("Oops...", date , "error");
+             }
+             else if (data.result == customer_data['emp name']) {
+                sweetAlert("Oops...", 'Employee name is not correct' , "error");
+             }
              else{
                  console.log("in upload refresh");
                  location.reload();

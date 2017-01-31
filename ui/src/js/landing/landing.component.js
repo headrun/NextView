@@ -11,6 +11,8 @@
 
              var self = this;
 
+             $rootScope.sel_value = '';
+
              var project = 'api/project/';
 
              self.hideLoading();
@@ -19,13 +21,20 @@
 
              $('#Widgets').hide();
 
-             $('#Projects').hide();
+             $('#About').hide();
 
-             $("#data").click(function() {
+             //$('#Projects').hide();
+
+             $('.mythili').hide();
+
+
+              self.clickPro = function(val, $rootScope){
 
                 self.showLoading();
 
-             });
+                $('#dropdown_title').text(val.split(' - ')[1]);
+
+              }
 
             $("#Ser").click(function() {
 
@@ -75,57 +84,57 @@
 
             $("#Ser").on('click', function() {
 
-                $("#Abt").removeClass('active');
+                $("#Proj").removeClass('active');
             });
 
             $("#Wid").on('click', function() {
 
-                $("#Abt").removeClass('active');
+                $("#Proj").removeClass('active');
             });
 
-            $("#Proj").on('click', function() {
+            $("#Abt").on('click', function() {
 
-                $("#Abt").removeClass('active');
+                $("#Proj").removeClass('active');
             });
 
 
 
             $http({method:"GET", url:project}).success(function(result){
 
-                self.pro_cen_nam = result.result.list[1]
+                self.pro_cen_nam = result.result.list[1];
 
-                /*if (result.result.role == "customer") {
+                if (result.result.role == "customer") {
 
-                    var map_list = result.result.list;
+                    self.mapping_list = [];
+                    self.mapping_list.push(result.result.list[1]);
 
-                    self.mapping_list = map_list[1];
-
-                }*/
+                }
 
 
-                /*if (result.result.role == "team_lead") {
+                if (result.result.role == "team_lead") {
 
-                    var map_list = result.result.list;
+                    self.mapping_list = []
+                    self.mapping_list.push(result.result.list[1]);
 
-                    self.mapping_list = map_list[1];
+                }
 
-                }*/
-
-                /*if (result.result['role'] == "center_manager") {
+                if (result.result['role'] == "center_manager") {
 
                     var map_list = result.result.list;
 
                     self.mapping_list = map_list;
 
-                    }*/
+                    }
 
-                /*if (result.result['role'] == "nextwealth_manager") {
+                if (result.result['role'] == "nextwealth_manager") {
 
-                      var map_list = result.result.list;
+                    var map_list = result.result.list;
 
-                      self.mapping_list = map_list;
+                    self.mapping_list = map_list;
 
-                       }*/
+                    $('.mythili').show();
+
+                    }
             });
 
          }],
@@ -135,6 +144,6 @@
               "hideLoading": "&",
               "showLoading": "&"
             }
-         });
-
+         }); 
+ 
 }(window.angular));
