@@ -57,7 +57,7 @@ img {
 
 <nav class="navbar navbar-default navbar-fixed-top" style="position: initial;">
 
-        <div class="navbar-header" style="margin-right:14%;">
+        <div class="navbar-header" style="margin-right:19%;">
             <button type="button" class="navbar-toggle collapsed"  data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
@@ -77,7 +77,7 @@ img {
               </ul>
             </div>
               <ul class="nav navbar-nav navbar-right" style="margin-top:-50px;">
-                  <div class=""style="font-size:1.2em;padding-right:15px;">
+                  <div class=""style="font-size:1.2em;padding-right:10px;">
                       <ul class="nav navbar-nav pull-right">
                       <li>
                          <div class="dropdown" id="select_dropdown">
@@ -133,26 +133,45 @@ img {
           fileName:"myfile",
           dragDrop: false,
           onSuccess:function(files,data,xhr,pd){
-             debugger;
              var file_name = files[0];
-             var str_to_display = "You have uploaded a wrong file format!";
-             str_to_display  += file_name;
+             var str_to_display = "You Trying to Upload a Wrong File.Please upload a correct a file";
+             /*str_to_display  += [file_name];*/
              console.log(data.result);
              if (data.result == 'Invalid File') {
                 sweetAlert("Oops...", str_to_display, "error");
              }
-             else if (data.result.indexOf('sheet name error') !== -1) {
-                var wrong_names = data.result.split('[')[1];
-                sweetAlert("Wrong Sheet Tabs", wrong_names, "error");
+
+             else if (data.result.includes('Wrong Sheet Names')) {
+                var wrong_names = data.result;
+                sweetAlert("Oops...", wrong_names, "error");
              }
+
              else if (data.result.includes('Date')) {
                 var date = data.result
                 sweetAlert("Oops...", date , "error");
              }
-             else if (data.result == customer_data['emp name']) {
-                sweetAlert("Oops...", 'Employee name is not correct' , "error");
+
+             else if (data.result.includes('Internal Employee Name not found')) {
+                var employee = data.result
+                sweetAlert("Oops...", employee , "error");
              }
-             else{
+
+             else if (data.result.includes('External Employee Name Not Found')) {
+                var extrnl_employee = data.result
+                sweetAlert("Oops...", extrnl_employee , "error");
+             }
+
+             else if (data.result.includes('External WorkPacket Not Found')) {
+                var extrnl_workpacket = data.result
+                sweetAlert("Oops...", extrnl_workpacket , "error");
+             }
+
+             else if (data.result.includes('Internal WorkPacket Not Found')) {
+                var intrnl_workpacket = data.result
+                sweetAlert("Oops...", intrnl_workpacket , "error");
+             }
+
+             else {
                  console.log("in upload refresh");
                  location.reload();
              }

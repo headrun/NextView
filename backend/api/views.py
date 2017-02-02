@@ -708,7 +708,6 @@ def redis_insert_old(prj_obj,center_obj,dates_list,key_type):
     return "hai"
 
 
-
 def dropdown_data(request):
     final_dict = {}
     final_dict['level'] = [1,2,3]
@@ -1264,7 +1263,12 @@ def upload_new(request):
             if sh_name in excel_sheet_names:
                 sheet_index_dict[sh_name] = open_book.sheet_names().index(sh_name)
             else:
-                return HttpResponse('sheet name error'+str(excel_sheet_names))
+                sheet_names = []
+                for name in excel_sheet_names:
+                    if name not in  file_sheet_names:
+                        sheet_names.append(name)
+                #return HttpResponse('sheet name error'+str(excel_sheet_names))
+                return HttpResponse('Wrong Sheet Names ' + str(sheet_names))
 
         db_check = str(Project.objects.filter(name=prj_obj.name,center=center_obj).values_list('project_db_handling',flat=True)[0])
         raw_table_dataset, internal_error_dataset, external_error_dataset, work_track_dataset,headcount_dataset = {}, {}, {}, {},{}
@@ -1288,9 +1292,8 @@ def upload_new(request):
                             cell_data = '%s-%s-%s' % (cell_data[0], cell_data[1], cell_data[2])
                             customer_data[column] = ''.join(cell_data)
                         except:
-                            #import pdb;pdb.set_trace()
-                            return HttpResponse('Invalid Date Format '  + str(open_sheet.row_values(row_idx)))
-                            #return HttpResponse('Invalid Date Format')
+                            return HttpResponse('Invalid Date Format in  ' + key + ' in Row No '+ str(row_idx))
+
 
                     elif column != "date" :
                         customer_data[column] = ''.join(cell_data)
@@ -1353,7 +1356,11 @@ def upload_new(request):
                     local_internalerror_data= {}
                     intr_error_types = {}
                     Missed_emp_names = []
+                    extrnl_emp_names = []
                     emp_list = RawTable.objects.filter(project = prj_obj,center = center_obj).values_list('employee_id',flat=True).distinct()
+                    workpacket_list = RawTable.objects.filter(project=prj_obj, center=center_obj).values_list('work_packet',flat=True).distinct()
+                    missed_work_packets = []
+                    #import pdb;pdb.set_trace()
                     for raw_key,raw_value in internal_error_mapping.iteritems():
                         if '#<>#' in raw_value:
                             checking_values = raw_value.split('#<>#')
@@ -1376,7 +1383,30 @@ def upload_new(request):
                                     local_internalerror_data['individual_errors']['no_data']='no_data'
                             else:
                                 local_internalerror_data[raw_key] = customer_data[raw_value]
-                    #import pdb;pdb.set_trace()
+
+                                if raw_key != 'employee_id':
+                                    local_internalerror_data[raw_key] = customer_data[raw_value]
+                                else:
+
+                                    if customer_data['emp name'] in emp_list:
+                                        local_internalerror_data[raw_key] = customer_data[raw_value]
+                                    else:
+                                        Missed_emp_names.append(customer_data['emp name'])
+
+                                if raw_key != 'work_packet':
+                                    local_internalerror_data[raw_key] = customer_data[raw_value]
+                                else:
+                                    if customer_data['work packet'] in workpacket_list:
+                                        local_internalerror_data[raw_key] = customer_data[raw_value]
+                                    else:
+                                        missed_work_packets.append(customer_data['work packet'])
+
+                    if len(Missed_emp_names) > 0:
+                        return HttpResponse("Internal Employee Name not found in Production" + str(Missed_emp_names))
+
+                    if len(missed_work_packets) > 0:
+                        return HttpResponse('Internal WorkPacket Not Found in Production' + str(missed_work_packets))
+
                     emp_key ='{0}_{1}_{2}_{3}'.format(local_internalerror_data.get('sub_project', 'NA') , local_internalerror_data.get('work_packet','NA') , local_internalerror_data.get('sub_packet', 'NA') , local_internalerror_data.get('employee_id', 'NA'))
                     if 'not_applicable' not in local_internalerror_data.values():
                         if internal_error_dataset.has_key(str(customer_data[date_name])):
@@ -1401,18 +1431,6 @@ def upload_new(request):
                                 del local_internalerror_data[delete_key]
                                 if 'not_applicable' not in local_internalerror_data.values():
                                     internal_error_dataset[str(customer_data[date_name])][emp_key] = local_internalerror_data
-
-                    if raw_key != 'employee_id':
-                        pass
-                    else:
-                        if customer_data['emp name'] in emp_list:
-                            pass
-                        else:
-                            Missed_emp_names.append(customer_data['emp name'])
-                    #import pdb;pdb.set_trace()
-                    if Missed_emp_names > 0:
-                        return HttpResponse(Missed_emp_names)
-
                     print local_internalerror_data
 
 
@@ -1422,6 +1440,8 @@ def upload_new(request):
                         external_error_dataset[str(customer_data[date_name])] = {}
                     local_externalerror_data= {}
                     extr_error_types = {}
+                    extrnl_emp_names = []
+                    extrnl_work_packets = []
                     for raw_key,raw_value in external_error_mapping.iteritems():
                         if '#<>#' in raw_value:
                             checking_values = raw_value.split('#<>#')
@@ -1444,6 +1464,29 @@ def upload_new(request):
                                     local_externalerror_data['individual_errors']['no_data']='no_data'
                             else:
                                 local_externalerror_data[raw_key] = customer_data[raw_value]
+                                #import pdb;pdb.set_trace()
+                                if raw_key != 'employee_id':
+                                    local_externalerror_data[raw_key] = customer_data[raw_value]
+                                else:
+
+                                    if customer_data['emp name'] in emp_list:
+                                        local_externalerror_data[raw_key] = customer_data[raw_value]
+                                    else:
+                                        extrnl_emp_names.append(customer_data['emp name'])
+
+                                if raw_key != 'work_packet':
+                                    local_externalerror_data[raw_key] = customer_data[raw_value]
+                                else:
+                                    if customer_data['work packet'] in workpacket_list:
+                                        local_externalerror_data[raw_key] = customer_data[raw_value]
+                                    else:
+                                        extrnl_work_packets.append(customer_data['work packet'])
+
+                    if len(extrnl_emp_names) > 0:
+                        return HttpResponse('External Employee Name Not Found in Production' + str(extrnl_emp_names))
+
+                    if len(extrnl_work_packets) > 0:
+                        return HttpResponse('External WorkPacket Not Found in Production' + str(extrnl_work_packets))
 
                     emp_key ='{0}_{1}_{2}_{3}'.format(local_externalerror_data.get('sub_project', 'NA') , local_externalerror_data.get('work_packet','NA') , local_externalerror_data.get('sub_packet', 'NA') , local_externalerror_data.get('employee_id', 'NA'))
                     if 'not_applicable' not in local_externalerror_data.values():

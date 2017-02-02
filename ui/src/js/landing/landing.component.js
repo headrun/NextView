@@ -103,13 +103,67 @@
 
                 self.pro_cen_nam = result.result.list[1];
 
+                self.widgets_name = result.result.lay[1].layout;
+
+                if (result.result.role == "customer") {
+
+                    var widgets_list = result.result.lay[1].layout;
+                    var i;
+                    var widgets_data;
+                    var widgets_names = [];
+                    for (i = 0; i < widgets_list.length; i++) {
+                        widgets_data = widgets_list[i];
+                    self.widgets_names.push(widgets_data);
+                    }
+
+                }
+
+                if (result.result.role == "team_lead") {
+                    var widgets_list = result.result.lay[1].layout;
+                    var i;
+                    var widgets_data;
+                    var widgets_names = [];
+                    for (i = 0; i < widgets_list.length; i++) {
+                        widgets_data = widgets_list[i];
+                    self.widgets_names.push(widgets_data);
+                    }
+                    //var data_widget = widgets_names;
+                }
+
+                if (result.result['role'] == "center_manager") {
+
+                    var widgets_list = result.result.lay[1].layout;
+                    var i;
+                    var widgets_data;
+                    var widgets_names = [];
+                    for (i = 0; i < widgets_list.length; i++) {
+                        widgets_data = widgets_list[i];
+                    self.widgets_names.push(widgets_data);
+                    }
+
+                    }
+
+                if (result.result['role'] == "nextwealth_manager") {
+
+                    var widgets_list = result.result.lay[1].layout;
+                    var i;
+                    var widgets_data;
+                    var widgets_names = [];
+                    for (i = 0; i < widgets_list.length; i++) {
+                        widgets_data = widgets_list[i];
+                    self.widgets_names.push(widgets_data);
+                    }
+
+                    $('.mythili').show();
+
+                    }
+
                 if (result.result.role == "customer") {
 
                     self.mapping_list = [];
                     self.mapping_list.push(result.result.list[1]);
 
                 }
-
 
                 if (result.result.role == "team_lead") {
 
@@ -136,6 +190,9 @@
 
                     }
             });
+
+             self.widgets_list = '';
+             self.widgets_names = [];
 
          }],
 
