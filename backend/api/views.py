@@ -90,9 +90,39 @@ def project(request):
         center = TeamLead.objects.filter(name_id=request.user.id).values_list('center')
         prj_id = TeamLead.objects.filter(name_id=request.user.id).values_list('project')
 
-    if 'customer' in user_group:
+    '''if 'customer' in user_group:
         center = Customer.objects.filter(name_id=request.user.id).values_list('center')
-        prj_id = Customer.objects.filter(name_id=request.user.id).values_list('project')
+        prj_id = Customer.objects.filter(name_id=request.user.id).values_list('project') '''
+
+    if 'customer' in user_group:
+        select_list = []
+        details = {}
+        center_list = Customer.objects.filter(name_id=request.user.id).values_list('center')
+        if len(center_list) < 2:
+            center_name = str(Center.objects.filter(id=center_list[0][0])[0])
+            center_id = Center.objects.filter(name = center_name)[0].id
+            project_list = Project.objects.filter(center_id=center_id)
+            for project in project_list:
+                project_name = str(project)
+                select_list.append(project_name)
+
+        elif len(center_list) >= 2:
+            for center in center_list:
+                center_name = str(Center.objects.filter(id=center[0])[0])
+                center_id = Center.objects.filter(id=center[0])[0].id
+                project_list = Project.objects.filter(center_id=center_id)
+                for project in project_list:
+                    project_name = str(project)
+                    select_list.append(project_name)
+
+        details['list'] = select_list
+
+        if len(select_list) > 1:
+            if manager_prj:
+                prj_id = Project.objects.filter(name=manager_prj).values_list('id','center_id')
+            else:
+                prj_name = select_list[1]
+                prj_id = Project.objects.filter(name=prj_name).values_list('id','center_id')
 
     if 'nextwealth_manager' in user_group:
         select_list = []
@@ -128,6 +158,7 @@ def project(request):
         select_list = []
         details = {}
         center_list = Centermanager.objects.filter(name_id=request.user.id).values_list('center')
+        #import pdb;pdb.set_trace()
         if len(center_list) < 2:
             center_name = str(Center.objects.filter(id=center_list[0][0])[0])
             center_id = Center.objects.filter(name = center_name)[0].id
@@ -152,9 +183,15 @@ def project(request):
                 prj_id = Project.objects.filter(name=manager_prj).values_list('id','center_id')
             else:
                 prj_name = select_list[1]
-                prj_id = Project.objects.filter(name=prj_name).values_list('id','center_id') 
+                prj_id = Project.objects.filter(name=prj_name).values_list('id','center_id')
+        else:
+            if manager_prj:
+                prj_id = Project.objects.filter(name=manager_prj).values_list('id','center_id')
+            else:
+                prj_name = select_list[0]
+                prj_id = Project.objects.filter(name=prj_name).values_list('id','center_id')
 
-    if user_group in ['nextwealth_manager','center_manager']:
+    if user_group in ['nextwealth_manager','center_manager','customer']:
         widgets_id = Widgets_group.objects.filter(User_Group_id=user_group_id, project=prj_id[0][0],center=prj_id[0][1]).values('widget_priority', 'is_drilldown','is_display', 'widget_name')
     else:
         widgets_id = Widgets_group.objects.filter(User_Group_id=user_group_id, project=prj_id,center=center).values('widget_priority', 'is_drilldown','is_display', 'widget_name')
@@ -295,43 +332,16 @@ def project(request):
         final_details = {}
         details = {}
         select_list = []
-        #layout_list = []
-        #lay_list = json.loads(str(Customer.objects.filter(name_id=request.user.id).values_list('layout')[0][0]))
-        #layout_list.append({'layout': lay_list})
-
         center_list = Customer.objects.filter(name_id=request.user.id).values_list('center')
         project_list = Customer.objects.filter(name_id=request.user.id).values_list('project')
-        #customer_id = Customer.objects.filter(name_id=request.user.id).values_list('id', flat=True)
-        """
-        widgets_id = Widget_Mapping.objects.filter(user_name_id=request.user.id).values('widget_priority', 'is_drilldown','is_display', 'widget_name')
-        list_wid = []
-        wid_dict = {}
-        final_dict = {}
-        for data in widgets_id:
-            if data['is_display'] == True:
-                widgets_data = Widgets.objects.filter(id=data['widget_name']).values('config_name', 'name', 'id_num','col', 'opt', 'day_type_widget','api')
-                wid_dict = widgets_data[0]
-                wid_dict['widget_priority'] = data['widget_priority']
-                wid_dict['is_drilldown'] = data['is_drilldown']
-                list_wid.append(wid_dict)
-        sorted_dict = sorted(list_wid, key=lambda k: k['widget_priority'])
-        lay_out_order = []
-        for i in sorted_dict:
-            config_name = i.pop('config_name')
-            lay_out_order.append(config_name)
-            final_dict[config_name] = i
-        layout_list.append(final_dict)
-        layout_list.append({'layout': lay_out_order})
-        """
+
         if (len(center_list) & len(project_list)) == 1:
             select_list.append('none')
         if len(center_list) < 2:
             center_name = str(Center.objects.filter(id=center_list[0][0])[0])
             for project in project_list:
                 project_name = str(Project.objects.filter(id=project[0])[0])
-                #lay_list = json.loads(str(Project.objects.filter(id=project[0]).values_list('layout')[0][0]))
                 vari = center_name + ' - ' + project_name
-                #layout_list.append({vari:lay_list})
                 select_list.append(vari)
         elif len(center_list) >= 2:
             for center in center_list:
@@ -1464,7 +1474,7 @@ def upload_new(request):
                                     local_externalerror_data['individual_errors']['no_data']='no_data'
                             else:
                                 local_externalerror_data[raw_key] = customer_data[raw_value]
-                                #import pdb;pdb.set_trace()
+
                                 if raw_key != 'employee_id':
                                     local_externalerror_data[raw_key] = customer_data[raw_value]
                                 else:
@@ -1603,11 +1613,11 @@ def upload_new(request):
                                     else:
                                         if (extr_key == 'total_errors') or (extr_key == 'audited_errors'):
                                             try:
-                                                extr_value = int(float(extr_value))
+                                                extr_value = float(extr_value)
                                             except:
                                                 extr_value = 0
                                             try:
-                                                dataset_value = int(float(headcount_dataset[str(customer_data[date_name])][emp_key][extr_key]))
+                                                dataset_value = float(headcount_dataset[str(customer_data[date_name])][emp_key][extr_key])
                                             except:
                                                 dataset_value = 0
                                             if db_check == 'aggregate':
@@ -1815,31 +1825,31 @@ def headcount_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_
                                           center=center_obj).values('buffer_support','buffer_agent','billable_support','non_billable_support_others','total','billable_agent')
 
     try:
-        billable_agent = int(float(customer_data['billable_agent']))
+        billable_agent = float(customer_data['billable_agent'])
     except:
         billable_agent = 0
     try:
-        buffer_agent = int(float(customer_data['buffer_agent']))
+        buffer_agent = float(customer_data['buffer_agent'])
     except:
         buffer_agent = 0
     try:
-        billable_support = int(float(customer_data['billable_support']))
+        billable_support = float(customer_data['billable_support'])
     except:
         billable_support = 0
     try:
-        buffer_support = int(float(customer_data['buffer_support']))
+        buffer_support = float(customer_data['buffer_support'])
     except:
         buffer_support = 0
     try:
-        non_billable_support_others = int(float(customer_data['non_billable_support_others']))
+        non_billable_support_others = float(customer_data['non_billable_support_others'])
     except:
         non_billable_support_others = 0
     try:
-        total = int(float(customer_data['total']))
+        total = float(customer_data['total'])
     except:
         total = 0
     try:
-        support_others_managers = int(float(customer_data['support_others_managers']))
+        support_others_managers = float(customer_data['support_others_managers'])
     except:
         support_others_managers = 0
 
@@ -3198,13 +3208,13 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
         monthly_volume_graph_details = Monthly_Volume_graph(dwm_dict['day'], prj_id, center, level_structure_key)
         result_dict['monthly_volume_graph_details'] = graph_data_alignment_color(monthly_volume_graph_details,'data', level_structure_key,prj_id, center)
 
-        #productivity_utilization_data = main_productivity_data(center, prj_id, dwm_dict['day'], level_structure_key)
+        productivity_utilization_data = main_productivity_data(center, prj_id, dwm_dict['day'], level_structure_key)
         utilization_fte_details = utilization_work_packet_data(center, prj_id, dwm_dict['day'], level_structure_key)
         utilization_operational_details = utilization_operational_data(center, prj_id, dwm_dict['day'], level_structure_key)
         result_dict['utilization_fte_details'] = graph_data_alignment_color(utilization_fte_details['utilization'], 'data',level_structure_key, prj_id, center)
         result_dict['utilization_operational_details'] = graph_data_alignment_color(utilization_operational_details['utilization'], 'data',level_structure_key, prj_id, center)
-        #result_dict['original_productivity_graph'] = graph_data_alignment_color(productivity_utilization_data['productivity'], 'data', level_structure_key, prj_id, center)
-        #result_dict['original_utilization_graph'] = graph_data_alignment_color(productivity_utilization_data['utilization'], 'data', level_structure_key, prj_id, center)
+        result_dict['original_productivity_graph'] = graph_data_alignment_color(productivity_utilization_data['productivity'], 'data', level_structure_key, prj_id, center)
+        result_dict['original_utilization_graph'] = graph_data_alignment_color(productivity_utilization_data['utilization'], 'data', level_structure_key, prj_id, center)
         #result_dict['utilization_fte_graph'] = graph_data_alignment_color(productivity_utilization_data, 'data', level_structure_key, prj_id, center)
         #productivity_min_max = adding_min_max('original_productivity_graph',productivity_utilization_data['productivity'])
         #utilization_min_max = adding_min_max('original_utilization_graph', productivity_utilization_data['utilization'])
@@ -5328,42 +5338,48 @@ def main_productivity_data(center,prj_id,date_list,level_structure_key):
         product_date_values['total_prodictivity'] = []
         utilization_date_values['total_utilization'] = []
         for date_value in date_list:
-            #import pdb;pdb.set_trace()
             total_done_value = RawTable.objects.filter(project=prj_id, center=center, date=date_value).aggregate(Max('per_day'))
             if total_done_value['per_day__max'] > 0:
                 billable_agent_count = Headcount.objects.filter(project=prj_id, center=center, date=date_value).values_list('billable_agent', flat=True)
-                billable_emp_count = Headcount.objects.filter(project=prj_id, center=center, date=date_value).values_list('billable_agent','buffer_agent','billable_support','buffer_support','non_billable_support_others','support_others_managers').distinct()
-                #total_emp_count = Headcount.objects.filter(Headcount.objects.filter(**total_work_query_set).values_list('billable_agent','buffer_agent').distinct()roject=prj_id, center=center, date=date_value).values_list('total', flat=True)
+                billable_count = Headcount.objects.filter(project=prj_id, center=center, date=date_value).values_list('billable_agent','buffer_agent','billable_support','buffer_support','non_billable_support_others','support_others_managers').distinct()
                 total_work_done = RawTable.objects.filter(project=prj_id, center=center, date=date_value).values_list('per_day').aggregate(Sum('per_day'))
                 total_work_done = total_work_done.get('per_day__sum')
-                # below code for productivity
 
-                if len(billable_agent_count) > 0:
-                    productivity_value = float(total_work_done / float(billable_agent_count[0]))
-                else:
-                    productivity_value = 0
-                final_prodictivity_value = float('%.2f' % round(productivity_value, 2))
-                product_date_values['total_prodictivity'].append(final_prodictivity_value)
-                # below code for utilization
-
-                '''new_billable_count = []
-                if len(billable_emp_count) >= 2:
-                    for b_count in billable_emp_count:
+                new_billable_count = []
+                if len(billable_count) >= 2:
+                    for b_count in billable_count:
                         if len(new_billable_count) == 0:
                             new_billable_count.append(b_count[0])
                             new_billable_count.append(b_count[1])
+                            new_billable_count.append(b_count[2])
+                            new_billable_count.append(b_count[3])
+                            new_billable_count.append(b_count[4])
+                            new_billable_count.append(b_count[5])
                         else:
                             new_billable_count[0] = b_count[0] + new_billable_count[0]
                             new_billable_count[1] = b_count[1] + new_billable_count[1]
-                    billable_emp_count = [tuple(new_billable_count)] '''
+                            new_billable_count[2] = b_count[2] + new_billable_count[2]
+                            new_billable_count[3] = b_count[3] + new_billable_count[3]
+                            new_billable_count[4] = b_count[4] + new_billable_count[4]
+                            new_billable_count[5] = b_count[5] + new_billable_count[5]
+                    billable_count = [tuple(new_billable_count)]
 
-                for i in billable_emp_count:
+                for i in billable_count:
                     if i[0] > 0:
                         utilization_value = (float(float(i[0]) / float(i[1] + i[2] + i[3] + i[4] + i[5]))) * 100
                         final_utilization_value = float('%.2f' % round(utilization_value, 2))
                     else:
                         final_utilization_value = 0
                     utilization_date_values['total_utilization'].append(final_utilization_value)
+
+                # below code for productivity
+                if len(billable_agent_count) > 0:
+                    productivity_value = float(total_work_done / float(billable_agent_count[0]))
+                else:
+                    productivity_value = 0
+                final_prodictivity_value = float('%.2f' % round(productivity_value, 2))
+                product_date_values['total_prodictivity'].append(final_prodictivity_value)
+
         final_prodictivity['productivity'] = product_date_values
         final_prodictivity['utilization'] = utilization_date_values
     else:
@@ -5395,7 +5411,10 @@ def main_productivity_data(center,prj_id,date_list,level_structure_key):
                     total_work_done = total_work_done.get('per_day__sum')
                     #import pdb;pdb.set_trace()
                     if len(billable_agent_count) > 0 and total_work_done != None:
-                        productivity_value = float(total_work_done / float(billable_agent_count[0]))
+                        if billable_agent_count[0]> 0:
+                            productivity_value = float(total_work_done / float(billable_agent_count[0]))
+                        else:
+                            productivity_value = 0
                     else:
                         productivity_value = 0
                     final_prodictivity_value = float('%.2f' % round(productivity_value, 2))
@@ -5411,7 +5430,7 @@ def main_productivity_data(center,prj_id,date_list,level_structure_key):
                             final_utilization_value = float('%.2f' % round(utilization_value, 2))
                         else:
                             final_utilization_value = 0
-                        utilization_date_values['total_utilization'].append(final_utilization_value)
+                        #utilization_date_values['total_utilization'].append(final_utilization_value)
 
                     packet_count += 1
 

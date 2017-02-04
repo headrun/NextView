@@ -127,7 +127,6 @@
                         widgets_data = widgets_list[i];
                     self.widgets_names.push(widgets_data);
                     }
-                    //var data_widget = widgets_names;
                 }
 
                 if (result.result['role'] == "center_manager") {
@@ -158,11 +157,24 @@
 
                     }
 
-                if (result.result.role == "customer") {
+                if (result.result['role'] == "customer") {
 
-                    self.mapping_list = [];
-                    self.mapping_list.push(result.result.list[1]);
+                    var map_list = result.result.list;
 
+                    if (map_list.includes("none")) {
+
+                        self.mapping_list = []
+
+                        var map_list = map_list[1];
+
+                        self.mapping_list.push(map_list);
+
+                    }
+
+                    else {
+
+                        self.mapping_list = map_list;
+                    }
                 }
 
                 if (result.result.role == "team_lead") {
