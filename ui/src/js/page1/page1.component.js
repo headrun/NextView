@@ -28,24 +28,30 @@
              var project = 'api/project/';
              var drop_down_link = '/api/dropdown_data/';
 
-             $('#select').daterangepicker({
+             $('#select').daterangepicker({'setDate': new Date(),
                     "autoApply": true,
+                    "defaultDate" : null,
+                    "startDate" : new Date(),
+                    "endDate" : new Date(),
                     "locale": {
                         "format": 'YYYY-MM-DD',
-                        "separator": ' to '
+                        "separator": ' to ',
                     },
+
               }, function(start, end, label) {
                 self.start = start.format('YYYY-MM-DD');
                 self.end = end.format('YYYY-MM-DD');
                 self.click(start,end);
+
                });
 
              $http({method:"GET", url:project}).success(function(result){
+
                 if (result.result.role === 'customer'){
                     $('#emp_widget').hide();    
                      }
                 self.list_object = result.result.lay[0];
-                /*self.list_object = result.result.lay[0];*/
+
                 if((result.result.role === 'customer') || (result.result.role === 'team_lead') || (result.result.role === 'center_manager') || (result.result.role === 'nextwealth_manager'))
                 {
                     var pro_cen_nam = result.result.list[1]
@@ -130,7 +136,6 @@
                         }
                     }
                     self.useful_layout.push(first_row,second_row);
-
                     self.location = pro_cen_nam.split('-')[0].replace(' ','') + ' - '
                     self.project = pro_cen_nam.split('-')[1].replace(' ','') + ' - '
                     var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + self.project
@@ -150,7 +155,6 @@
                         var work_packet_level = result.result.work_packet_level;
                         self.global_packet_values = result.result.fin;
                         self.hideLoading();
-
                         self.top_employee_details =  result.result.top_five_employee_details;
                         self.top_five = result.result.only_top_five;
                         self.volume_graphs = result.result.volumes_graphs_details;
@@ -165,7 +169,7 @@
                             }
                             else {
                                 $('#2').hide();
-                                //$('#2').remove();
+
                                 if (result.result.fin.work_packet) {
                                     console.log('work_packet_exist');
                                 }
@@ -230,24 +234,24 @@
                             if ((result.result.fin.sub_project) && (result.result.fin.work_packet)){
                                 $('#0').on('change', function(){
                                             if (self.day_type === 'week'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.day_type === 'month'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'day'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'week'){
-                                                $('.week').addClass('active');
-                                                $('.week').siblings().removeClass('active');
+                                                $('.week').addClass('active btn-success');
+                                                $('.week').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'month'){
-                                                $('.month').addClass('active');
-                                                $('.month').siblings().removeClass('active');
+                                                $('.month').addClass('active btn-success');
+                                                $('.month').siblings().removeClass('active btn-success');
                                             }
 
                                     self.showLoading();
@@ -271,29 +275,30 @@
                                     + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
+                                $("select").daterangepicker({"setDate": null});
                                 self.chart_render(result,self.project,self.location);
                             });
                                 });
                                 $('#1').on('change', function(){
                                             if (self.day_type === 'week'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.day_type === 'month'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'day'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'week'){
-                                                $('.week').addClass('active');
-                                                $('.week').siblings().removeClass('active');
+                                                $('.week').addClass('active btn-success');
+                                                $('.week').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'month'){
-                                                $('.month').addClass('active');
-                                                $('.month').siblings().removeClass('active');
+                                                $('.month').addClass('active btn-success');
+                                                $('.month').siblings().removeClass('active btn-success');
                                             }
                                     self.showLoading();
                                     self.drop_sub_proj = self.sub_pro_sel.value
@@ -315,29 +320,30 @@
                                     + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
+                                $("select").daterangepicker({"setDate": null});
                                 self.chart_render(result,self.project,self.location);
                             });
                                 });
                                     $('#2').on('change', function(){
                                             if (self.day_type === 'week'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.day_type === 'month'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'day'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'week'){
-                                                $('.week').addClass('active');
-                                                $('.week').siblings().removeClass('active');
+                                                $('.week').addClass('active btn-success');
+                                                $('.week').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'month'){
-                                                $('.month').addClass('active');
-                                                $('.month').siblings().removeClass('active');
+                                                $('.month').addClass('active btn-success');
+                                                $('.month').siblings().removeClass('active btn-success');
                                             }
 
                                         self.showLoading();
@@ -359,6 +365,7 @@
                                   + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
+                                $("select").daterangepicker({"setDate": null});
                                 self.chart_render(result,self.project,self.location);
                             });
                                     });
@@ -372,24 +379,24 @@
                                         self.drop_sub_proj = 'undefined';
                                         self.drop_sub_pack = self.sub_pac_sel.value;
                                             if (self.day_type === 'week'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.day_type === 'month'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'day'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'week'){
-                                                $('.week').addClass('active');
-                                                $('.week').siblings().removeClass('active');
+                                                $('.week').addClass('active btn-success');
+                                                $('.week').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'month'){
-                                                $('.month').addClass('active');
-                                                $('.month').siblings().removeClass('active');
+                                                $('.month').addClass('active btn-success');
+                                                $('.month').siblings().removeClass('active btn-success');
                                             }
 
                         //$('.day').addClass('active');
@@ -408,6 +415,7 @@
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
                                 self.chart_render(result,self.project,self.location);
+                                $("select").daterangepicker({"setDate": null});
                             });
                                     });
                                 }
@@ -420,24 +428,24 @@
                                             self.drop_sub_proj = 'undefined';
                                             self.drop_sub_pack = 'undefined';
                                             if (self.day_type === 'week'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.day_type === 'month'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'day'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'week'){
-                                                $('.week').addClass('active');
-                                                $('.week').siblings().removeClass('active');
+                                                $('.week').addClass('active btn-success');
+                                                $('.week').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'month'){
-                                                $('.month').addClass('active');
-                                                $('.month').siblings().removeClass('active');
+                                                $('.month').addClass('active btn-success');
+                                                $('.month').siblings().removeClass('active btn-success');
                                             }
                                             var is_exist = self.drop_work_pack.indexOf('&');
                                             if (is_exist > 0){
@@ -449,12 +457,11 @@
                             var from = dateEntered.split('to')[0].replace(' ','');
                             var to = dateEntered.split('to')[1].replace(' ','');
                             var placeholder = ''
-                            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                                   + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.chart_render(result,self.project,self.location);
+                                $("select").daterangepicker({"setDate": null});
                             });
                                     })
                                 }
@@ -462,24 +469,24 @@
                                 if (result.result.fin.sub_packet) {
                                     $('#1').on('change', function(){
                                             if (self.day_type === 'week'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.day_type === 'month'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'day'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'week'){
-                                                $('.week').addClass('active');
-                                                $('.week').siblings().removeClass('active');
+                                                $('.week').addClass('active btn-success');
+                                                $('.week').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'month'){
-                                                $('.month').addClass('active');
-                                                $('.month').siblings().removeClass('active');
+                                                $('.month').addClass('active btn-success');
+                                                $('.month').siblings().removeClass('active btn-success');
                                             }
 
                                         self.showLoading();
@@ -500,6 +507,7 @@
             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                    + '&center=' + self.location + '&type=' + 'day'  + final_work;
             $http({method:"GET", url:from_to_data}).success(function(result){
+                            $("select").daterangepicker({"setDate": null});
                             self.chart_render(result,self.project,self.location);
             });
 
@@ -557,8 +565,8 @@
                         $("#0").append(new Option("All"));
                         $("#1").append(new Option("All"));
                         $("#2").append(new Option("All"));
-                        $('.day').addClass('active');
-                        $('.day').siblings().removeClass('active');
+                        $('.day').addClass('active btn-success');
+                        $('.day').siblings().removeClass('active btn-success');
                         if (self.project == "Wallmart - "){
                             var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + 'DellBilling - ' +
                                  '&center=' + 'Salem' + '&type=' + self.day_type;
@@ -602,12 +610,13 @@
                 var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                         + '&center=' + self.location + '&type=' + self.day_type + final_work;
                 console.log(from_to_data);
+                $("select").daterangepicker({"setDate": null});
                 $http({method:"GET", url:from_to_data}).success(function(result){
                             self.hideLoading();
                             self.high_data_gener = [];
                             var final_data_gener = result.result;
                             self.high_data_gener.push(final_data_gener);
-                            if (name === 'chartOptions'){
+             if (name === 'chartOptions'){
                             angular.extend(self.render_data, {
                xAxis: {
                  categories: self.high_data_gener[0].data.date,
@@ -640,10 +649,9 @@
                                     $('#myModal').modal('show');
                                     self.names = data.result.data;
                                     var proj = data.result.project;
-                                    //var pro_drill = drilldown_config[proj];
                                     var pro_drill = data.result.table_headers;
                                     var chart_type = data.result.type;
-                                    //self.fields_list_drilldown = pro_drill[chart_type];
+
                                     self.fields_list_drilldown = pro_drill;
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
@@ -2680,22 +2688,29 @@ angular.extend(self.chartOptions18, {
                  backgroundColor: "transparent"
                 },
                 lang: {
-			       thousandsSep: ','
+			       thousandsSeparator: ','
 		        },
                 yAxis: {
                 gridLineColor: 'a2a2a2',
+
                 min: 0,
                 title: {
                  text: '',
                  align: 'high'
                 },
                 labels: {
-                 overflow: 'justify'
+                 overflow: 'justify',
+
                 }
                },
 
                tooltip: {
-                valueSuffix: ''
+                valueSuffix: '',
+
+                formatter: function () {
+                             return "<small>" + this.x + "</small><br/>" +
+                                    "<b>" + this.series.name + "</b> : " + Highcharts.numberFormat(this.y, null, null, ",");
+                           }
                },
 
                credits: {
@@ -2720,6 +2735,16 @@ angular.extend(self.chartOptions18, {
                     text: ''
                 }
             },
+
+            tooltip: {
+                valueSuffix: '',
+
+                formatter: function () {
+                             return "<small>" + this.x + "</small><br/>" +
+                                    "<b>" + this.series.name + "</b> : " + Highcharts.numberFormat(this.y, null, null, ",");
+                           }
+               },
+
             plotOptions:{
                 series:{
                     allowPointSelect: true,
@@ -2730,7 +2755,8 @@ angular.extend(self.chartOptions18, {
                 }
                 }
             }
-            };
+           };
+
             self.chartOptions9 = {
                 chart : {
                  backgroundColor: "transparent"

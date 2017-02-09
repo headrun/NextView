@@ -35,7 +35,7 @@
 
 .name {
     font-size:22px;
-    margin-right: 10px;
+    margin-right: 3px;
  }
  .admin {
     padding:5px; 
@@ -91,13 +91,13 @@ img {
                                                <a href="" ng-repeat="item in $ctrl.mapping_list" ng-click="$ctrl.clickFun(item)">{{item}}</a>
                                            </li>
 
-                                       </ul>
+                                           </ul>
                                    </li>
                                 </ul>
                          </div>
                           <li>
                             <div>
-                                <a href="http://nv.headrun.com:8188/admin/api" id="admin_but" class="btn btn-info" style="padding:5px;margin-top:10px;margin-right:-5px;color:black;border-color:black;background-color:white;" role="button" target="_blank">Admin</a>
+                                <a href="http://nv.headrun.com:8188/admin/api" id="admin_but" class="btn btn-info" style="padding:5px;margin-top:10px;margin-right:-5px;color:black;border-color:#ffffff;background-color:white;" role="button" target="_blank">Admin</a>
                             </div>
                           </li>
                           <li>
@@ -107,7 +107,7 @@ img {
                           </li>
 
                     <li class="dropdown user">
-                      <a href="" class="dropdown-toggle color-out" data-toggle="dropdown" style="padding:0px;margin-left:10px;">
+                      <a href="" class="dropdown-toggle color-out" data-toggle="dropdown" style="padding:0px;margin-left:-12px;">
                           <b><span style="float:right;margin-right:-18px;"><i class="fa fa-user name"></i>{{ $ctrl.user.userName }} <i class="fa fa-angle-down"></i></span></b>
                           <br>
                           <span style="font-size:15px;">{{ $ctrl.user.role }}</span>
@@ -123,8 +123,6 @@ img {
         </div>     <!--/.nav-collapse -->
 
 </nav>
-
-
 
 <script>
     $(function () {

@@ -38,11 +38,12 @@ dashboard {
 
     height: 100%;
     position: relative;
-    top: -10px;
-    left: 0;
+    /*top: -10px;*/
+    /*left: 0;*/
     padding-left: @gutter;
     padding-right: @gutter;
     padding-bottom: @gutter;
+    padding-top: 5px;
    /* padding-top: @gutter; */
    /* margin-top: -10px; */
 
@@ -57,7 +58,7 @@ dashboard {
       div.widget-content {
 
         .cover;
-        .box-shadow(0 0 4px @widget-shadow-color);
+        /*.box-shadow(0 0 4px @widget-shadow-color);*/
         /*background-color: @widget-bg;*/
         /*border: 1px solid @widget-border;*/
         text-align: left;
@@ -72,7 +73,9 @@ dashboard {
           top: 0;
           left: 0;
           width: 100%;
-          padding: @gutter/2 30px @gutter/2 @gutter;
+          color: #555;
+          /*padding: @gutter/2 30px @gutter/2 @gutter;*/
+          padding: 10px 0px 0px 10px;
           background-color: @widget-title-bg;
           /*color: @widget-bg;*/
           /*overflow: hidden;*/

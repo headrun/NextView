@@ -49,12 +49,12 @@ table {
 
 .date {
      float: right;
-     font-size: 28px;
-     padding-top: 5px;
+     font-size: 24px;
+     padding-top: 9px;
      cursor: pointer;
+     color: #555;
 }
 .select {
-
       float: right;
       color:#0a0909;
       margin:6px;
@@ -86,9 +86,8 @@ table {
     margin-top:-17px;
 }
 .graph {
-    border: 1px solid #A9A9A9;
-    border-radius:0.3em;
-    background-color:#f5f5f5;
+    border: 1px solid #ccc;
+    background-color:#ffffff;
     margin: 5px;
     padding-right: 10px;
     padding-left: 10px;
@@ -129,8 +128,10 @@ table {
     padding-right: 0px;
 }
 .widget-content {
-    border-radius: 0.3em;
-    background-color: #f5f5f5;
+    /*border-radius: 0.3em;*/
+    background-color: #ffffff;
+    border : 1px solid #ccc;
+    padding: 10px;
 }
 .body {
         width: 100%;
@@ -157,20 +158,34 @@ table {
     width: 19.7%;
     float: left;
 }
+.btn-group {
+    top: -11px;
+    left: 15px;
+}
+.dashboard {
+    top: 4px;
+    float: right;
+    left: -10px;
+}
 </style>
 <body>
     <div class="row">
     <div id="wrapper">
-        <div><h3 class="pull-left brand_style">{{$ctrl.project}}Dashboard</h3></div>
+        <div><h3 class="pull-left brand_style">{{$ctrl.project}}DASHBOARD</h3></div>
              <div id="inner1" class="form-group" style="margin-bottom:initial;">
-                 <!--<input class="form-control select" value="{{$ctrl.first}} to {{$ctrl.last}}" id="select" size="19">-->
                  <input class="form-control select" id="select" size="22">
+                 <!--<input class="form-control select" value="{{$ctrl.first}} to {{$ctrl.last}}" id="select" size="19">-->
                  <i class="fa fa-calendar date" aria-hidden="true"></i>
+             </div>
+             <div class="btn-group dashboard">
+                 <button type="button" id="day" class="active btn-success btn btn-default day" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" style="cursor:pointer;">Day</button>
+                 <button type="button" id="week" class="btn btn-default week" ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')" style="cursor:pointer;">Week</button>
+                 <button type="button" id="Month" class="btn btn-default month" ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')" style="cursor:pointer;">Month</button>
              </div>
              <div ng-repeat="k in $ctrl.packet_hierarchy_list track by $index">
                 <form>
                     <div class="form-group" style="float:left;padding-left:1%;padding-top:5px;margin-bottom:0px;">
-                        <select class="form-control input-sm" id="{{$index}}">
+                        <select class="form-control input-sm" id="{{$index}}" style="border: solid 1px #ccc;">
                             <option>All</option>
                         </select>
                     </div>
@@ -188,7 +203,7 @@ table {
                 <div class="widget-body">
                     <div ng-if="j.day_type_widget" class="input-group"id="inner2">
                          <div class="btn-group">
-                            <button type="button" id="day" class="active btn btn-default day" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" style="cursor:pointer;">Day</button>
+                            <button type="button" id="day" class="active btn-success btn btn-default day" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" style="cursor:pointer;">Day</button>
                             <button type="button" id="week" class="btn btn-default week" ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')" style="cursor:pointer;">Week</button>
                             <button type="button" id="Month" class="btn btn-default month" ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')" style="cursor:pointer;">Month</button>
                          </div>
@@ -297,9 +312,10 @@ table {
 </body>
 
 <script>
+
     $('body').on('click','.btn-group button', function(e) {
-     $(this).addClass('active');
-     $(this).siblings().removeClass('active');
+     $(this).addClass('active btn-success');
+     $(this).siblings().removeClass('active btn-success');
 });
 
 </script>
