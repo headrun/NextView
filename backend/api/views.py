@@ -1187,7 +1187,7 @@ def upload_new(request):
         ignorablable_fields = []
         other_fileds = []
         authoring_dates = {}
-        mapping_ignores = ['project_id','center_id','_state','sheet_name','id']
+        mapping_ignores = ['project_id','center_id','_state','sheet_name','id','total_errors_require']
         raw_table_map_query = Authoring_mapping(prj_obj,center_obj,'RawtableAuthoring')
         for map_key,map_value in raw_table_map_query.iteritems():
             if map_key == 'sheet_name':
@@ -1203,11 +1203,13 @@ def upload_new(request):
                             other_fileds.append(required_filed[1])
                 if map_key == 'date':
                     authoring_dates['raw_table_date'] = map_value.lower()
-
+        #import pdb;pdb.set_trace()
         internal_error_map_query  = Authoring_mapping(prj_obj,center_obj,'InternalerrorsAuthoring')
         for map_key,map_value in internal_error_map_query.iteritems():
             if map_key == 'sheet_name':
                 sheet_names['internal_error_sheet'] = map_value
+            if map_key == 'total_errors_require':
+                intrnl_error_check = map_value
             if map_value != '' and map_key not in mapping_ignores:
                 internal_error_mapping[map_key]= map_value.lower()
                 if '#<>#' in map_value:
@@ -1220,6 +1222,8 @@ def upload_new(request):
         for map_key,map_value in external_error_map_query.iteritems():
             if map_key == 'sheet_name':
                 sheet_names['external_error_sheet'] = map_value
+            if map_key == 'total_errors_require':
+                extrnl_error_check = map_value
             if map_value != '' and map_key not in mapping_ignores:
                 external_error_mapping[map_key]= map_value.lower()
                 if '#<>#' in map_value:
@@ -1277,7 +1281,6 @@ def upload_new(request):
                 for name in excel_sheet_names:
                     if name not in  file_sheet_names:
                         sheet_names.append(name)
-                #return HttpResponse('sheet name error'+str(excel_sheet_names))
                 return HttpResponse('Wrong Sheet Names ' + str(sheet_names))
 
         db_check = str(Project.objects.filter(name=prj_obj.name,center=center_obj).values_list('project_db_handling',flat=True)[0])
@@ -1411,11 +1414,11 @@ def upload_new(request):
                                     else:
                                         missed_work_packets.append(customer_data['work packet'])
 
-                    if len(Missed_emp_names) > 0:
+                    '''if len(Missed_emp_names) > 0:
                         return HttpResponse("Internal Employee Name not found in Production" + str(Missed_emp_names))
 
                     if len(missed_work_packets) > 0:
-                        return HttpResponse('Internal WorkPacket Not Found in Production' + str(missed_work_packets))
+                        return HttpResponse('Internal WorkPacket Not Found in Production' + str(missed_work_packets))'''
 
                     emp_key ='{0}_{1}_{2}_{3}'.format(local_internalerror_data.get('sub_project', 'NA') , local_internalerror_data.get('work_packet','NA') , local_internalerror_data.get('sub_packet', 'NA') , local_internalerror_data.get('employee_id', 'NA'))
                     if 'not_applicable' not in local_internalerror_data.values():
@@ -1492,11 +1495,11 @@ def upload_new(request):
                                     else:
                                         extrnl_work_packets.append(customer_data['work packet'])
 
-                    if len(extrnl_emp_names) > 0:
+                    '''if len(extrnl_emp_names) > 0:
                         return HttpResponse('External Employee Name Not Found in Production' + str(extrnl_emp_names))
 
                     if len(extrnl_work_packets) > 0:
-                        return HttpResponse('External WorkPacket Not Found in Production' + str(extrnl_work_packets))
+                        return HttpResponse('External WorkPacket Not Found in Production' + str(extrnl_work_packets))'''
 
                     emp_key ='{0}_{1}_{2}_{3}'.format(local_externalerror_data.get('sub_project', 'NA') , local_externalerror_data.get('work_packet','NA') , local_externalerror_data.get('sub_packet', 'NA') , local_externalerror_data.get('employee_id', 'NA'))
                     if 'not_applicable' not in local_externalerror_data.values():
@@ -1673,17 +1676,14 @@ def upload_new(request):
                                 target_dataset[str(customer_data[date_name])][emp_key] = local_target_data
                     print local_target_data
 
-
         for date_key,date_value in internal_error_dataset.iteritems():
             for emp_key,emp_value in date_value.iteritems():
-                emp_data = Error_checking(emp_value)
-                if emp_data['status'] == 'matched':
-                    internalerror_insert = internalerror_query_insertion(emp_data, prj_obj, center_obj,teamleader_obj_name,db_check)
+                emp_data = Error_checking(emp_value,intrnl_error_check)
+                internalerror_insert = internalerror_query_insertion(emp_data, prj_obj, center_obj,teamleader_obj_name,db_check)
         for date_key,date_value in external_error_dataset.iteritems():
             for emp_key,emp_value in date_value.iteritems():
-                emp_data = Error_checking(emp_value)
-                if emp_data['status'] == 'matched':
-                    externalerror_insert = externalerror_query_insertion(emp_value, prj_obj, center_obj,teamleader_obj_name,db_check)
+                emp_data = Error_checking(emp_value,extrnl_error_check)
+                externalerror_insert = externalerror_query_insertion(emp_value, prj_obj, center_obj,teamleader_obj_name,db_check)
         for date_key,date_value in work_track_dataset.iteritems():
             for emp_key,emp_value in date_value.iteritems():
                 externalerror_insert = worktrack_query_insertion(emp_value, prj_obj, center_obj,teamleader_obj_name,db_check)
@@ -1723,7 +1723,7 @@ def dates_sorting(timestamps):
     sorted_values = [datetime.datetime.strftime(ts, "%Y-%m-%d") for ts in dates]
     return sorted_values
 
-def Error_checking(employee_data):
+def Error_checking(employee_data,error_match=False):
     employee_data['status'] = 'mis_match'
     if employee_data.has_key('individual_errors'):
         if employee_data['individual_errors'].has_key('no_data'):
@@ -1739,15 +1739,23 @@ def Error_checking(employee_data):
             except:
                 er_value = 0
             all_error_values.append(er_value)
+        if error_match ==True:
+            if total_errors == sum(all_error_values):
+                all_error_values = [str(value) for value in all_error_values ]
+                error_types='#<>#'.join(employee_data['individual_errors'].keys())
+                error_values = '#<>#'.join(all_error_values)
+                employee_data['error_types'] = error_types
+                employee_data['error_values'] = error_values
+            else:
+                employee_data['error_types'] = None
+                employee_data['error_values'] = 0
+        else:
 
-        if total_errors == sum(all_error_values):
-            all_error_values = [str(value) for value in all_error_values ]
-            employee_data['status'] = 'matched'
-            error_types='#<>#'.join(employee_data['individual_errors'].keys())
+            all_error_values = [str(value) for value in all_error_values]
+            error_types = '#<>#'.join(employee_data['individual_errors'].keys())
             error_values = '#<>#'.join(all_error_values)
             employee_data['error_types'] = error_types
             employee_data['error_values'] = error_values
-
     return employee_data
 
 def worktrack_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, db_check):
@@ -2561,7 +2569,8 @@ def agent_pareto_data_generation(request,date_list,prj_id,center_obj,level_struc
     error_count = {}
     count = 0
     for agent in extr_volumes_list:
-        total_errors = Internalerrors.objects.filter(project=prj_id, center=center_obj, employee_id=agent,date__range=[date_list[0], date_list[-1]]).aggregate(Sum('total_errors'))
+        #total_errors = Internalerrors.objects.filter(project=prj_id, center=center_obj, employee_id=agent,date__range=[date_list[0], date_list[-1]]).aggregate(Sum('total_errors'))
+        total_errors = Internalerrors.objects.filter(project=prj_id, center=center_obj, employee_id=agent,date__range=[date_list[0], date_list[-1]]).aggregate(Sum('error_values'))
         if len(total_errors) > 0:
             for key, value in total_errors.iteritems():
                 agent_name[agent] = value
@@ -2633,7 +2642,8 @@ def agent_external_pareto_data_generation(request,date_list,prj_id,center_obj,le
     extrnl_error_count = {}
     count = 0
     for agent in extrnal_volumes_list:
-        total_errors = Externalerrors.objects.filter(project=prj_id, center=center_obj, employee_id=agent,date__range=[date_list[0], date_list[-1]]).aggregate(Sum('total_errors'))
+        #total_errors = Externalerrors.objects.filter(project=prj_id, center=center_obj, employee_id=agent,date__range=[date_list[0], date_list[-1]]).aggregate(Sum('total_errors'))
+        total_errors = Externalerrors.objects.filter(project=prj_id, center=center_obj, employee_id=agent,date__range=[date_list[0], date_list[-1]]).aggregate(Sum('error_values'))
         if len(total_errors) > 0:
             for key, value in total_errors.iteritems():
                 extrnl_agent_name[agent] = value
@@ -4248,9 +4258,9 @@ def from_to(request):
     final_result_dict = day_week_month(request,dwm_dict,prj_id,center,work_packet,level_structure_key)
     final_result_dict['top_five_employee_details'] = top_five_employee_details
     final_result_dict['only_top_five'] = only_top_five
-    agent_internal_pareto_data = agent_pareto_data_generation(request,date_list,prj_id,center,level_structure_key)
+    agent_internal_pareto_data = agent_pareto_data_generation(request,employe_dates['days'],prj_id,center,level_structure_key)
     #volumes_graphs_details = volumes_graphs_data(date_list,prj_id,center,level_structure_key)
-    extrnl_agent_pareto_data = agent_external_pareto_data_generation(request, date_list, prj_id, center, level_structure_key)
+    extrnl_agent_pareto_data = agent_external_pareto_data_generation(request, employe_dates['days'], prj_id, center, level_structure_key)
     volumes_graphs_details = volumes_graphs_data_table(employe_dates['days'],prj_id,center,level_structure_key)
     category_error_count = sample_pareto_analysis(request, date_list, prj_id, center, level_structure_key,"Internal")
     extrnl_category_error_count = sample_pareto_analysis(request, date_list, prj_id, center, level_structure_key, "External")
@@ -5373,7 +5383,7 @@ def main_productivity_data(center,prj_id,date_list,level_structure_key):
                     utilization_date_values['total_utilization'].append(final_utilization_value)
 
                 # below code for productivity
-                if len(billable_agent_count) > 0:
+                if len(billable_agent_count) > 0 and billable_agent_count[0] != 0:
                     productivity_value = float(total_work_done / float(billable_agent_count[0]))
                 else:
                     productivity_value = 0
