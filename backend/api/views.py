@@ -509,6 +509,8 @@ def redis_insertion_final(prj_obj,center_obj,dates_list,key_type,level_structure
         volumes_list = Externalerrors.objects.filter(project=prj_obj, center=center_obj).values('sub_project', 'work_packet', 'sub_packet').distinct()
     if key_type == 'WorkTrack':
         volumes_list = Worktrack.objects.filter(project=prj_obj, center=center_obj).values('sub_project', 'work_packet', 'sub_packet').distinct()
+    if key_type == 'Tat':
+        volumes_list = TatTable.objects.filter(project=prj_obj, center=center_obj).values('sub_project', 'work_packet', 'sub_packet').distinct()
     for date in dates_list:
         date_is = datetime.datetime.strptime(date,'%Y-%m-%d').date()
         for row_record_dict in volumes_list:
@@ -594,6 +596,28 @@ def redis_insertion_final(prj_obj,center_obj,dates_list,key_type,level_structure
                 print value_dict, redis_key
                 data_dict[redis_key] = value_dict
 
+            if key_type == 'Tat':
+                redis_key = '{0}_{1}_{2}_{3}_tats_table'.format(prj_name, center_name, final_work_packet,str(date_is))
+                total_received = TatTable.objects.filter(**query_set).values_list('total_received')
+                met_count = TatTable.objects.filter(**query_set).values_list('met_count')
+                non_met_count = TatTable.objects.filter(**query_set).values_list('non_met_count')
+
+                try:
+                    value_dict['total_received'] = str(total_received[0][0])
+                except:
+                    value_dict['total_received'] = ''
+                try:
+                    value_dict['met_count'] = str(met_count[0][0])
+                except:
+                    value_dict['met_count'] = ''
+                try:
+                    value_dict['non_met_count'] = str(non_met_count[0][0])
+                except:
+                    value_dict['non_met_count'] = ''
+
+                print value_dict, redis_key
+                data_dict[redis_key] = value_dict
+
     print data_dict, all_dates
     conn = redis.Redis(host="localhost", port=6379, db=0)
     current_keys = []
@@ -627,6 +651,12 @@ def redis_insert(prj_obj,center_obj,dates_list,key_type):
         wk_packet = [wp_count + 1 for key in level_herarchy_packets if len(key['work_packet'])]
         sub_packet = [sub_pct_count + 1 for key in level_herarchy_packets if len(key['sub_packet'])]
         sub_prj = [sub_prj_count + 1 for key in level_herarchy_packets if len(key['sub_project'])]
+    if key_type == 'TatTable':
+        level_herarchy_packets = TatTable.objects.filter(project=prj_obj, center=center_obj,date__range=[dates_list[0], dates_list[-1]]).values('sub_project','work_packet','sub_packet').distinct()
+        wk_packet = [wp_count + 1 for key in level_herarchy_packets if len(key['work_packet'])]
+        sub_packet = [sub_pct_count + 1 for key in level_herarchy_packets if len(key['sub_packet'])]
+        sub_prj = [sub_prj_count + 1 for key in level_herarchy_packets if len(key['sub_project'])]
+
     if len(wk_packet) > 0 : level_herarchy.append('work_packet')
     if len(sub_packet) > 0: level_herarchy.append('sub_packet')
     if len(sub_prj) > 0: level_herarchy.append('sub_project')
@@ -1163,7 +1193,6 @@ def upload_new(request):
     prj_obj = Project.objects.filter(id=teamleader_obj[0])[0]
     prj_name= prj_obj.name
     center_obj = Center.objects.filter(id=teamleader_obj[1])[0]
-    #import pdb;pdb.set_trace()
     fname = request.FILES['myfile']
     var = fname.name.split('.')[-1].lower()
     if var not in ['xls', 'xlsx', 'xlsb']:
@@ -1184,6 +1213,7 @@ def upload_new(request):
         worktrack_mapping = {}
         headcount_mapping = {}
         target_mapping = {}
+        tat_mapping = {}
         ignorablable_fields = []
         other_fileds = []
         authoring_dates = {}
@@ -1269,6 +1299,19 @@ def upload_new(request):
                         authoring_dates['target_from_date'] = map_value.lower()
                     else:
                         authoring_dates['target_to_date'] = map_value.lower()
+        #import pdb;pdb.set_trace()
+        tat_map_query = Authoring_mapping(prj_obj, center_obj, 'TatAuthoring')
+        for map_key, map_value in tat_map_query.iteritems():
+            if map_key == 'sheet_name':
+                sheet_names['tat_sheet'] = map_value
+            if map_value != '' and map_key not in mapping_ignores:
+                tat_mapping[map_key] = map_value.lower()
+                if '#<>#' in map_value:
+                    required_filed = map_value.split('#<>#')
+                    other_fileds.append(required_filed[1])
+                if map_key == 'date':
+                    authoring_dates['tat_date'] = map_value.lower()
+
 
         other_fileds = filter(None, other_fileds)
         file_sheet_names = sheet_names.values()
@@ -1284,7 +1327,7 @@ def upload_new(request):
                 return HttpResponse('Wrong Sheet Names ' + str(sheet_names))
 
         db_check = str(Project.objects.filter(name=prj_obj.name,center=center_obj).values_list('project_db_handling',flat=True)[0])
-        raw_table_dataset, internal_error_dataset, external_error_dataset, work_track_dataset,headcount_dataset = {}, {}, {}, {},{}
+        raw_table_dataset, internal_error_dataset, external_error_dataset, work_track_dataset,headcount_dataset,tats_table_dataset = {}, {}, {}, {},{},{}
         target_dataset = {}
         for key,value in sheet_index_dict.iteritems():
             one_sheet_data = {}
@@ -1306,7 +1349,6 @@ def upload_new(request):
                             customer_data[column] = ''.join(cell_data)
                         except:
                             return HttpResponse('Invalid Date Format in  ' + key + ' in Row No '+ str(row_idx))
-
 
                     elif column != "date" :
                         customer_data[column] = ''.join(cell_data)
@@ -1676,23 +1718,78 @@ def upload_new(request):
                                 target_dataset[str(customer_data[date_name])][emp_key] = local_target_data
                     print local_target_data
 
+
+                if key == sheet_names.get('tats_table_sheet', ''):
+                    date_name = authoring_dates['tats_table_date']
+                    if not tats_table_dataset.has_key(customer_data[date_name]):
+                        tats_table_dataset[str(customer_data[date_name])] = {}
+                    local_tat_data = {}
+                    for raw_key, raw_value in tat_mapping.iteritems():
+                        if '#<>#' in raw_value:
+                            checking_values = raw_value.split('#<>#')
+                            if customer_data.has_key(checking_values[0].lower()):
+                                if customer_data[checking_values[0].lower()].lower() == checking_values[1].lower():
+                                    local_tat_data[raw_key] = customer_data[checking_values[2].lower()]
+                                else:
+                                    local_tat_data[raw_key] = 'not_applicable'
+
+                        elif ('#<>#' not in raw_value) and (raw_value in customer_data.keys()):
+                            local_tat_data[raw_key] = customer_data[raw_value]
+
+                    emp_key = '{0}_{1}_{2}_{3}'.format(local_tat_data.get('sub_project', 'NA'),
+                                                       local_tat_data.get('work_packet', 'NA'),
+                                                       local_tat_data.get('sub_packet', 'NA'),
+                                                       local_tat_data.get('employee_id', 'NA'))
+                    if 'not_applicable' not in local_tat_data.values():
+                        if tats_table_dataset.has_key(str(customer_data[date_name])):
+                            if tats_table_dataset[str(customer_data[date_name])].has_key(emp_key):
+                                for extr_key, extr_value in local_tat_data.iteritems():
+                                    if extr_key not in tats_table_dataset[str(customer_data[date_name])][emp_key].keys():
+                                        tats_table_dataset[str(customer_data[date_name])][emp_key][extr_key] = extr_value
+                                    else:
+                                        if (extr_key == 'total_errors') or (extr_key == 'audited_errors'):
+                                            try:
+                                                extr_value = float(extr_value)
+                                            except:
+                                                extr_value = 0
+                                            try:
+                                                dataset_value = float(tats_table_dataset[str(customer_data[date_name])][emp_key][extr_key])
+                                            except:
+                                                dataset_value = 0
+                                            if db_check == 'aggregate':
+                                                tats_table_dataset[str(customer_data[date_name])][emp_key][extr_key] = extr_value + dataset_value
+                                            elif db_check == 'update':
+                                                tats_table_dataset[str(customer_data[date_name])][emp_key][extr_key] = extr_value
+                            else:
+                                tats_table_dataset[str(customer_data[date_name])][emp_key] = local_tat_data
+                    print local_tat_data
+
+
         for date_key,date_value in internal_error_dataset.iteritems():
             for emp_key,emp_value in date_value.iteritems():
                 emp_data = Error_checking(emp_value,intrnl_error_check)
                 internalerror_insert = internalerror_query_insertion(emp_data, prj_obj, center_obj,teamleader_obj_name,db_check)
+
         for date_key,date_value in external_error_dataset.iteritems():
             for emp_key,emp_value in date_value.iteritems():
                 emp_data = Error_checking(emp_value,extrnl_error_check)
                 externalerror_insert = externalerror_query_insertion(emp_value, prj_obj, center_obj,teamleader_obj_name,db_check)
+
         for date_key,date_value in work_track_dataset.iteritems():
             for emp_key,emp_value in date_value.iteritems():
                 externalerror_insert = worktrack_query_insertion(emp_value, prj_obj, center_obj,teamleader_obj_name,db_check)
+
         for date_key, date_value in headcount_dataset.iteritems():
             for emp_key, emp_value in date_value.iteritems():
                 headcount_insert = headcount_query_insertion(emp_value, prj_obj, center_obj, teamleader_obj_name,db_check)
+
         for date_key, date_value in target_dataset.iteritems():
             for emp_key, emp_value in date_value.iteritems():
                 externalerror_insert = target_table_query_insertion(emp_value, prj_obj, center_obj, teamleader_obj_name,db_check)
+
+        for date_key, date_value in tats_table_dataset.iteritems():
+            for emp_key, emp_value in date_value.iteritems():
+                externalerror_insert = tat_query_insertion(emp_value, prj_obj, center_obj, teamleader_obj_name,db_check)
 
         for date_key,date_value in raw_table_dataset.iteritems():
             for emp_key,emp_value in date_value.iteritems():
@@ -1714,6 +1811,9 @@ def upload_new(request):
         if len(work_track_dataset) > 0:
             sorted_dates = dates_sorting(work_track_dataset)
             insert = redis_insert(prj_obj, center_obj, sorted_dates, key_type='WorkTrack')
+        if len(tats_table_dataset) > 0:
+            sorted_dates = dates_sorting(tats_table_dataset)
+            insert = redis_insert(prj_obj, center_obj, sorted_dates, key_type='Tat')
         var ='hello'
         return HttpResponse(var)
 
@@ -1750,7 +1850,6 @@ def Error_checking(employee_data,error_match=False):
                 employee_data['error_types'] = None
                 employee_data['error_values'] = 0
         else:
-
             all_error_values = [str(value) for value in all_error_values]
             error_types = '#<>#'.join(employee_data['individual_errors'].keys())
             error_values = '#<>#'.join(all_error_values)
@@ -1903,6 +2002,59 @@ def headcount_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_
                                                                                         non_billable_support_others=non_billable_support_others,
                                                                                         total = total)
     return head_date_list
+
+
+def tat_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, db_check):
+    tat_date_list = customer_data['date']
+    check_query = TatTable.objects.filter(project=prj_obj, sub_project=customer_data.get('sub_project', ''),
+                                          work_packet=customer_data['work_packet'],
+                                          sub_packet=customer_data.get('sub_packet', ''),
+                                          received_date=customer_data['date'],
+                                          center=center_obj).values('total_received','met_count','non_met_count')
+
+    try:
+        total_received = int(float(customer_data['total_received']))
+    except:
+        total_received = 0
+    try:
+        met_count = int(float(customer_data['met_count']))
+    except:
+        met_count = 0
+    try:
+        non_met_count = int(float(customer_data['non_met_count']))
+    except:
+        non_met_count = 0
+
+
+    if len(check_query) == 0:
+        new_can = TatTable(sub_project=customer_data.get('sub_project', ''),
+                            work_packet=customer_data['work_packet'],
+                            sub_packet=customer_data.get('sub_packet', ''), received_date=customer_data['date'],
+                            total_received=total_received,
+                            met_count = met_count,
+                            non_met_count = non_met_count,
+                            project=prj_obj, center=center_obj)
+        if new_can:
+            try:
+                print customer_data
+                new_can.save()
+            except:
+                print "error in internal_table_query"
+
+    if len(check_query) > 0:
+        if db_check == 'aggregate':
+            total_received = total_received + int(check_query[0]['total_received'])
+            met_count = met_count + int(check_query[0]['met_count'])
+            non_met_count = non_met_count + int(check_query[0]['non_met_count'])
+            new_can_agr = TatTable.objects.filter(id=int(check_query[0]['id'])).update(total_received=total_received,
+                                                                                       met_count = met_count,
+                                                                                       non_met_count = non_met_count,)
+        elif db_check == 'update':
+            new_can_upd = TatTable.objects.filter(id=int(check_query[0]['id'])).update(total_received=total_received,
+                                                                                       met_count = met_count,
+                                                                                       non_met_count = non_met_count,)
+    return tat_date_list
+
 
 def user_data(request):
     user_group = request.user.groups.values_list('name',flat=True)[0]
@@ -2183,8 +2335,6 @@ def product_total_graph(date_list,prj_id,center_obj,work_packets,level_structure
         volumes_data = result['data']['data']
     if None in volumes_data.keys():
         del volumes_data[None]
-    #productivity_series_list = graph_data_alignment_other(volumes_data,work,name_key='data')
-    #productivity_series_list = graph_data_alignment(volumes_data,name_key='data')
     result['prod_days_data'] = volumes_data
     if 'All' not in level_structure_key.values():
         query_set = query_set_generation(prj_id, center_obj, level_structure_key, [])
