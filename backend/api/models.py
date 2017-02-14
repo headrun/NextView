@@ -98,13 +98,13 @@ class Headcount(models.Model):
     sub_packet = models.CharField(max_length=255, blank=True)
     center = models.ForeignKey(Center, null=True)
     project = models.ForeignKey(Project, null=True)
-    billable_agent = models.IntegerField(max_length=125)
-    buffer_agent = models.IntegerField(max_length=125)
-    billable_support = models.IntegerField(max_length=125)
-    buffer_support = models.IntegerField(max_length=125)
-    non_billable_support_others = models.IntegerField(max_length=125)
-    support_others_managers = models.IntegerField(max_length=125)
-    total = models.IntegerField(max_length=125)
+    billable_agent = models.FloatField(max_length=125, default=0)
+    buffer_agent = models.FloatField(max_length=125, default=0)
+    billable_support = models.FloatField(max_length=125, default=0)
+    buffer_support = models.FloatField(max_length=125, default=0)
+    non_billable_support_others = models.FloatField(max_length=125, default=0)
+    support_others_managers = models.FloatField(max_length=125, default=0)
+    total = models.FloatField(max_length=125, default=0)
 
     class Meta:
         db_table = u'headcount_table'
@@ -219,15 +219,6 @@ class InternalerrorsAuthoring(models.Model):
     sub_project = models.CharField(max_length=255, blank=True)
     work_packet = models.CharField(max_length=255)
     sub_packet = models.CharField(max_length=255, blank=True)
-    #error_type1 = models.CharField(max_length=255, blank=True)
-    #error_type2 = models.CharField(max_length=255, blank=True)
-    #error_type3 = models.CharField(max_length=255, blank=True)
-    #error_type4 = models.CharField(max_length=255, blank=True)
-    #error_type5 = models.CharField(max_length=255, blank=True)
-    #error_type6 = models.CharField(max_length=255, blank=True)
-    #error_type7 = models.CharField(max_length=255, blank=True)
-    #error_type8 = models.CharField(max_length=255, blank=True)
-    #error_type9 = models.CharField(max_length=255, blank=True)
     audited_errors = models.CharField(max_length=255,blank=True,verbose_name='Audited_errors')
     total_errors = models.CharField(max_length=255,default=0,verbose_name='total_errors')
     error_category = models.CharField(max_length=255, blank=True)
@@ -237,10 +228,10 @@ class InternalerrorsAuthoring(models.Model):
     center      = models.ForeignKey(Center, null=True)
     project     = models.ForeignKey(Project, null=True)
     sheet_name = models.CharField(max_length=255, default='')
+    total_errors_require = models.BooleanField(default=None)
 
     class Meta:
         db_table = u'internalerrors_authoring'
-        #unique_together = ("audited_errors","error_value","date","employee_id","volume_type")
 
     def __unicode__(self):
         return self.work_packet
@@ -249,7 +240,6 @@ class Externalerrors(models.Model):
     sub_project = models.CharField(max_length=255, blank=True)
     work_packet = models.CharField(max_length=255)
     sub_packet = models.CharField(max_length=255, blank=True)
-    #error_name = models.CharField(max_length=255, blank=True)
     error_types = models.CharField(max_length=512, blank=True)
     error_values = models.CharField(max_length=512, blank=True)
     audited_errors = models.IntegerField(max_length=255, blank=True, default=0)
@@ -261,7 +251,6 @@ class Externalerrors(models.Model):
 
     class Meta:
         db_table = u'external_error'
-        #unique_together = ("audited_errors","error_value","date","employee_id","volume_type")
 
     def __unicode__(self):
         return self.employee_id
@@ -271,15 +260,6 @@ class ExternalerrorsAuthoring(models.Model):
     sub_project = models.CharField(max_length=255, blank=True)
     work_packet = models.CharField(max_length=255)
     sub_packet = models.CharField(max_length=255, blank=True)
-    #error_type1 = models.CharField(max_length=255, blank=True)
-    #error_type2 = models.CharField(max_length=255, blank=True)
-    #error_type3 = models.CharField(max_length=255, blank=True)
-    #error_type4 = models.CharField(max_length=255, blank=True)
-    #error_type5 = models.CharField(max_length=255, blank=True)
-    #error_type6 = models.CharField(max_length=255, blank=True)
-    #error_type7 = models.CharField(max_length=255, blank=True)
-    #error_type8 = models.CharField(max_length=255, blank=True)
-    #error_type9 = models.CharField(max_length=255, blank=True)
     audited_errors = models.CharField(max_length=255,blank=True,verbose_name='Audited_errors')
     total_errors = models.CharField(max_length=255,default=0,verbose_name='total_errors')
     error_category = models.CharField(max_length=255, blank=True)
@@ -289,10 +269,9 @@ class ExternalerrorsAuthoring(models.Model):
     center      = models.ForeignKey(Center, null=True)
     project     = models.ForeignKey(Project, null=True)
     sheet_name = models.CharField(max_length=255, default='')
-
+    total_errors_require = models.BooleanField(default=None)
     class Meta:
         db_table = u'externalerrors_authoring'
-        #unique_together = ("audited_errors","error_value","date","employee_id","volume_type")
 
     def __unicode__(self):
         return self.work_packet
@@ -316,7 +295,6 @@ class Authoringtable(models.Model):
 class Document(models.Model):
     document = models.FileField(upload_to='media/preprocessing/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    #status = models.IntegerField(max_length=2, default=0)
     description = models.CharField(max_length=255, blank=True)
 
     class Meta:
@@ -412,3 +390,88 @@ class Color_Mapping(models.Model):
 
     def __unicode__(self):
         return self.work_packet
+
+
+class Alias_Widget(models.Model):
+    center = models.ForeignKey(Center, null=True)
+    project = models.ForeignKey(Project, null=True)
+    widget_name = models.ForeignKey(Widgets, null=True)
+    alias_widget_name = models.CharField(max_length=255, blank=True)
+    class Meta:
+        db_table = u'alias_widget'
+
+    def __unicode__(self):
+        return '%s %s' % (str(self.widget_name), str(self.project))
+        #return str(self.widget_name)
+
+class Alias_packets(models.Model):
+    #widget = models.ForeignKey(Alias_Widget, related_name="widget_name",null=True)
+    widget = models.ForeignKey(Alias_Widget, null=True)
+    existed_name = models.CharField(max_length=255, blank=True)
+    alias_name = models.CharField(max_length=255, blank=True)
+    class Meta:
+        db_table = u'alias_packets'
+
+    def __unicode__(self):
+        return self.alias_name
+
+class TatAuthoring(models.Model):
+    sub_project = models.CharField(max_length=255, blank=True)
+    work_packet = models.CharField(max_length=255, blank=True)
+    sub_packet = models.CharField(max_length=255, blank=True)
+    center = models.ForeignKey(Center, null=True)
+    project = models.ForeignKey(Project, null=True)
+    received_date = models.CharField(max_length=255, blank=True)
+    total_received = models.CharField(max_length=255, blank=True)
+    scan_date = models.CharField(max_length=255, blank=True)
+    completed_date = models.CharField(max_length=255, blank=True)
+    met_count = models.CharField(max_length=125, blank = True)
+    non_met_count = models.CharField(max_length=125, blank= True)
+    tat_status = models.CharField(max_length=255, blank=True)
+    sheet_name = models.CharField(max_length=255, default='')
+
+    class Meta:
+        db_table = u'tat_authoring'
+
+    def __unicode__(self):
+        return self.tat_status
+
+class TatTable(models.Model):
+    sub_project = models.CharField(max_length=255, blank=True)
+    work_packet = models.CharField(max_length=255)
+    sub_packet = models.CharField(max_length=255, blank=True)
+    center = models.ForeignKey(Center, null=True)
+    project = models.ForeignKey(Project, null=True)
+    date = models.DateField()
+    completed_date = models.DateField(null=True)
+    scan_date = models.DateField(null=True)
+    total_received = models.IntegerField(max_length=255)
+    met_count = models.IntegerField(max_length=125)
+    non_met_count = models.IntegerField(max_length=125, blank= True)
+    tat_status = models.CharField(max_length=255)
+
+    class Meta:
+        db_table = u'tats_table'
+
+    def __unicode__(self):
+        return self.tat_status
+
+'''class StatusTable(models.Model):
+    sub_project = models.CharField(max_length=255, blank=True)
+    work_packet = models.CharField(max_length=255, blank=True)
+    sub_packet = models.CharField(max_length=255, blank=True)
+    center = models.ForeignKey(Center, null=True)
+    project = models.ForeignKey(Project, null=True)
+    received_date = models.DateField()
+    completed_date = models.DateField()
+    scan_date = models.DateField()
+    total_received = models.IntegerField(max_length=255, blank=True)
+    met_count = models.IntegerField(max_length=125, blank = True)
+    non_met_count = models.IntegerField(max_length=125, blank= True)
+    tat_status = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        db_table = u'status_table'
+
+    def __unicode__(self):
+        return self.met_count'''

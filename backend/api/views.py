@@ -509,6 +509,7 @@ def redis_insertion_final(prj_obj,center_obj,dates_list,key_type,level_structure
         volumes_list = Externalerrors.objects.filter(project=prj_obj, center=center_obj).values('sub_project', 'work_packet', 'sub_packet').distinct()
     if key_type == 'WorkTrack':
         volumes_list = Worktrack.objects.filter(project=prj_obj, center=center_obj).values('sub_project', 'work_packet', 'sub_packet').distinct()
+
     if key_type == 'Tat':
         volumes_list = TatTable.objects.filter(project=prj_obj, center=center_obj).values('sub_project', 'work_packet', 'sub_packet').distinct()
     for date in dates_list:
@@ -651,11 +652,12 @@ def redis_insert(prj_obj,center_obj,dates_list,key_type):
         wk_packet = [wp_count + 1 for key in level_herarchy_packets if len(key['work_packet'])]
         sub_packet = [sub_pct_count + 1 for key in level_herarchy_packets if len(key['sub_packet'])]
         sub_prj = [sub_prj_count + 1 for key in level_herarchy_packets if len(key['sub_project'])]
-    if key_type == 'TatTable':
-        level_herarchy_packets = TatTable.objects.filter(project=prj_obj, center=center_obj,date__range=[dates_list[0], dates_list[-1]]).values('sub_project','work_packet','sub_packet').distinct()
+    #import pdb;pdb.set_trace()
+    '''if key_type == 'TatTable':
+        level_herarchy_packets = TatTable.objects.filter(project=prj_obj, center=center_obj,received_date__range=[dates_list[0], dates_list[-1]]).values('sub_project','work_packet','sub_packet').distinct()
         wk_packet = [wp_count + 1 for key in level_herarchy_packets if len(key['work_packet'])]
         sub_packet = [sub_pct_count + 1 for key in level_herarchy_packets if len(key['sub_packet'])]
-        sub_prj = [sub_prj_count + 1 for key in level_herarchy_packets if len(key['sub_project'])]
+        sub_prj = [sub_prj_count + 1 for key in level_herarchy_packets if len(key['sub_project'])]'''
 
     if len(wk_packet) > 0 : level_herarchy.append('work_packet')
     if len(sub_packet) > 0: level_herarchy.append('sub_packet')
@@ -1309,7 +1311,7 @@ def upload_new(request):
                 if '#<>#' in map_value:
                     required_filed = map_value.split('#<>#')
                     other_fileds.append(required_filed[1])
-                if map_key == 'date':
+                if map_key == 'received_date':
                     authoring_dates['tat_date'] = map_value.lower()
 
 
@@ -1327,7 +1329,8 @@ def upload_new(request):
                 return HttpResponse('Wrong Sheet Names ' + str(sheet_names))
 
         db_check = str(Project.objects.filter(name=prj_obj.name,center=center_obj).values_list('project_db_handling',flat=True)[0])
-        raw_table_dataset, internal_error_dataset, external_error_dataset, work_track_dataset,headcount_dataset,tats_table_dataset = {}, {}, {}, {},{},{}
+        raw_table_dataset, internal_error_dataset, external_error_dataset, work_track_dataset,headcount_dataset = {}, {}, {}, {},{}
+        tats_table_dataset = {}
         target_dataset = {}
         for key,value in sheet_index_dict.iteritems():
             one_sheet_data = {}
@@ -1628,6 +1631,7 @@ def upload_new(request):
                                     work_track_dataset[str(customer_data[date_name])][emp_key] = local_worktrack_data
                     print local_worktrack_data
 
+                #import pdb;pdb.set_trace()
                 if key == sheet_names.get('headcount_sheet', ''):
                     date_name = authoring_dates['headcount_date']
                     if not headcount_dataset.has_key(customer_data[date_name]):
@@ -1718,9 +1722,9 @@ def upload_new(request):
                                 target_dataset[str(customer_data[date_name])][emp_key] = local_target_data
                     print local_target_data
 
-
-                if key == sheet_names.get('tats_table_sheet', ''):
-                    date_name = authoring_dates['tats_table_date']
+                #import pdb;pdb.set_trace()
+                if key == sheet_names.get('tat_sheet', ''):
+                    date_name = authoring_dates['tat_date']
                     if not tats_table_dataset.has_key(customer_data[date_name]):
                         tats_table_dataset[str(customer_data[date_name])] = {}
                     local_tat_data = {}
@@ -1786,7 +1790,7 @@ def upload_new(request):
         for date_key, date_value in target_dataset.iteritems():
             for emp_key, emp_value in date_value.iteritems():
                 externalerror_insert = target_table_query_insertion(emp_value, prj_obj, center_obj, teamleader_obj_name,db_check)
-
+        #import pdb;pdb.set_trace()
         for date_key, date_value in tats_table_dataset.iteritems():
             for emp_key, emp_value in date_value.iteritems():
                 externalerror_insert = tat_query_insertion(emp_value, prj_obj, center_obj, teamleader_obj_name,db_check)
@@ -1811,9 +1815,10 @@ def upload_new(request):
         if len(work_track_dataset) > 0:
             sorted_dates = dates_sorting(work_track_dataset)
             insert = redis_insert(prj_obj, center_obj, sorted_dates, key_type='WorkTrack')
-        if len(tats_table_dataset) > 0:
+        #import pdb;pdb.set_trace()
+        '''if len(tats_table_dataset) > 0:
             sorted_dates = dates_sorting(tats_table_dataset)
-            insert = redis_insert(prj_obj, center_obj, sorted_dates, key_type='Tat')
+            insert = redis_insert(prj_obj, center_obj, sorted_dates, key_type='Tat')'''
         var ='hello'
         return HttpResponse(var)
 
@@ -2005,12 +2010,14 @@ def headcount_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_
 
 
 def tat_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, db_check):
-    tat_date_list = customer_data['date']
+    #import pdb;pdb.set_trace()
+    tat_date_list = customer_data['received_date']
     check_query = TatTable.objects.filter(project=prj_obj, sub_project=customer_data.get('sub_project', ''),
                                           work_packet=customer_data['work_packet'],
                                           sub_packet=customer_data.get('sub_packet', ''),
-                                          received_date=customer_data['date'],
-                                          center=center_obj).values('total_received','met_count','non_met_count')
+                                          date=customer_data['received_date'],
+                                          #scan_date = customer_data['scan_date'],
+                                          center=center_obj).values('total_received','met_count','non_met_count','tat_status')
 
     try:
         total_received = int(float(customer_data['total_received']))
@@ -2024,22 +2031,29 @@ def tat_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, 
         non_met_count = int(float(customer_data['non_met_count']))
     except:
         non_met_count = 0
-
+    try:
+        tat_status = customer_data['tat_status']
+    except:
+        tat_status = ''
 
     if len(check_query) == 0:
+        #import pdb;pdb.set_trace()
         new_can = TatTable(sub_project=customer_data.get('sub_project', ''),
                             work_packet=customer_data['work_packet'],
-                            sub_packet=customer_data.get('sub_packet', ''), received_date=customer_data['date'],
+                            sub_packet=customer_data.get('sub_packet', ''), date=customer_data['received_date'],
                             total_received=total_received,
                             met_count = met_count,
                             non_met_count = non_met_count,
+                            tat_status = tat_status,
                             project=prj_obj, center=center_obj)
+
         if new_can:
-            try:
+            new_can.save()
+            """try:
                 print customer_data
                 new_can.save()
             except:
-                print "error in internal_table_query"
+                print "error in internal_table_query" """
 
     if len(check_query) > 0:
         if db_check == 'aggregate':
@@ -2048,7 +2062,8 @@ def tat_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, 
             non_met_count = non_met_count + int(check_query[0]['non_met_count'])
             new_can_agr = TatTable.objects.filter(id=int(check_query[0]['id'])).update(total_received=total_received,
                                                                                        met_count = met_count,
-                                                                                       non_met_count = non_met_count,)
+                                                                                       non_met_count = non_met_count,
+                                                                                       tat_status = tat_status,)
         elif db_check == 'update':
             new_can_upd = TatTable.objects.filter(id=int(check_query[0]['id'])).update(total_received=total_received,
                                                                                        met_count = met_count,
@@ -2463,8 +2478,6 @@ def internal_extrnal_graphs_same_formula(request,date_list,prj_id,center_obj,lev
     indicidual_error_calc = error_types_sum(all_error_types)
 
     volume_dict = {}
-    # error_dist_vol = Error.objects.values_list('volume_type', flat=True).distinct()
-    #error_dist_vol = Externalerrors.objects.filter(project=prj_id, center=center_obj).values_list('volume_type',flat=True).distinct()
     error_volume_data = {}
     error_graph_data = []
     for key, value in vol_error_values.iteritems():
@@ -2552,7 +2565,6 @@ def externalerror_graph(request,date_list,prj_id,center_obj,packet_sum_data,leve
     prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
     center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
     query_set = query_set_generation(prj_id, center_obj, level_structure_key,date_list)
-    #extr_volumes_list = Externalerrors.objects.filter(**query_set).values('sub_project','work_packet','sub_packet').distinct()
     extr_volumes_list = worktrack_internal_external_workpackets_list(level_structure_key, 'Externalerrors', query_set)
     extr_volumes_list_new = []
     conn = redis.Redis(host="localhost", port=6379, db=0)
@@ -3355,11 +3367,72 @@ def adding_min_max(high_chart_key,values_dict):
     return result
 
 
+def tat_graph(date_list, prj_id, center, level_structure_key):
+    data_list = []
+    conn = redis.Redis(host="localhost", port=6379, db=0)
+    date_values = {}
+    prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
+    center_name = Center.objects.filter(id=center).values_list('name', flat=True)
+    query_set = query_set_generation(prj_id, center, level_structure_key, date_list)
+    new_date_list = []
+    new_dict = {}
+    #new_date_list = []
+
+    if level_structure_key.has_key('sub_project'):
+        if level_structure_key['sub_project'] == "All":
+            volume_list = TatTable.objects.filter(**query_set).values('sub_project').distinct()
+        else:
+            if level_structure_key.has_key('work_packet'):
+                if level_structure_key['work_packet'] == "All":
+                    volume_list = TatTable.objects.filter(**query_set).values('sub_project', 'work_packet').distinct()
+                else:
+                    volume_list = TatTable.objects.filter(**query_set).values('sub_project', 'work_packet','sub_packet').distinct()
+    elif level_structure_key.has_key('work_packet') and len(level_structure_key) == 1:
+        if level_structure_key['work_packet'] == "All":
+            volume_list = TatTable.objects.filter(**query_set).values('sub_project', 'work_packet').distinct()
+        else:
+            volume_list = TatTable.objects.filter(**query_set).values('sub_project', 'work_packet','sub_packet').distinct()
+    elif level_structure_key.has_key('work_packet') and level_structure_key.has_key('sub_packet'):
+        volume_list = TatTable.objects.filter(**query_set).values('sub_project', 'work_packet', 'sub_packet').distinct()
+    else:
+        volume_list = []
+
+    for date in date_list:
+        total_done_value = RawTable.objects.filter(project=prj_id, center=center, date=date).aggregate(Max('per_day'))
+        print total_done_value['per_day__max']
+        if total_done_value['per_day__max'] > 0:
+            data_list.append(date)
+            count = 0
+            for vol_type in volume_list:
+                if level_structure_key.has_key('sub_project'):
+                    local_level_hierarchy_key = vol_type
+                else:
+                    local_level_hierarchy_key = level_structure_key
+                final_work_packet = level_hierarchy_key(local_level_hierarchy_key, vol_type)
+                tat_table_query_set = tat_table_query_generations(prj_id, center, date, final_work_packet,level_structure_key)
+
+                if not final_work_packet:
+                        final_work_packet = level_hierarchy_key(volume_list[count], vol_type)
+                count = count + 1
+
+                for tat_status in  ['Met','Not Met']:
+                    tat_table_query_set['tat_status'] = tat_status
+                    tat_status_count = TatTable.objects.filter(**tat_table_query_set).count()
+                    if tat_status == 'Met':
+                        tat_accuracy = 100
+                        new_date_list.append(tat_accuracy)
+                    else:
+                        tat_accuracy = 0
+                        new_date_list.append(tat_accuracy)
+        new_dict['data'] = new_date_list
+    return new_dict
+
 def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_structure_key):
     if dwm_dict.has_key('day'):
         final_dict = {}
         final_details = {}
         result_dict =  product_total_graph(dwm_dict['day'], prj_id, center, work_packets, level_structure_key)
+        tat_graph_details = tat_graph(dwm_dict['day'], prj_id, center,level_structure_key)
         volume_graph = volume_graph_data(dwm_dict['day'], prj_id, center, level_structure_key)
         result_dict['volume_graphs'] = {}
         result_dict['volume_graphs']['bar_data'] = graph_data_alignment(volume_graph['bar_data'], name_key='data')
@@ -3367,6 +3440,8 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
 
         monthly_volume_graph_details = Monthly_Volume_graph(dwm_dict['day'], prj_id, center, level_structure_key)
         result_dict['monthly_volume_graph_details'] = graph_data_alignment_color(monthly_volume_graph_details,'data', level_structure_key,prj_id, center)
+
+        result_dict['tat_details'] = graph_data_alignment_color(tat_graph_details, 'data', level_structure_key, prj_id,center)
 
         productivity_utilization_data = main_productivity_data(center, prj_id, dwm_dict['day'], level_structure_key)
         utilization_fte_details = utilization_work_packet_data(center, prj_id, dwm_dict['day'], level_structure_key)
@@ -4414,6 +4489,7 @@ def from_to(request):
     volumes_graphs_details = volumes_graphs_data_table(employe_dates['days'],prj_id,center,level_structure_key)
     category_error_count = sample_pareto_analysis(request, date_list, prj_id, center, level_structure_key,"Internal")
     extrnl_category_error_count = sample_pareto_analysis(request, date_list, prj_id, center, level_structure_key, "External")
+    #final_result_dict['tat_details'] = tat_graph_details
     final_result_dict['Internal_Error_Category'] = category_error_count
     final_result_dict['External_Error_Category'] = extrnl_category_error_count
     final_result_dict['External_Pareto_data'] = extrnl_agent_pareto_data
@@ -5981,6 +6057,35 @@ def rawtable_query_generations(pro_id,cen_id,date,main_work_packet,level_structu
             rawtable_query_set['work_packet'] = main_work_packet
     return rawtable_query_set
 
+
+def tat_table_query_generations(pro_id,cen_id,date,main_work_packet,level_structure_key):
+    tat_table_query_set = {}
+    tat_table_query_set['project'] = pro_id
+    tat_table_query_set['center'] = cen_id
+    tat_table_query_set['date'] = date
+    if '_' in main_work_packet:
+        packets_list = main_work_packet.split('_')
+        if len(packets_list) == 3:
+            tat_table_query_set['sub_project'] = packets_list[0]
+            tat_table_query_set['work_packet'] = packets_list[1]
+            tat_table_query_set['sub_packet'] = packets_list[2]
+        elif len(packets_list) == 2:
+            if level_structure_key.has_key('sub_project'):
+                tat_table_query_set['sub_project'] = packets_list[0]
+                tat_table_query_set['work_packet'] = packets_list[1]
+            else:
+                tat_table_query_set['work_packet'] = packets_list[0]
+                tat_table_query_set['sub_packet'] = packets_list[1]
+
+        else:
+            tat_table_query_set['work_packet'] = packets_list[0]
+        #target_query_set['sub_packet'] = packets_list[1]
+    else:
+        if level_structure_key.has_key('sub_project'):
+            tat_table_query_set['sub_project'] = main_work_packet
+        else:
+            tat_table_query_set['work_packet'] = main_work_packet
+    return tat_table_query_set
 
 
 def Monthly_Volume_graph(date_list, prj_id, center, level_structure_key):
