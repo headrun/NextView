@@ -28,11 +28,8 @@
              var project = 'api/project/';
              var drop_down_link = '/api/dropdown_data/';
 
-             $('#select').daterangepicker({'setDate': new Date(),
+             $('#select').daterangepicker({
                     "autoApply": true,
-                    "defaultDate" : null,
-                    "startDate" : new Date(),
-                    "endDate" : new Date(),
                     "locale": {
                         "format": 'YYYY-MM-DD',
                         "separator": ' to ',
@@ -98,7 +95,8 @@
                     'self.chartOptions27':self.chartOptions27,
                     'self.chartOptions28':self.chartOptions28,
                     'self.chartOptions29':self.chartOptions29,
-                    'self.chartOptions30':self.chartOptions30
+                    'self.chartOptions30':self.chartOptions30,
+                    'self.chartOptions31':self.chartOptions31
                     };
 
                     var final_layout_list = [];
@@ -178,7 +176,7 @@
                                 }
                                 else {
                                     $('#1').hide();
-                                    //$('#1').remove();
+
                                 }
                             }
                             
@@ -187,7 +185,7 @@
                                 }
                             else {
                                     $('#2').hide();
-                                    //$('#1').remove();
+
                               }                            
 
                         for (var sub_pro in self.drop_list) {
@@ -206,7 +204,7 @@
                                 self.wor_pac_sel.options[self.wor_pac_sel.options.length] = new Option(wor_pac, wor_pac);
                             }
                             if (self.wor_pac_sel.options.length==2) {
-                                //self.wor_pac_sel.selectedIndex=1;
+
                                 self.wor_pac_sel.onchange();
                             }
                         }
@@ -258,9 +256,6 @@
                                     self.drop_sub_proj = this.value;
                                     self.drop_work_pack = self.wor_pac_sel.value;
                                     self.drop_sub_pack = self.sub_pac_sel.value;
-                        //$('.day').addClass('active');
-                        //$('.day').siblings().removeClass('active');
-
 
                             var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack +
                                 '&work_packet=' + self.drop_work_pack
@@ -269,13 +264,12 @@
                             var from = dateEntered.split('to')[0].replace(' ','');
                             var to = dateEntered.split('to')[1].replace(' ','');
                             var placeholder = ''
-                            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
+
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                                     + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
-                                $("select").daterangepicker({"setDate": null});
+
                                 self.chart_render(result,self.project,self.location);
                             });
                                 });
@@ -283,7 +277,7 @@
                                             if (self.day_type === 'week'){
                                                 $('.day').addClass('active btn-success');
                                                 $('.day').siblings().removeClass('active btn-success');
-                                            }
+                                                                                            }
                                             if (self.day_type === 'month'){
                                                 $('.day').addClass('active btn-success');
                                                 $('.day').siblings().removeClass('active btn-success');
@@ -291,6 +285,7 @@
                                             if (self.sel_type === 'day'){
                                                 $('.day').addClass('active btn-success');
                                                 $('.day').siblings().removeClass('active btn-success');
+
                                             }
                                             if (self.sel_type === 'week'){
                                                 $('.week').addClass('active btn-success');
@@ -304,8 +299,6 @@
                                     self.drop_sub_proj = self.sub_pro_sel.value
                                     self.drop_work_pack = this.value;
                                     self.drop_sub_pack = self.sub_pac_sel.value;
-                        //$('.day').addClass('active');
-                        //$('.day').siblings().removeClass('active');
 
                             var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack +
                                 '&work_packet=' + self.drop_work_pack
@@ -314,13 +307,10 @@
                             var from = dateEntered.split('to')[0].replace(' ','');
                             var to = dateEntered.split('to')[1].replace(' ','');
                             var placeholder = ''
-                            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                                     + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
-                                $("select").daterangepicker({"setDate": null});
                                 self.chart_render(result,self.project,self.location);
                             });
                                 });
@@ -350,8 +340,7 @@
                                         self.drop_work_pack = self.wor_pac_sel.value;
                                         self.drop_sub_proj = self.sub_pro_sel.value;
                                         self.drop_sub_pack = this.value;
-                        //$('.day').addClass('active');
-                        //$('.day').siblings().removeClass('active');
+
 
                             var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack + '&work_packet=' + self.drop_work_pack
                             var dateEntered = document.getElementById('select').value
@@ -359,13 +348,11 @@
                             var from = dateEntered.split('to')[0].replace(' ','');
                             var to = dateEntered.split('to')[1].replace(' ','');
                             var placeholder = ''
-                            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
+
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                                   + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
-                                $("select").daterangepicker({"setDate": null});
                                 self.chart_render(result,self.project,self.location);
                             });
                                     });
@@ -399,23 +386,18 @@
                                                 $('.month').siblings().removeClass('active btn-success');
                                             }
 
-                        //$('.day').addClass('active');
-                        //$('.day').siblings().removeClass('active');
-
                             var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack + '&work_packet=' + self.drop_work_pack
                             var dateEntered = document.getElementById('select').value
                             dateEntered = dateEntered.replace(' to ','to');
                             var from = dateEntered.split('to')[0].replace(' ','');
                             var to = dateEntered.split('to')[1].replace(' ','');
                             var placeholder = ''
-                            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
+
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                                   + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
                                 self.chart_render(result,self.project,self.location);
-                                $("select").daterangepicker({"setDate": null});
                             });
                                     });
                                 }
@@ -461,7 +443,6 @@
                                   + '&center=' + self.location + '&type=' + 'day'  + final_work;
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.chart_render(result,self.project,self.location);
-                                $("select").daterangepicker({"setDate": null});
                             });
                                     })
                                 }
@@ -507,7 +488,6 @@
             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                    + '&center=' + self.location + '&type=' + 'day'  + final_work;
             $http({method:"GET", url:from_to_data}).success(function(result){
-                            $("select").daterangepicker({"setDate": null});
                             self.chart_render(result,self.project,self.location);
             });
 
@@ -529,6 +509,7 @@
                                     selectbox.remove(i);
                                 }
                             }
+
              var unWatch;
 
              this.$onInit = function () {
@@ -593,8 +574,10 @@
             self.dateType = function(key,all_data,name,button_clicked){
                 self.showLoading();
                 self.day_type = key;
+                //debugger;
                 var obj = {"self.chartOptions":self.chartOptions,"self.chartOptions9":self.chartOptions9,"self.chartOptions9_2":self.chartOptions9_2,"self.chartOptions10":self.chartOptions10,"self.chartOptions15":self.chartOptions15,"self.chartOptions16":self.chartOptions16,"self.chartOptions16_2":self.chartOptions16_2,"self.chartOptions17":self.chartOptions17,"self.chartOptions18":self.chartOptions18,"self.chartOptions19":self.chartOptions19,"self.chartOptions20":self.chartOptions20,'self.chartOptions21':self.chartOptions21,'self.chartOptions24':self.chartOptions24,'self.chartOptions25':self.chartOptions25,'self.chartOptions26':self.chartOptions26}
                 self.render_data = obj[all_data];
+                //self.render_data = all_data;
                 self.high_data = [];
                 self.button_clicked = button_clicked;
                 self.packet_clicked = self.drop_work_pack;
@@ -610,7 +593,6 @@
                 var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                         + '&center=' + self.location + '&type=' + self.day_type + final_work;
                 console.log(from_to_data);
-                $("select").daterangepicker({"setDate": null});
                 $http({method:"GET", url:from_to_data}).success(function(result){
                             self.hideLoading();
                             self.high_data_gener = [];
@@ -1739,6 +1721,26 @@ plotOptions: {
                             series: self.high_data_gener[0].Internal_Error_Category.category_pareto
                             });
 
+                            angular.extend(self.chartOptions31, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date,
+                                title: {
+                                    text: '',
+                                }
+                            },
+plotOptions: {
+                series : {
+                    allowPointSelect: true,
+                    cursor: 'pointer'
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+                            series: self.high_data_gener[0].tat_details
+                            });
 
 
                             angular.extend(self.chartOptions30, {
@@ -2419,8 +2421,8 @@ plotOptions: {
                 var final_work =  '&sub_project=' + self.sub_pro_sel_two + '&sub_packet=' + self.sub_pac_sel_two + '&work_packet=' + self.packet_clicked;
                 var from_to_data = from_to + 'from=' + dates_list[0] + '&to=' + dates_list[1] + '&project=' + self.project
                        + '&center=' + self.location + '&type=' + 'day' + final_work;
-                $('.day').addClass('active');
-                $('.day').siblings().removeClass('active');
+                $('.day').addClass('active btn-success');
+                $('.day').siblings().removeClass('active btn-success');
 
                 /*var from_to_data = from_to + 'from=' + dates_list[0] + '&to=' + dates_list[1] + '&project=' + self.project
                          + '&center=' + self.location + '&type=' + self.day_type;*/
@@ -2428,16 +2430,16 @@ plotOptions: {
                             $('#select').val(self.start + ' to ' + self.end)
                             self.sel_type = result.result.days_type;
                             if (self.sel_type === 'week'){
-                                $('.week').addClass('active');
-                                $('.week').siblings().removeClass('active');
+                                $('.week').addClass('active btn-success');
+                                $('.week').siblings().removeClass('active btn-success');
                             }
                             if (self.sel_type === 'month'){
-                                $('.month').addClass('active');
-                                $('.month').siblings().removeClass('active');
+                                $('.month').addClass('active btn-success');
+                                $('.month').siblings().removeClass('active btn-success');
                             }
                             if (self.sel_type === 'day'){
-                                $('.day').addClass('active');
-                                $('.day').siblings().removeClass('active');
+                                $('.day').addClass('active btn-success');
+                                $('.day').siblings().removeClass('active btn-success');
                             }
                             self.chart_render(result,self.project,self.location);
                          });
@@ -3469,7 +3471,32 @@ angular.extend(self.chartOptions18, {
                     'color' : '#717171',
                }
         },
-    }
+    };
+
+    self.chartOptions31 = {
+                chart : {
+                 backgroundColor: "transparent"
+                },
+                               yAxis: {
+                gridLineColor: 'a2a2a2',
+                min: 0,
+                title: {
+                 text: '',
+                 align: 'high'
+                },
+                labels: {
+                 overflow: 'justify'
+                }
+               },
+
+               tooltip: {
+                valueSuffix: ''
+               },
+               credits: {
+                enabled: false
+               },
+            };
+
 
     self.chartOptions30 = {
                 chart: {

@@ -1,4 +1,49 @@
 <style>
+@media (max-width : 320px) {
+     .btn-group {
+        /*top: 4px !important;*/
+        left: 16px !important;
+       }
+       .btn{
+        padding: 1px 5px !important;
+        font-size: 12px !important;
+        line-height: 1.5 !important;
+        }
+        .brand_style {
+            font-size: 13px !important;
+        }
+        .ajax-file-upload {
+            padding: 1px 2px;
+            font-size: 13px;
+            background: whitesmoke !important;
+            border: none;
+            color: black;
+        }
+        .pull-left {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            max-width: 147px;
+            white-space: nowrap;
+        }
+        .form-control {
+            width: initial !important;
+            height: 23px !important;
+            padding: 4px;
+            margin-left: 4px !important;
+            font-size: 13px !important;
+        }
+        .date {
+            float: right !important;
+            font-size: 21px !important;
+            padding-top: 6px !important;
+            cursor: pointer !important;
+            color: #555 !important;
+        }
+        #inner1 {
+            float: left !important;
+            margin-left: 5px;
+        }
+     }
 ::-webkit-scrollbar-thumb {
       background:#4c4c4c;
 }
@@ -85,13 +130,14 @@ table {
     margin-right: 5px;
     margin-top:-17px;
 }
-.graph {
+.table-responsive {
     border: 1px solid #ccc;
     background-color:#ffffff;
     margin: 5px;
     padding-right: 10px;
     padding-left: 10px;
-    padding-bottom: 1px;
+    /*padding-bottom: 1px;*/
+    /*padding-top: 37px;*/
 }
 .table-bordered>tbody>tr>td {
     border : none;
@@ -121,7 +167,7 @@ table {
    /*margin-left:-2px;*/
    margin-bottom:12px;
    margin-left: auto;
-   margin-right: auto;
+   /*margin-right: auto;*/
 }
 .col-md-6 {
     padding-left: 0px;
@@ -167,21 +213,36 @@ table {
     float: right;
     left: -10px;
 }
+thead {
+    border: 1px solid black;
+}
+.ajax-file-upload {
+    border: none;
+    background: white;
+    color: black;
+}
 </style>
 <body>
-    <div class="row">
+<!--<div ng-controller="ButtonsCtrl">-->
+ <div class="row">
     <div id="wrapper">
         <div><h3 class="pull-left brand_style">{{$ctrl.project}}DASHBOARD</h3></div>
              <div id="inner1" class="form-group" style="margin-bottom:initial;">
                  <input class="form-control select" id="select" size="22">
-                 <!--<input class="form-control select" value="{{$ctrl.first}} to {{$ctrl.last}}" id="select" size="19">-->
                  <i class="fa fa-calendar date" aria-hidden="true"></i>
              </div>
-             <div class="btn-group dashboard">
-                 <button type="button" id="day" class="active btn-success btn btn-default day" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" style="cursor:pointer;">Day</button>
-                 <button type="button" id="week" class="btn btn-default week" ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')" style="cursor:pointer;">Week</button>
-                 <button type="button" id="Month" class="btn btn-default month" ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')" style="cursor:pointer;">Month</button>
-             </div>
+
+             <!--<div class="btn-group dashboard">
+                 <button type="button" id="day" class="active btn-success btn btn-default day1" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" style="cursor:pointer;">Day</button>
+                 <button type="button" id="week" class="btn btn-default week1" ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')" style="cursor:pointer;">Week</button>
+                 <button type="button" id="Month" class="btn btn-default month1" ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')" style="cursor:pointer;">Month</button>
+             </div>-->
+            <!--<div class="btn-group">
+                <label class="btn btn-primary" ng-model="radioModel" uib-btn-radio="'Left'">Left</label>
+                <label class="btn btn-primary" ng-model="radioModel" uib-btn-radio="'Middle'">Middle</label>
+                <label class="btn btn-primary" ng-model="radioModel" uib-btn-radio="'Right'">Right</label>
+            </div>-->
+
              <div ng-repeat="k in $ctrl.packet_hierarchy_list track by $index">
                 <form>
                     <div class="form-group" style="float:left;padding-left:1%;padding-top:5px;margin-bottom:0px;">
@@ -202,11 +263,16 @@ table {
                 </div>
                 <div class="widget-body">
                     <div ng-if="j.day_type_widget" class="input-group"id="inner2">
-                         <div class="btn-group">
+                        <div class="btn-group">
                             <button type="button" id="day" class="active btn-success btn btn-default day" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" style="cursor:pointer;">Day</button>
                             <button type="button" id="week" class="btn btn-default week" ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')" style="cursor:pointer;">Week</button>
                             <button type="button" id="Month" class="btn btn-default month" ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')" style="cursor:pointer;">Month</button>
                          </div>
+                        <!--<div class="btn-group">
+                            <label class="btn btn-success" ng-model="radioModel" uib-btn-radio="'Left'" uncheckable>Left</label>
+                            <label class="btn btn-success" ng-model="radioModel" uib-btn-radio="'Middle'" uncheckable>Middle</label>
+                            <label class="btn btn-success" ng-model="radioModel" uib-btn-radio="'Right'" uib-uncheckable="uncheckable">Right</label>
+                        </div>-->
                      </div>
                     <highcharts options="$ctrl.final_layout_values_list[j.opt]"></highcharts>
                 </div>
@@ -215,66 +281,64 @@ table {
     </div>
 
     <div class="row">
-        <div class="col-md-6" id="emp_widget">
-            <div class="graph">
+        <div class="col-md-6">
+            <div class="table-responsive">
                 <div class="widget-title clearfix" title="Sample Widg">
                     <h4>Top Employee Performance Details</h4>
                 </div>
                 <table class="table table-bordered line">
-                        <thead>
-                            <tr class="row_name">
-                                <th>Rank</th>
-                                <th>Employee Name</th>
-                                <th>Productivity</th>
-                                <th>Packet</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="l in $ctrl.top_five">
-                                <td>{{l.rank}}</td>
-                                <td>{{l.employee_id}}</td>
-                                <td>{{l.productivity}}</td>
-                                <td>{{l.work_packet}}</td>
-                            </tr>
-                        </tbody>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Employee Name</th>
+                            <th>Productivity</th>
+                            <th>Packet</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="l in $ctrl.top_five">
+                            <td>{{l.rank}}</td>
+                            <td>{{l.employee_id}}</td>
+                            <td>{{l.productivity}}</td>
+                            <td>{{l.work_packet}}</td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="graph">
-                <div class="widget-title clearfix" title="Sample Widg">
+<div class="row">
+    <div class="col-md-6">
+        <div class="table-responsive">
+            <div class="widget-title clearfix" title="Sample Widg">
                     <h4>Volume Status</h4>
-                </div>
-                <table class="table table-bordered line body">
-                        <thead>
-                            <tr class="row_name">
-                                <th style="width:15%;">Date</th>
-                                <th style="width:12%;">Opening</th>
-                                <th style="width:13%;">Received</th>
-                                <th style="width:24%;">NonWorkableCount</th>
-                                <th style="width:14%;">Completed</th>
-                                <th style="width:22%;">Closing</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="l in $ctrl.volume_graphs">
-                                <td style="width:16%;">{{l.date}}</td>
-                                <td style="width:12%;">{{l.opening}}</td>
-                                <td style="width:13%;">{{l.received}}</td>
-                                <td style="width:25%;">{{l.non_workable_count}}</td>
-                                <td style="width:14%;">{{l.completed}}</td>
-                                <td style="width:12%;">{{l.closing_balance}}</td>
-                            </tr>
-                        </tbody>
-                </table>
             </div>
+            <table class="table table-bordered line">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Opening</th>
+                        <th>Received</th>
+                        <th>NonWorkableCount</th>
+                        <th>Completed</th>
+                        <th>Closing</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="l in $ctrl.volume_graphs">
+                        <td>{{l.date}}</td>
+                        <td>{{l.opening}}</td>
+                        <td>{{l.received}}</td>
+                        <td>{{l.non_workable_count}}</td>
+                        <td>{{l.completed}}</td>
+                        <td>{{l.closing_balance}}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 
 
 <div class="modal fade" id="myModal" role="dialog">
@@ -309,7 +373,9 @@ table {
        </div>
     </div>
   </div>
+ </div>
 </body>
+
 
 <script>
 

@@ -2010,13 +2010,11 @@ def headcount_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_
 
 
 def tat_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, db_check):
-    #import pdb;pdb.set_trace()
     tat_date_list = customer_data['received_date']
     check_query = TatTable.objects.filter(project=prj_obj, sub_project=customer_data.get('sub_project', ''),
                                           work_packet=customer_data['work_packet'],
                                           sub_packet=customer_data.get('sub_packet', ''),
                                           date=customer_data['received_date'],
-                                          #scan_date = customer_data['scan_date'],
                                           center=center_obj).values('total_received','met_count','non_met_count','tat_status')
 
     try:
@@ -2037,7 +2035,6 @@ def tat_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, 
         tat_status = ''
 
     if len(check_query) == 0:
-        #import pdb;pdb.set_trace()
         new_can = TatTable(sub_project=customer_data.get('sub_project', ''),
                             work_packet=customer_data['work_packet'],
                             sub_packet=customer_data.get('sub_packet', ''), date=customer_data['received_date'],
@@ -3376,7 +3373,6 @@ def tat_graph(date_list, prj_id, center, level_structure_key):
     query_set = query_set_generation(prj_id, center, level_structure_key, date_list)
     new_date_list = []
     new_dict = {}
-    #new_date_list = []
 
     if level_structure_key.has_key('sub_project'):
         if level_structure_key['sub_project'] == "All":
@@ -3403,31 +3399,49 @@ def tat_graph(date_list, prj_id, center, level_structure_key):
         if total_done_value['per_day__max'] > 0:
             data_list.append(date)
             count = 0
-            for vol_type in volume_list:
-                if level_structure_key.has_key('sub_project'):
-                    local_level_hierarchy_key = vol_type
-                else:
-                    local_level_hierarchy_key = level_structure_key
-                final_work_packet = level_hierarchy_key(local_level_hierarchy_key, vol_type)
-                tat_table_query_set = tat_table_query_generations(prj_id, center, date, final_work_packet,level_structure_key)
-
-                if not final_work_packet:
-                        final_work_packet = level_hierarchy_key(volume_list[count], vol_type)
-                count = count + 1
-
-                for tat_status in  ['Met','Not Met']:
-                    tat_table_query_set['tat_status'] = tat_status
-                    tat_status_count = TatTable.objects.filter(**tat_table_query_set).count()
-                    if tat_status == 'Met':
-                        tat_accuracy = 100
-                        new_date_list.append(tat_accuracy)
+            final_data = []
+            final_notmet_data = []
+            #import pdb;pdb.set_trace()
+            if level_structure_key['work_packet'] == "All":
+                tat_status = TatTable.objects.filter(project = prj_id,center= center,date=date).values_list('tat_status',flat=True)
+                for i in tat_status:
+                    if i == 'Met':
+                        tat_value = 100
+                        final_data.append(tat_value)
                     else:
-                        tat_accuracy = 0
-                        new_date_list.append(tat_accuracy)
-        new_dict['data'] = new_date_list
+                        tat_value = 0
+                        final_notmet_data.append(tat_value)
+
+                tat_count = len(final_data)
+                tat_not_count = len(final_notmet_data)
+                tat_accuracy = float((float(tat_not_count)/float(tat_count+tat_not_count))*100)
+                tat_accuracy = 100 - (float('%.2f' % round(tat_accuracy, 2)))
+                new_date_list.append(tat_accuracy)
+            else:
+                for vol_type in volume_list:
+                    if level_structure_key.has_key('sub_project'):
+                        local_level_hierarchy_key = vol_type
+                    else:
+                        local_level_hierarchy_key = level_structure_key
+                    final_work_packet = level_hierarchy_key(local_level_hierarchy_key, vol_type)
+                    tat_table_query_set = tat_table_query_generations(prj_id, center, date, final_work_packet,level_structure_key)
+
+                    if not final_work_packet:
+                        final_work_packet = level_hierarchy_key(volume_list[count], vol_type)
+                    count = count + 1
+                    tat_status_value = TatTable.objects.filter(**tat_table_query_set).values_list('tat_status',flat=True)
+                    for i in tat_status_value:
+                        if  i == 'Met':
+                            tat_value = 100
+                        else:
+                            tat_value = 0
+                        new_date_list.append(tat_value)
+        new_dict['Tat Status Met'] = new_date_list
+        #new_dict['Date'] = data_list
     return new_dict
 
 def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_structure_key):
+    #import pdb;pdb.set_trace()
     if dwm_dict.has_key('day'):
         final_dict = {}
         final_details = {}
@@ -5264,8 +5278,6 @@ def internal_chart_data(pro_id,cen_id,to_date,work_packet,chart_type,project):
     final_internal_drilldown['data'] = internal_list
     final_internal_drilldown['table_headers'] = table_headers
     return final_internal_drilldown
-
-
 
 def productivity_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type,project):
     final_productivity_drilldown = {}
