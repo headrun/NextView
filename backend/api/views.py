@@ -817,6 +817,7 @@ def internalerror_query_insertion(customer_data, prj_obj, center_obj,teamleader_
                                  audited_errors=int(float(audited_count)),
                                  total_errors=total_errors,
                                  error_types = customer_data.get('error_types', ''),
+                                 error_field=customer_data.get('error_field', ''),
                                  error_values = customer_data.get('error_values', ''),
                                  project=prj_obj, center=center_obj)
         if new_can:
@@ -864,6 +865,7 @@ def externalerror_query_insertion(customer_data, prj_obj, center_obj,teamleader_
                                  audited_errors=int(float(audited_count)),
                                  total_errors=total_errors,
                                  error_types=customer_data.get('error_types', ''),
+                                 error_field=customer_data.get('error_field',''),
                                  error_values=customer_data.get('error_values', ''),
                                  project=prj_obj, center=center_obj)
         if new_can:
@@ -3414,9 +3416,10 @@ def tat_graph(date_list, prj_id, center, level_structure_key):
 
                 tat_count = len(final_data)
                 tat_not_count = len(final_notmet_data)
-                tat_accuracy = float((float(tat_not_count)/float(tat_count+tat_not_count))*100)
-                tat_accuracy = 100 - (float('%.2f' % round(tat_accuracy, 2)))
-                new_date_list.append(tat_accuracy)
+                if tat_count != 0:
+                    tat_accuracy = float((float(tat_not_count)/float(tat_count+tat_not_count))*100)
+                    tat_accuracy = 100 - (float('%.2f' % round(tat_accuracy, 2)))
+                    new_date_list.append(tat_accuracy)
             else:
                 for vol_type in volume_list:
                     if level_structure_key.has_key('sub_project'):
@@ -3436,7 +3439,7 @@ def tat_graph(date_list, prj_id, center, level_structure_key):
                         else:
                             tat_value = 0
                         new_date_list.append(tat_value)
-        new_dict['Tat Status Met'] = new_date_list
+        new_dict['Tat Met Status'] = new_date_list
         #new_dict['Date'] = data_list
     return new_dict
 
@@ -3446,7 +3449,7 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
         final_dict = {}
         final_details = {}
         result_dict =  product_total_graph(dwm_dict['day'], prj_id, center, work_packets, level_structure_key)
-        tat_graph_details = tat_graph(dwm_dict['day'], prj_id, center,level_structure_key)
+        #tat_graph_details = tat_graph(dwm_dict['day'], prj_id, center,level_structure_key)
         volume_graph = volume_graph_data(dwm_dict['day'], prj_id, center, level_structure_key)
         result_dict['volume_graphs'] = {}
         result_dict['volume_graphs']['bar_data'] = graph_data_alignment(volume_graph['bar_data'], name_key='data')
@@ -3455,7 +3458,9 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
         monthly_volume_graph_details = Monthly_Volume_graph(dwm_dict['day'], prj_id, center, level_structure_key)
         result_dict['monthly_volume_graph_details'] = graph_data_alignment_color(monthly_volume_graph_details,'data', level_structure_key,prj_id, center)
 
-        result_dict['tat_details'] = graph_data_alignment_color(tat_graph_details, 'data', level_structure_key, prj_id,center)
+        #result_dict['tat_details'] = graph_data_alignment_color(tat_graph_details, 'data', level_structure_key, prj_id,center)
+        #tat_min_max = adding_min_max('tat_details',tat_graph_details)
+        #result_dict.update(tat_min_max)
 
         productivity_utilization_data = main_productivity_data(center, prj_id, dwm_dict['day'], level_structure_key)
         utilization_fte_details = utilization_work_packet_data(center, prj_id, dwm_dict['day'], level_structure_key)
