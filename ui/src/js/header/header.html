@@ -34,7 +34,7 @@
     }
 }
 
- .navbar-collapse.in {
+ /*.navbar-collapse.in {
 
      overflow-y: inherit;
  }
@@ -42,7 +42,7 @@
  .navbar-collapse {
 
      overflow-x: hidden;
-}
+}*/
 
 .navbar-toggle {
 
@@ -84,9 +84,16 @@ img {
     background: white;
     border : none;
 }
+.position {
+    position: fixed;
+    margin-top: 0px;
+    box-shadow: none !important;
+}
+dashboard div.dashboard-content {
+    margin-top: 79px;
+}
 </style>
-
-<nav class="navbar navbar-default navbar-fixed-top" style="position: initial;">
+<nav class="navbar navbar-default navbar-fixed-top position">
 
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed"  data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -96,7 +103,7 @@ img {
                 <span class="icon-bar"></span>
             </button>
             <img src="/img/nextwealth.png" alt="Nexwealth_Logo" style="float:left;">
-            <a class="navbar-brand" style="font-size:2.0em;margin-left:-2%;font-weight:bold;color:black;">NextPulse </a>
+            <a class="navbar-brand" style="font-size:2.0em;margin-left:-2%;font-weight:100;color:#555;">NextPulse </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <div class="data">
@@ -104,7 +111,7 @@ img {
                   <li><a href="" id="Abt">About</a></li>
                   <li><a href="" id="Ser">Services</a></li>
                   <li><a href="" id="Wid">Features</a></li>
-                  <li><a href="" id="Proj" class="active">Customers</a></li>
+                  <li><a href="" id="Proj" class="active">Projects</a></li>
               </ul>
             </div>
               <ul class="nav navbar-nav navbar-right" style="margin-top:-50px;">

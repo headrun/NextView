@@ -1,3 +1,4 @@
+<body>
 <style>
 @media (max-width : 320px) {
      .btn-group {
@@ -52,6 +53,31 @@
 }
 .daterangepicker {
     color: black;
+}
+
+/*.daterangepicker td.active {
+    background-color: white;
+    border-color: transparent;
+    color: black;
+}
+
+.daterangepicker td.active, .daterangepicker td.active:hover {
+     background-color: white; 
+     border-color: none; 
+     color: black; 
+}*/
+
+.daterangepicker td.active, .daterangepicker td.active:hover {
+    background-color: white;
+    border-color: transparent;
+    color: black;
+ }
+
+.daterangepicker td.in-range {
+    background-color: white;
+    border-color: transparent;
+    color: black;
+    border-radius: 0;
 }
 
 #Abt {
@@ -123,6 +149,7 @@ table {
 }
 #inner1{
     float:right;
+    margin-right: -11.75%;
 }
 #inner2{
     float:right;
@@ -209,44 +236,35 @@ table {
     left: 15px;
 }
 .dashboard {
-    top: 4px;
-    float: right;
-    left: -10px;
+    margin-top: 9px;
+    margin-left: -2%;
+    float: left;
 }
 thead {
     border: 1px solid black;
 }
-.ajax-file-upload {
-    border: none;
-    background: white;
-    color: black;
+div.content {
+    overflow: hidden;
 }
+.volume {
+    margin-left: -1%;
+}
+
 </style>
-<body>
 <!--<div ng-controller="ButtonsCtrl">-->
+ <div class="container volume">
  <div class="row">
     <div id="wrapper">
         <div><h3 class="pull-left brand_style">{{$ctrl.project}}DASHBOARD</h3></div>
              <div id="inner1" class="form-group" style="margin-bottom:initial;">
                  <input class="form-control select" id="select" size="22">
                  <i class="fa fa-calendar date" aria-hidden="true"></i>
-             </div>
-
-             <!--<div class="btn-group dashboard">
-                 <button type="button" id="day" class="active btn-success btn btn-default day1" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" style="cursor:pointer;">Day</button>
-                 <button type="button" id="week" class="btn btn-default week1" ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')" style="cursor:pointer;">Week</button>
-                 <button type="button" id="Month" class="btn btn-default month1" ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')" style="cursor:pointer;">Month</button>
-             </div>-->
-            <!--<div class="btn-group">
-                <label class="btn btn-primary" ng-model="radioModel" uib-btn-radio="'Left'">Left</label>
-                <label class="btn btn-primary" ng-model="radioModel" uib-btn-radio="'Middle'">Middle</label>
-                <label class="btn btn-primary" ng-model="radioModel" uib-btn-radio="'Right'">Right</label>
-            </div>-->
+            </div>
 
              <div ng-repeat="k in $ctrl.packet_hierarchy_list track by $index">
                 <form>
                     <div class="form-group" style="float:left;padding-left:1%;padding-top:5px;margin-bottom:0px;">
-                        <select class="form-control input-sm" id="{{$index}}" style="border: solid 1px #ccc;">
+                        <select class="form-control input-sm" id="{{$index}}" style="border: solid 1px #ccc;background:white;color:black;">
                             <option>All</option>
                         </select>
                     </div>
@@ -254,7 +272,14 @@ thead {
              </div>
         </div>
 
+        <div class="btn-group dashboard">
+            <label class="btn btn-success day"   ng-model="radioModel"  ng-click="$ctrl.type_handler('day')"       uib-btn-radio="'Day'">Day</label>
+            <label class="btn btn-success week"  ng-model="radioModel"   ng-click="$ctrl.type_handler('week')"     uib-btn-radio="'Week'">Week</label>
+            <label class="btn btn-success month" ng-model="radioModel"    ng-click="$ctrl.type_handler('month')"   uib-btn-radio="'Month'">Month</label>
+        </div>
     </div>
+ </div>
+    <div class="scroll">
     <div class="row" ng-repeat="i in $ctrl.useful_layout">
         <div ng-repeat="j in i" class="col-sm-{{j.col}} widget">
             <div class="widget-content">
@@ -264,15 +289,10 @@ thead {
                 <div class="widget-body">
                     <div ng-if="j.day_type_widget" class="input-group"id="inner2">
                         <div class="btn-group">
-                            <button type="button" id="day" class="active btn-success btn btn-default day" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" style="cursor:pointer;">Day</button>
-                            <button type="button" id="week" class="btn btn-default week" ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')" style="cursor:pointer;">Week</button>
-                            <button type="button" id="Month" class="btn btn-default month" ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')" style="cursor:pointer;">Month</button>
-                         </div>
-                        <!--<div class="btn-group">
-                            <label class="btn btn-success" ng-model="radioModel" uib-btn-radio="'Left'" uncheckable>Left</label>
-                            <label class="btn btn-success" ng-model="radioModel" uib-btn-radio="'Middle'" uncheckable>Middle</label>
-                            <label class="btn btn-success" ng-model="radioModel" uib-btn-radio="'Right'" uib-uncheckable="uncheckable">Right</label>
-                        </div>-->
+                            <label class="btn btn-success day"   ng-model="radioModel"  ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')"       uib-btn-radio="'Day'">Day</label>
+                            <label class="btn btn-success week"  ng-model="radioModel"   ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')"     uib-btn-radio="'Week'">Week</label>
+                            <label class="btn btn-success month" ng-model="radioModel"    ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')"   uib-btn-radio="'Month'">Month</label>
+                        </div>
                      </div>
                     <highcharts options="$ctrl.final_layout_values_list[j.opt]"></highcharts>
                 </div>
@@ -338,6 +358,7 @@ thead {
             </table>
         </div>
     </div>
+</div>
 </div>
 
 

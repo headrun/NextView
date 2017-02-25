@@ -28,6 +28,29 @@
              var project = 'api/project/';
              var drop_down_link = '/api/dropdown_data/';
 
+             $scope.singleModel = 1;
+
+             $scope.radioModel = 'Day';
+
+             $scope.checkModel = {
+                day: true,
+                week: false,
+                month: false
+             };
+
+             $scope.checkResults = [];
+
+             $scope.$watchCollection('checkModel', function () {
+             $scope.checkResults = [];
+             angular.forEach($scope.checkModel, function (value, key) {
+                if (value) {
+
+                  $scope.checkResults.push(key);
+
+                }
+            });
+           });
+
              $('#select').daterangepicker({
                     "autoApply": true,
                     "locale": {
@@ -267,9 +290,9 @@
 
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                                     + '&center=' + self.location + '&type=' + 'day'  + final_work;
+
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
-
                                 self.chart_render(result,self.project,self.location);
                             });
                                 });
@@ -571,10 +594,11 @@
                 self.last = self.firstDate;
                 self.first = self.lastDate;
 
-            self.dateType = function(key,all_data,name,button_clicked){
+            self.dateType = function(key,all_data,name,button_clicked) {
+
                 self.showLoading();
                 self.day_type = key;
-                //debugger;
+
                 var obj = {"self.chartOptions":self.chartOptions,"self.chartOptions9":self.chartOptions9,"self.chartOptions9_2":self.chartOptions9_2,"self.chartOptions10":self.chartOptions10,"self.chartOptions15":self.chartOptions15,"self.chartOptions16":self.chartOptions16,"self.chartOptions16_2":self.chartOptions16_2,"self.chartOptions17":self.chartOptions17,"self.chartOptions18":self.chartOptions18,"self.chartOptions19":self.chartOptions19,"self.chartOptions20":self.chartOptions20,'self.chartOptions21':self.chartOptions21,'self.chartOptions24':self.chartOptions24,'self.chartOptions25':self.chartOptions25,'self.chartOptions26':self.chartOptions26}
                 self.render_data = obj[all_data];
                 //self.render_data = all_data;
@@ -592,12 +616,14 @@
                 var to = dateEntered.split('to')[1].replace(' ','');
                 var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
                         + '&center=' + self.location + '&type=' + self.day_type + final_work;
+
                 console.log(from_to_data);
                 $http({method:"GET", url:from_to_data}).success(function(result){
                             self.hideLoading();
                             self.high_data_gener = [];
                             var final_data_gener = result.result;
                             self.high_data_gener.push(final_data_gener);
+
              if (name === 'chartOptions'){
                             angular.extend(self.render_data, {
                xAxis: {
@@ -1394,6 +1420,18 @@
             }
                          });
             }
+
+            self.type_handler = function(key) {
+                self.showLoading();
+                self.day_type = key;
+
+                var obj = {"chartOptions":self.chartOptions,"self.chartOptions9":self.chartOptions9,"self.chartOptions9_2":self.chartOptions9_2,"self.chartOptions10":self.chartOptions10,"self.chartOptions15":self.chartOptions15,"self.chartOptions16":self.chartOptions16,"self.chartOptions16_2":self.chartOptions16_2,"self.chartOptions17":self.chartOptions17,"self.chartOptions18":self.chartOptions18,"self.chartOptions19":self.chartOptions19,"self.chartOptions20":self.chartOptions20,'self.chartOptions21':self.chartOptions21,'self.chartOptions24':self.chartOptions24,'self.chartOptions25':self.chartOptions25,'self.chartOptions26':self.chartOptions26}
+                angular.forEach(obj, function(obj_key, value){
+
+                   self.dateType(key,obj_key, value,key+'_yes')
+                })
+            }
+
             self.chart_render = function(result,pro,loc){
                             self.hideLoading();
                             self.high_data_gener = [];
@@ -1719,6 +1757,11 @@ plotOptions: {
                 }
                },
                             series: self.high_data_gener[0].Internal_Error_Category.category_pareto
+                            });
+
+                            angular.extend(self.chartOptions31.yAxis,{
+                                min:result.result.min_tat_details,
+                                max:result.result.max_tat_details
                             });
 
                             angular.extend(self.chartOptions31, {
