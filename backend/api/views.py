@@ -205,13 +205,13 @@ def project(request):
             list_wid.append(wid_dict)
     sorted_dict = sorted(list_wid, key=lambda k: k['widget_priority'])
     lay_out_order = []
+    #import pdb;pdb.set_trace()
     for i in sorted_dict:
         config_name = i.pop('config_name')
         lay_out_order.append(config_name)
         final_dict[config_name] = i
     layout_list.append(final_dict)
     layout_list.append({'layout': lay_out_order}) 
-
 
     if 'team_lead' in user_group:
         final_details = {}
@@ -438,6 +438,7 @@ def internal_extrnal_error_types(request,date_list,prj_id,center_obj,level_struc
     extrnl_err_type = {}
     extr_volumes_list_new=[]
     all_error_types = []
+    #import pdb;pdb.set_trace()
     for date_va in date_list:
         count =0
         total_done_value = RawTable.objects.filter(project=prj_id, center=center_obj, date=date_va).aggregate(Max('per_day'))
@@ -3375,7 +3376,7 @@ def tat_graph(date_list, prj_id, center, level_structure_key):
     query_set = query_set_generation(prj_id, center, level_structure_key, date_list)
     new_date_list = []
     new_dict = {}
-
+    #import pdb;pdb.set_trace()
     if level_structure_key.has_key('sub_project'):
         if level_structure_key['sub_project'] == "All":
             volume_list = TatTable.objects.filter(**query_set).values('sub_project').distinct()
@@ -3403,9 +3404,26 @@ def tat_graph(date_list, prj_id, center, level_structure_key):
             count = 0
             final_data = []
             final_notmet_data = []
-            #import pdb;pdb.set_trace()
-            if level_structure_key['work_packet'] == "All":
+            if level_structure_key.get('work_packet','') == "All":
                 tat_status = TatTable.objects.filter(project = prj_id,center= center,date=date).values_list('tat_status',flat=True)
+                for i in tat_status:
+                    if i == 'Met':
+                        tat_value = 100
+                        final_data.append(tat_value)
+                    else:
+                        tat_value = 0
+                        final_notmet_data.append(tat_value)
+
+                tat_count = len(final_data)
+                tat_not_count = len(final_notmet_data)
+                if tat_count != 0:
+                    tat_accuracy = float((float(tat_not_count) / float(tat_count + tat_not_count)) * 100)
+                    tat_accuracy = 100 - (float('%.2f' % round(tat_accuracy, 2)))
+                    new_date_list.append(tat_accuracy)
+
+            elif level_structure_key.get('sub_project', '') == "All":
+                tat_status = TatTable.objects.filter(project=prj_id, center=center, date=date).values_list(
+                    'tat_status', flat=True)
                 for i in tat_status:
                     if i == 'Met':
                         tat_value = 100
@@ -3440,8 +3458,38 @@ def tat_graph(date_list, prj_id, center, level_structure_key):
                             tat_value = 0
                         new_date_list.append(tat_value)
         new_dict['Tat Met Status'] = new_date_list
-        #new_dict['Date'] = data_list
     return new_dict
+
+def getting_packets_type (prj_id,center):
+    final_details = {}
+    sub_pro_level = filter(None, RawTable.objects.filter(project=prj_id, center=center).values_list('sub_project',flat=True).distinct())
+    sub_project_level = [i for i in sub_pro_level]
+    if len(sub_project_level) >= 1:
+        sub_project_level.append('all')
+    else:
+        sub_project_level = ''
+    work_pac_level = filter(None, RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet',flat=True).distinct())
+    work_packet_level = [j for j in work_pac_level]
+    if len(work_packet_level) >= 1:
+        work_packet_level.append('all')
+    else:
+        work_packet_level = ''
+    sub_pac_level = filter(None, RawTable.objects.filter(project=prj_id, center=center).values_list('sub_packet',flat=True).distinct())
+    sub_packet_level = [k for k in sub_pac_level]
+    if len(sub_packet_level) >= 1:
+        sub_packet_level.append('all')
+    else:
+        sub_packet_level = ''
+    final_details['sub_project'] = 0
+    final_details['work_packet'] = 0
+    final_details['sub_packet'] = 0
+    if len(sub_pro_level) >= 1:
+        final_details['sub_project'] = 1
+    if len(work_pac_level) >= 1:
+        final_details['work_packet'] = 1
+    if len(sub_pac_level) >= 1:
+        final_details['sub_packet'] = 1
+    return final_details
 
 def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_structure_key):
     #import pdb;pdb.set_trace()
@@ -3449,7 +3497,7 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
         final_dict = {}
         final_details = {}
         result_dict =  product_total_graph(dwm_dict['day'], prj_id, center, work_packets, level_structure_key)
-        #tat_graph_details = tat_graph(dwm_dict['day'], prj_id, center,level_structure_key)
+        tat_graph_details = tat_graph(dwm_dict['day'], prj_id, center,level_structure_key)
         volume_graph = volume_graph_data(dwm_dict['day'], prj_id, center, level_structure_key)
         result_dict['volume_graphs'] = {}
         result_dict['volume_graphs']['bar_data'] = graph_data_alignment(volume_graph['bar_data'], name_key='data')
@@ -3458,9 +3506,9 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
         monthly_volume_graph_details = Monthly_Volume_graph(dwm_dict['day'], prj_id, center, level_structure_key)
         result_dict['monthly_volume_graph_details'] = graph_data_alignment_color(monthly_volume_graph_details,'data', level_structure_key,prj_id, center)
 
-        #result_dict['tat_details'] = graph_data_alignment_color(tat_graph_details, 'data', level_structure_key, prj_id,center)
-        #tat_min_max = adding_min_max('tat_details',tat_graph_details)
-        #result_dict.update(tat_min_max)
+        result_dict['tat_details'] = graph_data_alignment_color(tat_graph_details, 'data', level_structure_key, prj_id,center)
+        tat_min_max = adding_min_max('tat_details',tat_graph_details)
+        result_dict.update(tat_min_max)
 
         productivity_utilization_data = main_productivity_data(center, prj_id, dwm_dict['day'], level_structure_key)
         utilization_fte_details = utilization_work_packet_data(center, prj_id, dwm_dict['day'], level_structure_key)
@@ -3608,7 +3656,6 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
                 work_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet').distinct()
                 for i in work_pac_level:
                     big_dict[i[0]] = {}
-        # final_dict['drop_value'] = {u'Charge': {u'Copay': [], u'Charge': [], u'DemoCheck': [], u'Demo': []}, u'Payment': {u'Payment': []}}
         final_dict['level'] = [1, 2]
         final_dict['fin'] = final_details
         final_dict['drop_value'] = big_dict
@@ -3734,7 +3781,7 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
         result_dict['internal_pareto_graph_data'] = internal_pareto_anlysis_data
         external_pareto_anlysis_data = week_month_pareto_calc(month_names, externl_pareto_error_count,final_external_accuracy_timeline)
         result_dict['external_pareto_graph_data'] = external_pareto_anlysis_data
-
+        result_dict['fin'] = getting_packets_type(prj_id, center)
         int_error_timeline_min_max = error_timeline_min_max(final_internal_accuracy_timeline)
         result_dict['min_internal_time_line'] = int_error_timeline_min_max['min_value']
         result_dict['max_internal_time_line'] = int_error_timeline_min_max['max_value']
@@ -3793,8 +3840,6 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
         result_dict['ext_max_value'] = ext_min_max['max_value']
         result_dict['data']['date'] = data_date
         return result_dict
-
-
 
     if dwm_dict.has_key('week'):
         final_result_dict = {}
@@ -3916,6 +3961,7 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
         final_montly_vol_data = prod_volume_week(week_names, monthly_vol_data, {})
         result_dict['monthly_volume_graph_details'] = graph_data_alignment_color(final_montly_vol_data, 'data', level_structure_key,prj_id, center)
 
+        result_dict['fin'] = getting_packets_type(prj_id, center)
         final_productivity = prod_volume_week(week_names, productivity_list, final_productivity)
         final_vol_graph_bar_data = prod_volume_week(week_names, vol_graph_bar_data, final_vol_graph_bar_data)
         final_vol_graph_line_data = prod_volume_week(week_names, vol_graph_line_data, final_vol_graph_line_data)
@@ -3982,8 +4028,6 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
         result_dict['ext_max_value'] = ext_min_max['max_value']
         result_dict['data']['date'] = data_date
         return result_dict
-
-
 
 def num_of_days(to_date,from_date):
     date_list=[]

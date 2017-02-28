@@ -156,6 +156,7 @@
                             }
                         }
                     }
+
                     self.useful_layout.push(first_row,second_row);
                     self.location = pro_cen_nam.split('-')[0].replace(' ','') + ' - '
                     self.project = pro_cen_nam.split('-')[1].replace(' ','') + ' - '
@@ -184,7 +185,6 @@
                         self.wor_pac_sel = document.getElementById("1");
                         self.sub_pac_sel = document.getElementById("2");
                         $("#0, #1, #2").unbind("change");
-
                             if (result.result.fin.sub_project) {
                                 console.log('sub_projet_exist');
                             }
@@ -202,14 +202,14 @@
 
                                 }
                             }
-                            
+
                             if (result.result.fin.sub_packet) {
                                     console.log('sub_packet_exist');
                                 }
                             else {
                                     $('#2').hide();
 
-                              }                            
+                              }
 
                         for (var sub_pro in self.drop_list) {
                             self.sub_pro_sel.options[self.sub_pro_sel.options.length] = new Option(sub_pro, sub_pro);
@@ -288,8 +288,10 @@
                             var to = dateEntered.split('to')[1].replace(' ','');
                             var placeholder = ''
 
+                            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                                    + '&center=' + self.location + '&type=' + 'day'  + final_work;*/
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                    + '&center=' + self.location + '&type=' + 'day'  + final_work;
+                                    + '&center=' + self.location + '&type=' + self.day_type + final_work;
 
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
@@ -330,8 +332,11 @@
                             var from = dateEntered.split('to')[0].replace(' ','');
                             var to = dateEntered.split('to')[1].replace(' ','');
                             var placeholder = ''
+                            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                                    + '&center=' + self.location + '&type=' + 'day'  + final_work;*/
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                    + '&center=' + self.location + '&type=' + 'day'  + final_work;
+                                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
                                 self.chart_render(result,self.project,self.location);
@@ -372,8 +377,12 @@
                             var to = dateEntered.split('to')[1].replace(' ','');
                             var placeholder = ''
 
+                            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                                  + '&center=' + self.location + '&type=' + 'day'  + final_work;*/
+
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                  + '&center=' + self.location + '&type=' + 'day'  + final_work;
+                                  + '&center=' + self.location + '&type=' + self.day_type + final_work;
+
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
                                 self.chart_render(result,self.project,self.location);
@@ -416,8 +425,12 @@
                             var to = dateEntered.split('to')[1].replace(' ','');
                             var placeholder = ''
 
+                            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                                  + '&center=' + self.location + '&type=' + 'day'  + final_work;*/
+
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                  + '&center=' + self.location + '&type=' + 'day'  + final_work;
+                                  + '&center=' + self.location + '&type=' + self.day_type + final_work;
+
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.hideLoading();
                                 self.chart_render(result,self.project,self.location);
@@ -462,8 +475,12 @@
                             var from = dateEntered.split('to')[0].replace(' ','');
                             var to = dateEntered.split('to')[1].replace(' ','');
                             var placeholder = ''
+                            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                                  + '&center=' + self.location + '&type=' + 'day'  + final_work;*/
+
                             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                                  + '&center=' + self.location + '&type=' + 'day'  + final_work;
+                                  + '&center=' + self.location + '&type=' + self.day_type + final_work;
+
                             $http({method:"GET", url:from_to_data}).success(function(result){
                                 self.chart_render(result,self.project,self.location);
                             });
@@ -506,10 +523,10 @@
             var from = dateEntered.split('to')[0].replace(' ','');
             var to = dateEntered.split('to')[1].replace(' ','');
             var placeholder = ''
-            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;*/
             var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
-                   + '&center=' + self.location + '&type=' + 'day'  + final_work;
+                    + '&center=' + self.location + '&type=' + self.day_type  + final_work;
+            /*var from_to_data = from_to + 'from=' + from + '&to=' + to + '&project=' + self.project
+                   + '&center=' + self.location + '&type=' + 'day'  + final_work;*/
             $http({method:"GET", url:from_to_data}).success(function(result){
                             self.chart_render(result,self.project,self.location);
             });
@@ -577,8 +594,10 @@
                         }
                         else
                         {
-                         var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + self.project +
-                             '&center=' + self.location + '&type=' + 'day';
+                         /*var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + self.project +
+                             '&center=' + self.location + '&type=' + 'day';*/
+                           var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + self.project +
+                             '&center=' + self.location + '&type=' + self.day_type;
                         }
                         self.tabData.state = JSON.parse("{}");
                         self.main_render(from_to_data)
@@ -595,10 +614,9 @@
                 self.first = self.lastDate;
 
             self.dateType = function(key,all_data,name,button_clicked) {
-
+                debugger;
                 self.showLoading();
                 self.day_type = key;
-
                 var obj = {"self.chartOptions":self.chartOptions,"self.chartOptions9":self.chartOptions9,"self.chartOptions9_2":self.chartOptions9_2,"self.chartOptions10":self.chartOptions10,"self.chartOptions15":self.chartOptions15,"self.chartOptions16":self.chartOptions16,"self.chartOptions16_2":self.chartOptions16_2,"self.chartOptions17":self.chartOptions17,"self.chartOptions18":self.chartOptions18,"self.chartOptions19":self.chartOptions19,"self.chartOptions20":self.chartOptions20,'self.chartOptions21':self.chartOptions21,'self.chartOptions24':self.chartOptions24,'self.chartOptions25':self.chartOptions25,'self.chartOptions26':self.chartOptions26}
                 self.render_data = obj[all_data];
                 //self.render_data = all_data;
@@ -624,7 +642,7 @@
                             var final_data_gener = result.result;
                             self.high_data_gener.push(final_data_gener);
 
-             if (name === 'chartOptions'){
+             if (name === 'chartOptions') {
                             angular.extend(self.render_data, {
                xAxis: {
                  categories: self.high_data_gener[0].data.date,
@@ -659,7 +677,6 @@
                                     var proj = data.result.project;
                                     var pro_drill = data.result.table_headers;
                                     var chart_type = data.result.type;
-
                                     self.fields_list_drilldown = pro_drill;
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
@@ -1370,7 +1387,7 @@
 
             }
             if (name === 'chartOptions18'){
-                                            angular.extend(self.render_data, {
+                               angular.extend(self.render_data, {
                                 xAxis: {
                                     categories: self.high_data_gener[0].data.date,
                                     title: {
@@ -1421,27 +1438,34 @@
                          });
             }
 
-            self.type_handler = function(key) {
+            /*self.type_handler = function(key) {
                 self.showLoading();
                 self.day_type = key;
+                //var obj = {"self.chartOptions":"chartOptions","self.chartOptions9":"chartOptions9","self.chartOptions9_2":"chartOptions9_2","self.chartOptions10":"chartOptions10","self.chartOptions15":"chartOptions15","self.chartOptions16":"chartOptions16","self.chartOptions16_2":"chartOptions16_2","self.chartOptions17":"chartOptions17","self.chartOptions18":"chartOptions18","self.chartOptions19":"chartOptions19","self.chartOptions20":"chartOptions20","self.chartOptions21":"chartOptions21","self.chartOptions24":"chartOptions24","self.chartOptions25":"chartOptions25","self.chartOptions26":"chartOptions26"}
+                var obj = {"self.chartOptions":"chartOptions"}
+                angular.forEach(obj, function(value,obj_key) {
+                   self.dateType(key,obj_key,value,key+'_yes')
+                });
+            }*/
 
-                var obj = {"chartOptions":self.chartOptions,"self.chartOptions9":self.chartOptions9,"self.chartOptions9_2":self.chartOptions9_2,"self.chartOptions10":self.chartOptions10,"self.chartOptions15":self.chartOptions15,"self.chartOptions16":self.chartOptions16,"self.chartOptions16_2":self.chartOptions16_2,"self.chartOptions17":self.chartOptions17,"self.chartOptions18":self.chartOptions18,"self.chartOptions19":self.chartOptions19,"self.chartOptions20":self.chartOptions20,'self.chartOptions21':self.chartOptions21,'self.chartOptions24':self.chartOptions24,'self.chartOptions25':self.chartOptions25,'self.chartOptions26':self.chartOptions26}
-                angular.forEach(obj, function(obj_key, value){
-
-                   self.dateType(key,obj_key, value,key+'_yes')
-                })
-            }
-
-            self.chart_render = function(result,pro,loc){
+            self.chart_render = function(result,pro,loc,button_clicked){
                             self.hideLoading();
                             self.high_data_gener = [];
                             var final_data_gener = result.result;
+                            self.button_clicked = button_clicked;
                             self.high_data_gener.push(final_data_gener);
+
+                            self.packet_clicked = self.drop_work_pack;
+                            var is_exist = self.packet_clicked.indexOf('&');
+                            if (is_exist > 0){
+                                self.packet_clicked = self.packet_clicked.replace(' & ',' and ')
+                             }
+                            var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack + '&work_packet=' + self.packet_clicked + '&is_clicked=' + self.button_clicked;
+
                             self.top_employee_details =  result.result.top_five_employee_details;
                             self.top_five = result.result.only_top_five;
                             self.volume_graphs = result.result.volumes_graphs_details;
                             angular.extend(self.chartOptions, {
-
                                 xAxis: {
                                     categories: self.high_data_gener[0].data.date,
                                     title: {
@@ -1449,7 +1473,6 @@
                                     }
                                 },
                                 plotOptions: {
-
                                      series : {
                                         allowPointSelect: true,
                                         cursor: 'pointer',
@@ -1475,11 +1498,9 @@
                                     self.names = data.result.data;
                                     var proj = data.result.project;
                                     var pro_drill = data.result.table_headers;
-                                    //var pro_drill = drilldown_config[proj];
                                     var chart_type = data.result.type;
                                     self.fields_list_drilldown = pro_drill;
-                                    //self.fields_list_drilldown = pro_drill[chart_type];
-                                    //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
+
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
@@ -1509,8 +1530,6 @@
                                 }
                             },
 
-
-
 plotOptions: {
                 series : {
                     allowPointSelect: true,
@@ -1538,11 +1557,8 @@ plotOptions: {
                                     self.names = data.result.data;
                                     var proj = data.result.project;
                                     var pro_drill = data.result.table_headers;
-                                    //var pro_drill = drilldown_config[proj];
                                     var chart_type = data.result.type;
                                     self.fields_list_drilldown = pro_drill;
-                                    //self.fields_list_drilldown = pro_drill[chart_type];
-                                    //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
@@ -1764,7 +1780,7 @@ plotOptions: {
                                 max:result.result.max_tat_details
                             });
 
-                            angular.extend(self.chartOptions31, {
+                            /*angular.extend(self.chartOptions31, {
                             xAxis: {
                                 categories: self.high_data_gener[0].data.date,
                                 title: {
@@ -1783,7 +1799,7 @@ plotOptions: {
                 }
                },
                             series: self.high_data_gener[0].tat_details
-                            });
+                            });*/
 
 
                             angular.extend(self.chartOptions30, {
@@ -1831,7 +1847,6 @@ plotOptions: {
                                                  }
 
                             var dates_list = self.get_date();
-                            //var dates_list = [self.start,self.end];
                             $http.get( productivity_bar_graph + 'packet=' + packet_clicked + '&date=' + e.target.category
                              + '&type=' + 'Production Chart'+addition).success(
                             function(data, status)
@@ -1840,11 +1855,8 @@ plotOptions: {
                                     self.names = data.result.data;
                                     var proj = data.result.project;
                                     var pro_drill = data.result.table_headers;
-                                    //var pro_drill = drilldown_config[proj];
                                     var chart_type = data.result.type;
                                     self.fields_list_drilldown = pro_drill;
-                                    //self.fields_list_drilldown = pro_drill[chart_type];
-                                    //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
@@ -1927,6 +1939,99 @@ plotOptions: {
                 }
                },
                series: self.high_data_gener[0].volume_graphs.line_data
+             });
+
+                            angular.extend(self.chartOptions31, {
+                                xAxis: {
+                                    categories: self.high_data_gener[0].data.date,
+                                    title: {
+                                        text: '',
+                                    }
+                                },
+                                plotOptions: {
+                                    series : {
+                                        allowPointSelect: true,
+                                        cursor: 'pointer',
+                                        point: {
+                                            events:{
+                                             click: function() {
+                                                             if ($("body").hasClass("add_annotation")) {
+
+                                                return;
+                                             }
+                                             var chart_name = 'Tat Graph';
+                                             var is_drill = self.list_object[chart_name].is_drilldown;
+                                             if (is_drill){
+                                             var addition = '&project=' +pro + '&center=' +loc;
+                                             //console.log(e.target.series.name);
+                                             var productivity_graph ='/api/chart_data/?'
+                                             var packet_clicked = this.series.name;
+                                             var is_exist = packet_clicked.indexOf('&');
+                                             if (is_exist > 0){
+                                                packet_clicked = packet_clicked.replace(' & ',' and ')
+                                             }
+                            $http.get( productivity_graph+ 'packet=' + packet_clicked + '&date=' + this.category +
+                            '&type=' + 'Production Trends' + addition).success(
+                            function(data, status)
+                                {
+
+                                    $('#myModal').modal('show');
+                                    self.names = data.result.data;
+                                    var proj = data.result.project;
+                                    var pro_drill = data.result.table_headers;
+                                    //var pro_drill = drilldown_config[proj];
+                                    var chart_type = data.result.type;
+                                    self.fields_list_drilldown = data.result.type;
+                                    self.chart_type = data.result.type;
+                                    console.log(self.names);
+                                }).error(function(error){ console.log("error")});
+                                }
+                        }, contextmenu: function () {
+                            return new Annotation('Tat Graph',$(event.currentTarget), this.series.chart, this);
+                        }
+                    }
+                    }
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+               series: self.high_data_gener[0].tat_details,
+               onComplete: function(chart){
+
+                 var series = null;
+
+                 var chart_data = chart.series;
+
+                 for(var i in chart_data){
+
+                   series = chart_data[i];
+
+                   (function(series){
+
+                     $http({method:"GET", url:"/api/annotations/?series_name="+series.name+"&chart_name="+'Tat Graph'}).success(function(annotations){
+
+                       annotations = _.sortBy(annotations.result, function(annotation){ return annotation.epoch });
+
+                       $.each(annotations, function(j, annotation){
+			  var point = _.filter(series.points, function(point){ return point.category == annotation.epoch});
+
+                         point = point[0];
+
+                         if(annotation.epoch){
+                           var a = new Annotation("Tat Graph", $(self.chartOptions9.chart.renderTo),
+                                chart, point, annotation);
+
+                           console.log(a);
+                           }
+                       })
+
+                     })
+                   }(series));
+                 }
+               }
              });
 
                             angular.extend(self.chartOptions26, {
@@ -2462,8 +2567,10 @@ plotOptions: {
                     self.packet_clicked = self.packet_clicked.replace(' & ',' and ')
                 }
                 var final_work =  '&sub_project=' + self.sub_pro_sel_two + '&sub_packet=' + self.sub_pac_sel_two + '&work_packet=' + self.packet_clicked;
-                var from_to_data = from_to + 'from=' + dates_list[0] + '&to=' + dates_list[1] + '&project=' + self.project
-                       + '&center=' + self.location + '&type=' + 'day' + final_work;
+                /*var from_to_data = from_to + 'from=' + dates_list[0] + '&to=' + dates_list[1] + '&project=' + self.project
+                       + '&center=' + self.location + '&type=' + 'day' + final_work;*/
+                  var from_to_data = from_to + 'from=' + dates_list[0] + '&to=' + dates_list[1] + '&project=' + self.project
+                       + '&center=' + self.location + '&type=' +self.day_type+ final_work;
                 $('.day').addClass('active btn-success');
                 $('.day').siblings().removeClass('active btn-success');
 
