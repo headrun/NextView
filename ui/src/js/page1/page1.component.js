@@ -41,15 +41,14 @@
              $scope.checkResults = [];
 
              $scope.$watchCollection('checkModel', function () {
-             $scope.checkResults = [];
-             angular.forEach($scope.checkModel, function (value, key) {
-                if (value) {
+                $scope.checkResults = [];
+                angular.forEach($scope.checkModel, function (value, key) {
+                    if (value) {
+                        $scope.checkResults.push(key);
 
-                  $scope.checkResults.push(key);
-
-                }
-            });
-           });
+                    }
+                });
+             });
 
              $('#select').daterangepicker({
                     "autoApply": true,
@@ -614,12 +613,10 @@
                 self.first = self.lastDate;
 
             self.dateType = function(key,all_data,name,button_clicked) {
-                debugger;
                 self.showLoading();
                 self.day_type = key;
                 var obj = {"self.chartOptions":self.chartOptions,"self.chartOptions9":self.chartOptions9,"self.chartOptions9_2":self.chartOptions9_2,"self.chartOptions10":self.chartOptions10,"self.chartOptions15":self.chartOptions15,"self.chartOptions16":self.chartOptions16,"self.chartOptions16_2":self.chartOptions16_2,"self.chartOptions17":self.chartOptions17,"self.chartOptions18":self.chartOptions18,"self.chartOptions19":self.chartOptions19,"self.chartOptions20":self.chartOptions20,'self.chartOptions21':self.chartOptions21,'self.chartOptions24':self.chartOptions24,'self.chartOptions25':self.chartOptions25,'self.chartOptions26':self.chartOptions26}
                 self.render_data = obj[all_data];
-                //self.render_data = all_data;
                 self.high_data = [];
                 self.button_clicked = button_clicked;
                 self.packet_clicked = self.drop_work_pack;
@@ -730,9 +727,7 @@
                                     self.names = data.result.data;
                                     var proj = data.result.project;
                                     var pro_drill = data.result.table_headers;
-                                    //var pro_drill = drilldown_config[proj];
                                     var chart_type = data.result.type;
-                                    //self.fields_list_drilldown = pro_drill[chart_type];
                                     self.fields_list_drilldown = pro_drill;
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
@@ -1438,30 +1433,24 @@
                          });
             }
 
-            /*self.type_handler = function(key) {
-                self.showLoading();
-                self.day_type = key;
-                //var obj = {"self.chartOptions":"chartOptions","self.chartOptions9":"chartOptions9","self.chartOptions9_2":"chartOptions9_2","self.chartOptions10":"chartOptions10","self.chartOptions15":"chartOptions15","self.chartOptions16":"chartOptions16","self.chartOptions16_2":"chartOptions16_2","self.chartOptions17":"chartOptions17","self.chartOptions18":"chartOptions18","self.chartOptions19":"chartOptions19","self.chartOptions20":"chartOptions20","self.chartOptions21":"chartOptions21","self.chartOptions24":"chartOptions24","self.chartOptions25":"chartOptions25","self.chartOptions26":"chartOptions26"}
-                var obj = {"self.chartOptions":"chartOptions"}
-                angular.forEach(obj, function(value,obj_key) {
-                   self.dateType(key,obj_key,value,key+'_yes')
-                });
-            }*/
 
-            self.chart_render = function(result,pro,loc,button_clicked){
+            self.active_filters = function(type){
+                //$scope.radioModel = type;
+                //self.day_type = type;
+                var from_to_data = from_to +'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + self.project + '&center=' + self.location + '&type=' + type;
+                self.showLoading();
+                $http({method:"GET", url:from_to_data}).success(function(result){
+                    self.hideLoading();
+                    self.chart_render(result,self.project,self.location);
+                });
+
+            }
+
+            self.chart_render = function(result,pro,loc){
                             self.hideLoading();
                             self.high_data_gener = [];
                             var final_data_gener = result.result;
-                            self.button_clicked = button_clicked;
                             self.high_data_gener.push(final_data_gener);
-
-                            self.packet_clicked = self.drop_work_pack;
-                            var is_exist = self.packet_clicked.indexOf('&');
-                            if (is_exist > 0){
-                                self.packet_clicked = self.packet_clicked.replace(' & ',' and ')
-                             }
-                            var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack + '&work_packet=' + self.packet_clicked + '&is_clicked=' + self.button_clicked;
-
                             self.top_employee_details =  result.result.top_five_employee_details;
                             self.top_five = result.result.only_top_five;
                             self.volume_graphs = result.result.volumes_graphs_details;
