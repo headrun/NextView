@@ -72,10 +72,10 @@
     border-color:white;
     color:white;
 }
-img {
+.logo {
     width:27%;
     margin-left:-3%;
-    margin-top: -14px;
+    margin-top: -20px;
  }
 .upload {
     cursor: pointer;
@@ -92,6 +92,9 @@ img {
 dashboard div.dashboard-content {
     margin-top: 79px;
 }
+.home {
+    margin-top: 9px !important;
+}
 </style>
 <nav class="navbar navbar-default navbar-fixed-top position">
 
@@ -102,8 +105,10 @@ dashboard div.dashboard-content {
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <img src="/img/nextwealth.png" alt="Nexwealth_Logo" style="float:left;">
+            <!--<img class="logo" src="/img/nextwealth.png" alt="Nexwealth_Logo" style="float:left;">-->
+            <a href="http://nextwealth.in" id="nextwealth" target="_blank"><img class="logo" src="/img/nextwealth.png" alt="Nexwealth_Logo" style="float:left;"></a>
             <a class="navbar-brand" style="font-size:2.0em;margin-left:-2%;font-weight:100;color:#555;">NextPulse </a>
+            <a href="http://localhost:8112/#!/landing" id="home_but" class="btn btn-success home" role="button" target="_blank">Home</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <div class="data">
@@ -114,7 +119,7 @@ dashboard div.dashboard-content {
                   <li><a href="" id="Proj" class="active">Projects</a></li>
               </ul>
             </div>
-              <ul class="nav navbar-nav navbar-right" style="margin-top:-50px;">
+              <ul class="nav navbar-nav navbar-right" style="margin-top:-57px;">
                   <div class="data_value" style="font-size:1.2em;padding-right:10px;">
                       <ul class="nav navbar-nav pull-right">
                       <li>

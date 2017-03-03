@@ -785,8 +785,8 @@ def raw_table_query_insertion(customer_data,prj_obj,center_obj,teamleader_obj_na
             per_day_value = per_day_value + int(check_query[0]['per_day'])
             new_can_agr = RawTable.objects.filter(id=int(check_query[0]['id'])).update(per_day=per_day_value)
         elif db_check == 'update':
+            #import pdb;pdb.set_trace()
             new_can_upd = RawTable.objects.filter(id=int(check_query[0]['id'])).update(per_day=per_day_value)
-
     return prod_date_list
 
 
@@ -924,7 +924,10 @@ def target_table_query_insertion(customer_data,prj_obj,center_obj,teamleader_obj
             fte_target = fte_target + int(check_query[0]['fte_target'])
             new_can_agr = Targets.objects.filter(id=int(check_query[0]['id'])).update(targer=target,fte_target=fte_target)
         elif db_check == 'update':
-            new_can_upd = Targets.objects.filter(id=int(check_query[0]['id'])).update(targer=target,fte_target=fte_target)
+            try:
+                new_can_upd = Targets.objects.filter(id=int(check_query[0]['id'])).update(targer=target,fte_target=fte_target)
+            except:
+                new_can_upd = 0
 
     return prod_date_list
 
@@ -1032,6 +1035,31 @@ def upload(request):
                             audited_count = customer_data.get('audited_count', '')
                         externalerror_insert = externalerror_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, audited_count,total_errors, db_check)
                         external_date_list.append(customer_data['date'])
+                    if table_name == 'worktrack_table':
+                        if customer_data.has_key('target') == False:
+                            customer_data['target'] = 0
+                        try:
+                            opening = int(float(customer_data.get('opening', '')))
+                        except:
+                            opening = 0
+                        try:
+                            received = int(float(customer_data.get('received', '')))
+                        except:
+                            received = 0
+                        try:
+                            non_workable_count = int(float(customer_data.get('non_workable_count', '')))
+                        except:
+                            non_workable_count = 0
+                        try:
+                            completed = int(float(customer_data.get('completed', '')))
+                        except:
+                            completed = 0
+                        try:
+                            closing_balance = int(float(customer_data.get('closing_balance', '')))
+                        except:
+                            closing_balance = 0
+                        worktrack_insert = worktrack_query_insertion(customer_data,prj_obj,center_obj,teamleader_obj_name,db_check)
+                        worktrac_date_list.append(customer_data['date'])
 
                 if len(sheet_count) == 2 :
                     if table_name == 'raw_table':
@@ -1071,6 +1099,31 @@ def upload(request):
                             total_errors = 0
                         externalerror_insert = externalerror_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, audited_count,total_errors, db_check)
                         external_date_list.append(customer_data['date'])
+                    if table_name == 'worktrack_table':
+                        if customer_data.has_key('target') == False:
+                            customer_data['target'] = 0
+                        try:
+                            opening = int(float(customer_data.get('opening', '')))
+                        except:
+                            opening = 0
+                        try:
+                            received = int(float(customer_data.get('received', '')))
+                        except:
+                            received = 0
+                        try:
+                            non_workable_count = int(float(customer_data.get('non_workable_count', '')))
+                        except:
+                            non_workable_count = 0
+                        try:
+                            completed = int(float(customer_data.get('completed', '')))
+                        except:
+                            completed = 0
+                        try:
+                            closing_balance = int(float(customer_data.get('closing_balance', '')))
+                        except:
+                            closing_balance = 0
+                        worktrack_insert = worktrack_query_insertion(customer_data,prj_obj,center_obj,teamleader_obj_name,db_check)
+                        worktrac_date_list.append(customer_data['date'])
 
 
             if len(sheet_count) >= 3:
@@ -1083,6 +1136,9 @@ def upload(request):
                 if table_name == 'external_error':
                     external_date_list = list(set(external_date_list))
                     insert = redis_insert(prj_obj, center_obj, external_date_list, key_type='External', )
+                if table_name == 'worktrack_table':
+                    worktrac_date_list = list(set(worktrac_date_list))
+                    insert = redis_insert(prj_obj, center_obj, worktrac_date_list, key_type='WorkTrack')
 
             if len(sheet_count) == 2:
                 prod_date_list = list(set(prod_date_list))
@@ -1093,6 +1149,9 @@ def upload(request):
                     internal_date_list = list(set(internal_date_list))
                     insert = redis_insert(prj_obj, center_obj, external_date_list, key_type='External')
                     insert = redis_insert(prj_obj, center_obj, internal_date_list, key_type='Internal')
+                if table_name == 'worktrack_table':
+                    worktrac_date_list = list(set(worktrac_date_list))
+                    insert = redis_insert(prj_obj, center_obj, worktrac_date_list, key_type='WorkTrack')
 
             var ='hello'
         return HttpResponse(var)
@@ -1324,12 +1383,12 @@ def upload_new(request):
         for sh_name in file_sheet_names:
             if sh_name in excel_sheet_names:
                 sheet_index_dict[sh_name] = open_book.sheet_names().index(sh_name)
-            else:
+            """else:
                 sheet_names = []
                 for name in excel_sheet_names:
                     if name not in  file_sheet_names:
                         sheet_names.append(name)
-                return HttpResponse('Wrong Sheet Names ' + str(sheet_names))
+                return HttpResponse('Wrong Sheet Names ' + str(sheet_names)) """
 
         db_check = str(Project.objects.filter(name=prj_obj.name,center=center_obj).values_list('project_db_handling',flat=True)[0])
         raw_table_dataset, internal_error_dataset, external_error_dataset, work_track_dataset,headcount_dataset = {}, {}, {}, {},{}
@@ -1337,7 +1396,7 @@ def upload_new(request):
         target_dataset = {}
         for key,value in sheet_index_dict.iteritems():
             one_sheet_data = {}
-            prod_date_list,internal_date_list,external_date_list=[],[],[]
+            prod_date_list,internal_date_list,external_date_list,worktrack_date_list=[],[],[],[]
             open_sheet = open_book.sheet_by_index(value)
             SOH_XL_HEADERS = open_sheet.row_values(0)
             main_headers = []
@@ -1784,7 +1843,27 @@ def upload_new(request):
 
         for date_key,date_value in work_track_dataset.iteritems():
             for emp_key,emp_value in date_value.iteritems():
-                externalerror_insert = worktrack_query_insertion(emp_value, prj_obj, center_obj,teamleader_obj_name,db_check)
+                try:
+                    opening = int(float(emp_value.get('opening', '')))
+                except:
+                    opening = 0
+                try:
+                    received = int(float(emp_value.get('received', '')))
+                except:
+                    received = 0
+                try:
+                    non_workable_count = int(float(emp_value.get('non_workable_count', '')))
+                except:
+                    non_workable_count = 0
+                try:
+                    completed = int(float(emp_value.get('completed', '')))
+                except:
+                    completed = 0
+                try:
+                    closing_balance = int(float(emp_value.get('closing_balance', '')))
+                except:
+                    closing_balance = 0
+                worktrack_insert = worktrack_query_insertion(emp_value, prj_obj, center_obj,teamleader_obj_name,db_check)
 
         for date_key, date_value in headcount_dataset.iteritems():
             for emp_key, emp_value in date_value.iteritems():
@@ -1793,7 +1872,7 @@ def upload_new(request):
         for date_key, date_value in target_dataset.iteritems():
             for emp_key, emp_value in date_value.iteritems():
                 externalerror_insert = target_table_query_insertion(emp_value, prj_obj, center_obj, teamleader_obj_name,db_check)
-        #import pdb;pdb.set_trace()
+
         for date_key, date_value in tats_table_dataset.iteritems():
             for emp_key, emp_value in date_value.iteritems():
                 externalerror_insert = tat_query_insertion(emp_value, prj_obj, center_obj, teamleader_obj_name,db_check)
@@ -1924,11 +2003,14 @@ def worktrack_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_
                             completed = completed,
                             closing_balance = closing_balance,)
         elif db_check == 'update':
-            new_can_upd = Internalerrors.objects.filter(id=int(check_query[0]['id'])).update(opening=opening,
-                            received = received,
-                            non_workable_count = non_workable_count,
-                            completed = completed,
-                            closing_balance = closing_balance,)
+            try:
+                new_can_upd = Worktrack.objects.filter(id=int(check_query[0]['id'])).update(opening=opening,
+                                received = received,
+                                non_workable_count = non_workable_count,
+                                completed = completed,
+                                closing_balance = closing_balance,)
+            except:
+                new_can_upd = 0
     return worktrac_date_list
 
 def headcount_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, db_check):
@@ -2772,9 +2854,10 @@ def agent_pareto_data_generation(request,date_list,prj_id,center_obj,level_struc
     new_dict.update(new_list)
     #import pdb;pdb.set_trace()
     for key, value in new_dict.iteritems():
-        accuracy = (float(float(value)/float(error_sum)))*100
-        accuracy_perc = float('%.2f' % round(accuracy, 2))
-        accuracy_dict[key] = accuracy_perc
+        if error_sum != 0:
+            accuracy = (float(float(value)/float(error_sum)))*100
+            accuracy_perc = float('%.2f' % round(accuracy, 2))
+            accuracy_dict[key] = accuracy_perc
     error_accuracy = []
     final_emps = []
     for key, value in sorted(accuracy_dict.iteritems(), key=lambda (k, v): (v, k)):
@@ -2954,9 +3037,10 @@ def sample_pareto_analysis(request,date_list,prj_id,center_obj,level_structure_k
     final_cate_list = []
     cate_accuracy_dict = {}
     for key, value in new_cate_dict.iteritems():
-        accuracy = (float(float(value) / float(error_cate_sum))) * 100
-        accuracy_perc = float('%.2f' % round(accuracy, 2))
-        cate_accuracy_dict[key] = accuracy_perc
+        if error_cate_sum != 0:
+            accuracy = (float(float(value) / float(error_cate_sum))) * 100
+            accuracy_perc = float('%.2f' % round(accuracy, 2))
+            cate_accuracy_dict[key] = accuracy_perc
 
     error_accuracy = []
     final_cate_list = []
