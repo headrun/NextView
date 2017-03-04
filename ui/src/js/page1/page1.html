@@ -1,4 +1,64 @@
 <style>
+@media (max-width : 320px) {
+     .btn-group {
+        /*top: 4px !important;*/
+        left: 16px !important;
+       }   
+       .btn{
+        padding: 1px 5px !important;
+        font-size: 12px !important;
+        line-height: 1.5 !important;
+        }   
+        .brand_style {
+            font-size: 13px !important;
+        }   
+        .ajax-file-upload {
+            padding: 1px 2px;
+            font-size: 13px;
+            background: whitesmoke !important;
+            border: none;
+            color: black;
+        }   
+        .pull-left {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            max-width: 147px;
+            white-space: nowrap;
+        }   
+        .form-control {
+            width: initial !important;
+            height: 23px !important;
+            padding: 4px;
+            margin-left: 4px !important;
+            font-size: 13px !important;
+        }
+        .date {
+            float: right !important;
+            font-size: 21px !important;
+            padding-top: 6px !important;
+            cursor: pointer !important;
+            color: #555 !important;
+        }   
+        #inner1 {
+            float: left !important;
+            margin-left: 5px;
+        }   
+     }
+
+.daterangepicker td.active, .daterangepicker td.active:hover {
+    background-color: white;
+    border-color: transparent;
+    color: black;
+ }
+
+.daterangepicker td.in-range {
+    background-color: white;
+    border-color: transparent;
+    color: black;
+    border-radius: 0;
+}
+
+
 ::-webkit-scrollbar-thumb {
       background:#4c4c4c;
 }
@@ -7,6 +67,22 @@
 }
 .daterangepicker {
     color: black;
+}
+
+#Abt {
+    display: none;
+}
+
+#Ser {
+    display: none;
+}
+
+#Wid {
+   display: none;
+}
+
+#Proj {
+   display: none;
 }
 
 body.add-annotations div.annotations-bd {
@@ -98,9 +174,10 @@ table {
 
 .date {
      float: right;
-     font-size: 28px;
-     padding-top: 5px;
+     font-size: 24px;
+     padding-top: 9px;
      cursor: pointer;
+     color: #555;
 }
 .select {
 
@@ -127,6 +204,7 @@ table {
 }
 #inner1{
     float:right;
+    margin-right: -11.75%;
 }
 #inner2{
     float:right;
@@ -135,9 +213,8 @@ table {
     margin-top:-17px;
 }
 .graph {
-    border: 1px solid #A9A9A9;
-    border-radius:0.3em;
-    background-color:#f5f5f5;
+    border: 1px solid #ccc;
+    background-color:#ffffff;
     margin: 5px;
     padding-right: 10px;
     padding-left: 10px;
@@ -178,8 +255,9 @@ table {
     padding-right: 0px;
 }
 .widget-content {
-    border-radius: 0.3em;
-    background-color: #f5f5f5;
+    background-color: #ffffff;
+    border : 1px solid #ccc;
+    padding: 10px;
 }
 .body {
         width: 100%;
@@ -206,8 +284,31 @@ table {
     width: 19.7%;
     float: left;
 }
+div.content {
+    overflow: hidden;
+}
+.dashboard {
+    margin-top: 1px;
+    margin-left: 25%;
+    float: left;
+    position: fixed;
+}
+.volume {
+    margin-left: -1%;
+}
+.btn-success.active:hover {
+    color: #000000 !important;
+    background-color: #d4d4d4 !important;
+    border-color: #8c8c8c !important;
+}
+.btn-success.active {
+    color: #000000 !important;
+    background-color: #d4d4d4 !important;
+    border-color: #8c8c8c !important;
+}
 </style>
 <body class="add_annotation">
+    <div class="container volume">
     <div class="row">
     <div id="wrapper">
         <div><h3 class="pull-left brand_style">{{$ctrl.project}}Dashboard</h3></div>
@@ -219,7 +320,7 @@ table {
              <div ng-repeat="k in $ctrl.packet_hierarchy_list track by $index">
                 <form>
                     <div class="form-group" style="float:left;padding-left:1%;padding-top:5px;margin-bottom:0px;">
-                        <select class="form-control input-sm" id="{{$index}}" style="background-color:#ffffff;color:#000000;">
+                        <select class="form-control input-sm" id="{{$index}}" style="border: solid 1px #ccc;background-color:#ffffff;color:black;">
                         <option>All</option>
                     </select>
                 </div>
@@ -228,7 +329,14 @@ table {
         <!--<button id="annotation_button" type="button" class="btn btn-default">Show Annotations</button>-->
         <div class="annotations-bd"></div>
     </div>
+    <div class="btn-group dashboard">
+            <button type="button" id="day" ng-model="radioModel" class="btn btn-default day" ng-click="$ctrl.active_filters('day')" uib-btn-radio="'Day'"style="cursor:pointer;">Day</button>
+            <button type="button" id="week" ng-model="radioModel" class="btn btn-default week" ng-click="$ctrl.active_filters('week')" uib-btn-radio="'Week'" style="cursor:pointer;">Week</button>
+            <button type="button" id="Month" ng-model="radioModel" class="btn btn-default month" ng-click="$ctrl.active_filters('month')" uib-btn-radio="'Month'" style="cursor:pointer;">Month</button>
+    </div>
 </div>
+</div>
+<div class="scroll">
 <div class="row" ng-repeat="i in $ctrl.useful_layout">
     <div ng-repeat="j in i" class="col-sm-{{j.col}} widget">
         <div class="widget-content">
@@ -238,9 +346,9 @@ table {
             <div class="widget-body">
                 <div ng-if="j.day_type_widget" class="input-group"id="inner2">
                      <div class="btn-group">
-                        <button type="button" id="day" class="active btn btn-default day" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" style="cursor:pointer;">Day</button>
-                        <button type="button" id="week" class="btn btn-default week" ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')" style="cursor:pointer;">Week</button>
-                        <button type="button" id="Month" class="btn btn-default month" ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')" style="cursor:pointer;">Month</button>
+                        <button type="button" id="day" ng-model="radioModel" class="btn btn-default day" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" uib-btn-radio="'Day'" style="cursor:pointer;">Day</button>
+                        <button type="button" id="week" ng-model="radioModel" class="btn btn-default week" ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')" uib-btn-radio="'Week'" style="cursor:pointer;">Week</button>
+                        <button type="button" id="Month" ng-model="radioModel" class="btn btn-default month" ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')" uib-btn-radio="'Month'" style="cursor:pointer;">Month</button>
                      </div>
                  </div>
                 <highcharts options="$ctrl.final_layout_values_list[j.opt]"></highcharts>
@@ -305,36 +413,8 @@ table {
                 </table>
             </div>
         </div>
-
-        <!--<div class="col-md-6" id="emp_widget">
-            <div class="graph">
-                <div class="widget-title clearfix" title="Sample Widg">
-                    <h4>Volume Status</h4>
-                </div>
-                <table class="table table-bordered line body">
-                        <thead>
-                            <tr class="row_name">
-                                <th style="width:15%;">Opening</th>
-                                <th style="width:15%;">Received</th>
-                                <th style="width:28%;">Non Workable Count</th>
-                                <th style="width:15%;">Completed</th>
-                                <th style="width:22%;">Closing balance</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="l in $ctrl.volume_graphs">
-                                <td style="width:15%;">{{l.opening}}</td>
-                                <td style="width:16%;">{{l.received}}</td>
-                                <td style="width:28%;">{{l.non_workable_count}}</td>
-                                <td style="width:15%;">{{l.completed}}</td>
-                                <td style="width:22%;">{{l.closing_balance}}</td>
-                            </tr>
-                        </tbody>
-                </table>
-            </div>
-        </div>-->
     </div>
-
+</div>
 
 <div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog">
@@ -373,8 +453,8 @@ table {
 
 <script>
     $('body').on('click','.btn-group button', function(e) {
-     $(this).addClass('active');
-     $(this).siblings().removeClass('active');
+     $(this).addClass('active btn-success');
+     $(this).siblings().removeClass('active btn-success');
 });
 
 </script>

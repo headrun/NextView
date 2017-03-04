@@ -21,27 +21,18 @@
 
              $('#Widgets').hide();
 
-             $('#Projects').hide();
+             $('#About').hide();
+
+             //$('#Projects').hide();
 
              $('.mythili').hide();
 
-             /*$(".pro_loading").click(function() {
-
-                self.showLoading();
-
-             });*/
 
               self.clickPro = function(val, $rootScope){
 
                 self.showLoading();
 
                 $('#dropdown_title').text(val.split(' - ')[1]);
-
-                //self.cen_pro_name['state'] = val;
-
-                //val = '';
-
-                //self.updateState({'state':self.cen_pro_name, 'pageName':'page1'});
 
               }
 
@@ -93,42 +84,128 @@
 
             $("#Ser").on('click', function() {
 
-                $("#Abt").removeClass('active');
+                $("#Proj").removeClass('active');
             });
 
             $("#Wid").on('click', function() {
 
-                $("#Abt").removeClass('active');
+                $("#Proj").removeClass('active');
             });
 
-            $("#Proj").on('click', function() {
+            $("#Abt").on('click', function() {
 
-                $("#Abt").removeClass('active');
+                $("#Proj").removeClass('active');
             });
 
 
 
             $http({method:"GET", url:project}).success(function(result){
 
-                self.pro_cen_nam = result.result.list[1];
+                //self.pro_cen_nam = result.result.list[1];
+
+                self.widgets_name = result.result.lay[1].layout;
 
                 if (result.result.role == "customer") {
 
-                    //var map_list = result.result.list;
+                    var widgets_list = result.result.lay[1].layout;
 
-                    //self.mapping_list = map_list[1];
-                    //
-                    self.mapping_list = [];
-                    self.mapping_list.push(result.result.list[1]);
+                    var i;
+
+                    var widgets_data;
+
+                    var widgets_names = [];
+
+                    for (i = 0; i < widgets_list.length; i++) {
+
+                        widgets_data = widgets_list[i];
+
+                    self.widgets_names.push(widgets_data);
+
+                    }
 
                 }
 
+                if (result.result.role == "team_lead") {
+
+                    var widgets_list = result.result.lay[1].layout;
+
+                    var i;
+
+                    var widgets_data;
+
+                    var widgets_names = [];
+
+                    for (i = 0; i < widgets_list.length; i++) {
+
+                        widgets_data = widgets_list[i];
+
+                    self.widgets_names.push(widgets_data);
+
+                    }
+                }
+
+                if (result.result['role'] == "center_manager") {
+
+                    var widgets_list = result.result.lay[1].layout;
+
+                    var i;
+
+                    var widgets_data;
+
+                    var widgets_names = [];
+
+                    for (i = 0; i < widgets_list.length; i++) {
+
+                        widgets_data = widgets_list[i];
+
+                    self.widgets_names.push(widgets_data);
+
+                    }
+
+                }
+
+                if (result.result['role'] == "nextwealth_manager") {
+
+                    var widgets_list = result.result.lay[1].layout;
+
+                    var i;
+
+                    var widgets_data;
+
+                    var widgets_names = [];
+
+                    for (i = 0; i < widgets_list.length; i++) {
+
+                        widgets_data = widgets_list[i];
+
+                    self.widgets_names.push(widgets_data);
+
+                    }
+
+                }
+
+                if (result.result['role'] == "customer") {
+
+                    var map_list = result.result.list;
+
+                    if (map_list.includes("none")) {
+
+                        self.mapping_list = []
+
+                        var map_list = map_list[1];
+
+                        self.mapping_list.push(map_list);
+
+                    }
+
+                    else {
+
+                        self.mapping_list = map_list;
+                    }
+                }
 
                 if (result.result.role == "team_lead") {
 
-                    //var map_list = result.result.list;
-
-                    //self.mapping_list = map_list[1];
                     self.mapping_list = []
                     self.mapping_list.push(result.result.list[1]);
 
@@ -146,12 +223,15 @@
 
                     var map_list = result.result.list;
 
-                    self.mapping_list = map_list;
+                    self.mapping_list = map_list.sort();
 
                     $('.mythili').show();
 
                     }
             });
+
+             self.widgets_list = '';
+             self.widgets_names = [];
 
          }],
 

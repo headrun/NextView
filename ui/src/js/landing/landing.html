@@ -14,123 +14,181 @@ h2 {
 }
 .second {
     float: right;
-    margin-top: -29%;
+    margin-top: -22.5%;
     margin-right: 40%;
 }
 div {
     font-family: serif;
 }
-#page-content-wrapper {
 
-    margin-top: -2%;
-}
-
-a.active{
+a.active {
 
     background-color: #f1f1f1;
 }
-/*#content {
-    margin-top: 5%;
-}*/
+
+.upload {
+    display: none;
+}
+#admin_but {
+   display: none;
+}
+.card {
+    position: relative;
+    margin-top: 50px;
+    background: #f5f5f5;
+    margin-bottom: 30px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.15);
+    margin-right: 4%;
+    margin-left: 4%;
+}
+.listview {
+    position: relative;
+}
+.lv-header-alt {
+    position: relative;
+    background: #f8f8f8;
+    padding: 15px;
+}
+.lvh-label {
+    color: #ffffff;
+    display: inline-block;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 0 6px;
+    line-height: 33px;
+    vertical-align: middle;
+    float: left;
+}
+.row {
+    background: #61B329;;
+    padding: 10px 10px;
+    /*margin-left: -3%;*/
+    /*margin-right: -3%;*/
+    margin-top: -3%;
+    color: white;
+}
+li.ng-binding {
+    list-style-type: none;
+    height: 50px;
+    margin: 10px 0;
+    border-bottom: 1px solid grey;
+    margin-left: -2.75%;
+    padding-left: 10%;
+    margin-right: -2.75%;
+    line-height: 40px;
+}
+a:last-child li {
+    border: none;
+    margin-bottom: -1%;
+}
+
+div:last-child li {
+    border: none;
+}
+.row_data {
+    margin-top: 20px;
+}
+.widgets {
+    list-style-type: none;
+    height: 45px;
+    /* margin: 10px 0; */
+    border-bottom: 1px solid grey;
+    margin-left: -2.75%;
+    padding-left: 10%;
+    margin-right: -2.75%;
+    line-height: 40px;
+}
+p {
+    font-family: Georgia;
+    color: #555;
+    text-align: left;
+}
+.container {
+    padding: 0;
+    margin: 0;
+    /* margin-right: -20px; */
+    /* padding-right: 0; */
+    margin-right: 0px !important;
+    padding-right: 0px !important;
+    width: 100%;
+}
+dashboard div.dashboard-content {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+.col-md-3 {
+    margin-top: 31px;
+    font-size: xx-large;
+}
+.col-md-9 {
+    margin-top: 27px;
+    font-size: 16px;
+}
+
 </style>
 <head>
 <title>NextPulse</title>
 </head>
 <body>
-    <div class="container">
-        <div class="row" style="margin-top: 5%;">
-            <div id='content' class='row-fluid col-md-3'>
-                <div class='span2 sidebar'>
-                    <ul class="nav nav-tabs" style="border-bottom: none;">
-                        <li><a href="" id="Abt" class="active">About NextWealth</a></li>
-                        <li><a href="" id="Ser">Services Of NextWealth</a></li>
-                        <li><a href="" id="Wid">Widgets Of NextPulse</a></li>
-                        <li><a href="" id="Proj">Projects Under NextPulse</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div id="page-content-wrapper" class="col-md-9">
-                <div class="container-fluid xyz">
-                    <section id="About">
-                        <h2>NextWealth</h2>
-                        <!--<h3>About NextWealth</h3>-->
-                        <p>NextWealth Entrepreneurs Private Limited (NextWealth) is a  IT Services company founded by four accomplished industry veterans and is based in Bangalore, India.</p>
-                        <p>NextWealth is created grounds up to meet the needs of Digital Enterprises using information based strategies and ride on accelerated rate at which people, places and things are becoming digitally interconnected.Digital Enterprises utilize IT and digital technologies as the foundation of their products and services and would like to improve. NextWealth’s business model assists Digital Enterprises in this journey.</p>
-                        <p>NextWealth establishes delivery centers in locations where cost of living is low, talent sources are present in the vicinity and required infrastructure like bandwidth are readily available resulting in reduced cost of operations by an order of magnitude.</p>
-                        <img class="img-responsive" src="/img/about.png" alt="Nexwealth" style="width:595px; height:316px;float:right;margin-right:12%;">
-                    </section>
-                    <section id="Services">
-                        <h3>Services Of NextWealth</h3>
-                        <ul>
-                            <li>Banking & Financial Services</li>
-                            <li>Content and Catalogue</li>
-                            <li>Analytics</li>
-                            <li>Testing</li>
-                            <li>Tech Support</li>
-                            <li>Healthcare RCM</li>
-                        </ul>
-                        <img src="/img/services.jpg" alt="Services" style="width:120%;margin-top:6%;margin-left:-10%;">
-                    </section>
-                    <section id="Widgets">
-                        <h2>NextPulse</h2>
+<div class="container">
+    <section id="About">
+        <div class="image" style="background-image: url(/img/banner_about_us.png);height: 325px;padding: 0;margin-top: -25px;">
+            <!--<h1 class="page-title page_title_text" style="text-align: left; color: white;">About Us</h1>-->
+        </div><!--<img class="img-responsive" src="/img/banner_about_us.png" alt="Nexwealth" style="width:912px;height:309px;">-->
+        <div class="col-md-3">
+            <p style="color:#0f99c9;font-size:21px;">Who We Are</p>
+            <b style="font-weight:100;font-size:21px;color:#555;">Adding A Human Touch To Digital Processes</b>
+        </div>
+        <div class="col-md-9">
+            <p>NextWealth provides <b>Digital Business Processes Management services</b> to companies that embrace digital technologies. One of the outcomes of digital technology implementation is automation of processes that require human effort.</p>
+            <p>At one end, there are processes that are amenable to a high degree of automation. In such a case, there is a need for <b>‘Human touch to Digital processes.’</b> NextWealth collects, processes, organizes, and analyses vast amount of data that is ready for automation, thus providing Digital Data services .</p>
+            <p>At the other end of the spectrum, some processes are still performed manually. In such a case, there is a need for <b>‘Digital touch to Human processes.’</b> NextWealth employs Cloud-based technologies, chatbots, and mobile apps to provide Customer Interaction services in this respect.</p>
+            <p>Overall, NextWealth helps companies enhance and extend their customer experience and empowers them for deeper engagements; for example e-Commerce and new-age financial institutions.</p>
+            <p>NextWealth works with <b>enterprise giants, start-ups, and large banking firms</b> – renowned in their space – to help them embrace and adopt digital technologies with greater ease.</p>
+            <p>Our services are planned towards <b>introducing, enhancing, and extending</b> customer experience processes to build brand loyalty for our clients. Backed by a human touch, our services cover a range of activities for improved customer experience processes – for example, meta-tagging products for quicker searches and voice-based solutions for faster ticket resolution.</p>
+        </div>
+
+    </section>
+    <section id="Services">
+        <div class="image" style="background-image: url(/img/services_banner.png);height: 340px;padding: 0;margin-top: -25px;"></div>
+        <div class="col-md-3">
+            <p style="color:#0f99c9;font-size:21px;">Strengthening Businesses, The Digital Way</p>
+        </div>
+        <div class="col-md-9">
+            <p>Digitalization is taking the world by storm and changing the way businesses think, act, and function. To address the new needs and demands of the market, companies are redrawing the processes paradigm to involve IT solutions that help them emerge as market leaders.</p>
+            <p>At NextWealth, we take on the all-important task of refining your business processes and enhancing workflows for you. We help you meet the ever-changing needs of the market and stay agile – allowing you to take your business to newer frontiers, every single day.</p>
+        </div>
+    </section>
+</div>
+<div class="container">
+    <div class="card">
+        <div class="listview lv-bordered lv-lg">
+            <div class="clearfix lv-header-alt">
+                <section id="Widgets">
+                    <div class="row">
+                        <h2 style="float:left;font-size:large;margin-top:5px;">NextPulse</h2>
+                    </div>
+                    <div class="row_data">
                         <p>NextPulse is a software by NextWealth used to measure the accuracy of work across each location and for each project.It handles various projects across different centers.</p>
-                        <h3>Each project has multiple widgets,the list of widgets are as follows:</h3>
-                        <ul class="first">
-                            <li>Production Trends</li>
-                            <li>Internal Accuracy</li>
-                            <li>External Accuracy</li>
-                            <li>Internal Accuracy Trends</li>
-                            <li>External Accuracy Trends</li>
-                            <li>Production Chart</li>
-                            <li>Internal Error Types</li>
-                            <li>External Error Types</li>
-                            <li>FTE Utilized_Workpacket Wise</li>
-                            <li>Total FTE Utilized</li>
-                            <li>Volume Status</li>
-                        </ul>
-                        <ul class="second">
-                            <li>Received Vs Completed</li>
-                            <li>Overall Utilization</li>
-                            <li>FTE Utilization</li>
-                            <li>Operational Utilization</li>
-                            <li>Productivity Trends</li>
-                            <li>Internal Pareto Analysis</li>
-                            <li>External Pareto Analysis</li>
-                            <li>Monthly Volume graph</li>
-                            <li>Top Employee Performance Table</li>
-                            <li>Volume Status Table</li>
-                        </ul>
-                    </section>
-                    <section id="Projects">
-                        <h3>The Projects under NextPulse are:</h3>
-                        <!--<ol>
-                            <a id="pro_loading" href="/#!/page1"><li>{{$ctrl.pro_cen_nam}}</li></a>
-                            <a href="/#!/page1" ng-repeat="item in $ctrl.mapping_list"><li>{{item}}</li></a>
-                         </ol>-->
-                        <ol>
-                            <!--<a href="/#!/page1" 
-                                ng-repeat="item in $ctrl.mapping_list" 
-                                ng-click="$ctrl.clickPro(item)"
-                                update-state="$ctrl.updateState(pageName, item)"><li>{{item}}</li></a>-->
-                                <!--<a href="/#!/page1"
-                                ng-repeat="item in $ctrl.mapping_list"
-                                ng-click="$ctrl.clickPro(item)"><li>{{item}}</li></a>-->
-                          
-                                <a ng-repeat="item in $ctrl.mapping_list" 
-                                   ui-sref="dashboard.page1({'selpro': item})"
-                                   ng-click="$ctrl.clickPro(item)">
-                                    <li>{{item}}</li>
-                                </a>
-                                <li class="mythili" style="color:red;">Salem - IBM</li>
-                                <li class="mythili" style="color:red;">Salem - E4U</li>
-                                <li class="mythili" style="color:red;">Salem - Indix</li>
-                                <li class="mythili" style="color:red;">Salem - Bridgei2i</li>
-                        </ol>
-                        
-                        <!--<a href="/#!/page1" class="btn btn-info" role="button" id="data">Go To Dashboard</a>-->
-                    </section>
-                </div>
+                        <h3 style="color:#555;">Widgets under project are</h3>
+                    </div>
+                    <div ng-repeat="item in $ctrl.widgets_names">
+                        <li style="color:#555;" class="widgets">{{item}}</li>
+                    </div>
+                </section>
+                <section id="Projects">
+                    <div class="row">
+                        <h2 class="hidden-xs lvh-label">Projects</h2>
+                    </div>
+                    <a ng-repeat="item in $ctrl.mapping_list"
+                        ui-sref="dashboard.page1({'selpro': item})"
+                        ng-click="$ctrl.clickPro(item)">
+                        <li>{{item.split(' - ')[1]}}</li>
+                    </a>
+                </section>
             </div>
         </div>
     </div>
+</div>
 </body>

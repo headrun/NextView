@@ -22,6 +22,7 @@ import json
 from django.apps import apps
 from collections import OrderedDict
 from django.utils.timezone import utc
+from django.utils.encoding import smart_str, smart_unicode
 
 def error_insert(request):
     pass
@@ -65,6 +66,7 @@ def validate_sheet(open_sheet, request, SOH_XL_HEADERS, SOH_XL_MAN_HEADERS):
 def get_cell_data(open_sheet, row_idx, col_idx):
     try:
         cell_data = open_sheet.cell(row_idx, col_idx).value
+        cell_data = smart_str(cell_data)
         cell_data = str(cell_data)
         if isinstance(cell_data, str):
             cell_data = cell_data.strip()
@@ -76,16 +78,121 @@ def get_cell_data(open_sheet, row_idx, col_idx):
 
 def project(request):
     try:
-        manager_prj =  request.GET.get('name','')
-        manager_prj = manager_prj.strip(' -')
+        #manager_prj =  request.GET.get('name','')
+        #manager_prj = manager_prj.strip(' -')
+        multi_center, multi_project = request.GET.get('name').split(' - ')
     except: 
-        manager_prj = ''
+        #manager_prj = ''
+        multi_center, multi_project = '',''
     user_group = request.user.groups.values_list('name', flat=True)[0]
+    user_group_id = Group.objects.filter(name=user_group).values_list('id', flat=True)
     dict = {}
     list_wid = []
     layout_list = []
     final_dict = {}
-    widgets_id = Widget_Mapping.objects.filter(user_name_id=request.user.id).values('widget_priority', 'is_drilldown','is_display', 'widget_name')
+    
+    if 'team_lead' in user_group:
+        center = TeamLead.objects.filter(name_id=request.user.id).values_list('center')
+        prj_id = TeamLead.objects.filter(name_id=request.user.id).values_list('project')
+
+    if 'customer' in user_group:
+        select_list = [] 
+        details = {} 
+        center_list = Customer.objects.filter(name_id=request.user.id).values_list('center')
+        project_list = Customer.objects.filter(name_id=request.user.id).values_list('project')
+        if (len(center_list) & len(project_list)) == 1:
+            select_list.append('none')
+        if len(center_list) < 2: 
+            center_name = str(Center.objects.filter(id=center_list[0][0])[0])
+            for project in project_list:
+                project_name = str(Project.objects.filter(id=project[0])[0])
+                vari = center_name + ' - ' + project_name
+                select_list.append(vari)
+        elif len(center_list) >= 2:
+            for center in center_list:
+                center_name = str(Center.objects.filter(id=center[0])[0])
+                for project in project_list:
+                    project_name = str(Project.objects.filter(id=project[0])[0])
+                    select_list.append(center_name + ' - ' + project_name) 
+        details['list'] = select_list
+    
+        if len(select_list) > 1: 
+              if multi_project:
+                 prj_id = Project.objects.filter(name=multi_project).values_list('id','center_id')
+              else:
+                 prj_name = select_list[1].split(' - ')[1]
+                 prj_id = Project.objects.filter(name=prj_name).values_list('id','center_id') 
+
+    if 'nextwealth_manager' in user_group:
+        select_list = []  
+        #layout_list = []
+        center_list = Nextwealthmanager.objects.filter(name_id=request.user.id).values_list('center')
+        if len(center_list) < 2: 
+            center_name = str(Center.objects.filter(id=center_list[0][0])[0])
+            center_id = Center.objects.filter(name = center_name)[0].id
+            project_list = Project.objects.filter(center_id=center_id)
+            for project in project_list:
+                project_name = str(project)
+                #select_list.append(center_name + ' - ' + project_name)
+                select_list.append(project_name)
+
+        elif len(center_list) >= 2:
+            for center in center_list:
+                center_name = str(Center.objects.filter(id=center[0])[0])
+                center_id = Center.objects.filter(id=center[0])[0].id
+                project_list = Project.objects.filter(center_id=center_id)
+                for project in project_list:
+                    project_name = str(project)
+                    select_list.append(project_name)    
+
+        if len(select_list) > 1:
+            if multi_project:
+                prj_id = Project.objects.filter(name=multi_project).values_list('id','center_id')
+            else:
+                prj_name = select_list[1]
+                #prj_name = select_list[1]
+                prj_id = Project.objects.filter(name=prj_name).values_list('id','center_id')
+
+    if 'center_manager' in user_group:
+        select_list = []
+        center_list = Centermanager.objects.filter(name_id=request.user.id).values_list('center')
+        if len(center_list) < 2:
+            center_name = str(Center.objects.filter(id=center_list[0][0])[0])
+            center_id = Center.objects.filter(name = center_name)[0].id
+            project_list = Project.objects.filter(center_id=center_id)
+            for project in project_list:
+                project_name = str(project)
+                select_list.append(project_name)
+
+        elif len(center_list) >= 2:
+            for center in center_list:
+                center_name = str(Center.objects.filter(id=center[0])[0])
+                center_id = Center.objects.filter(id=center[0])[0].id
+                project_list = Project.objects.filter(center_id=center_id)
+                for project in project_list:
+                    project_name = str(project)
+                    select_list.append(project_name)
+          
+        if len(select_list) > 1:
+            if multi_project:
+                prj_id = Project.objects.filter(name=multi_project).values_list('id','center_id')
+            else:
+                prj_name = select_list[1]
+                prj_id = Project.objects.filter(name=prj_name).values_list('id','center_id')    
+
+        else:
+            if multi_project:
+                prj_id = Project.objects.filter(name=multi_project).values_list('id','center_id')
+            else:
+                prj_name = select_list[0]
+                prj_id = Project.objects.filter(name=prj_name).values_list('id','center_id') 
+
+    
+    if user_group in ['nextwealth_manager','center_manager','customer']:
+        widgets_id = Widgets_group.objects.filter(User_Group_id=user_group_id, project=prj_id[0][0],center=prj_id[0][1]).values('widget_priority', 'is_drilldown','is_display', 'widget_name')
+    else:
+        widgets_id = Widgets_group.objects.filter(User_Group_id=user_group_id, project=prj_id,center=center).values('widget_priority', 'is_drilldown','is_display', 'widget_name')
+
     for data in widgets_id:
         if data['is_display'] == True:
             widgets_data = Widgets.objects.filter(id=data['widget_name']).values('config_name', 'name', 'id_num', 'col','opt', 'day_type_widget', 'api')
@@ -95,6 +202,7 @@ def project(request):
             list_wid.append(wid_dict)
     sorted_dict = sorted(list_wid, key=lambda k: k['widget_priority'])
     lay_out_order = []
+    #import pdb;pdb.set_trace()
     for i in sorted_dict:
         config_name = i.pop('config_name')
         lay_out_order.append(config_name)
@@ -151,8 +259,8 @@ def project(request):
         details['lay'] = layout_list
         details['final'] = final_details
         if len(project_names) > 1: 
-            if manager_prj:
-                prj_id = Project.objects.filter(name=manager_prj).values_list('id',flat=True)
+            if multi_project:
+                prj_id = Project.objects.filter(name=multi_project).values_list('id',flat=True)
             else:
                 prj_id = Project.objects.filter(name=project_names[1]).values_list('id',flat=True)
             new_dates = latest_dates(request, prj_id)
@@ -205,8 +313,8 @@ def project(request):
         details['lay'] = layout_list
         details['final'] = final_details
         if len(select_list) > 1:
-            if manager_prj:
-                prj_id = Project.objects.filter(name=manager_prj).values_list('id',flat=True)
+            if multi_project:
+                prj_id = Project.objects.filter(name=multi_project).values_list('id',flat=True)
             else:
                 prj_name = select_list[1].split('- ')[1].strip()
                 #prj_name = select_list[1]
@@ -228,27 +336,7 @@ def project(request):
         center_list = Customer.objects.filter(name_id=request.user.id).values_list('center')
         project_list = Customer.objects.filter(name_id=request.user.id).values_list('project')
         #customer_id = Customer.objects.filter(name_id=request.user.id).values_list('id', flat=True)
-        """
-        widgets_id = Widget_Mapping.objects.filter(user_name_id=request.user.id).values('widget_priority', 'is_drilldown','is_display', 'widget_name')
-        list_wid = []
-        wid_dict = {}
-        final_dict = {}
-        for data in widgets_id:
-            if data['is_display'] == True:
-                widgets_data = Widgets.objects.filter(id=data['widget_name']).values('config_name', 'name', 'id_num','col', 'opt', 'day_type_widget','api')
-                wid_dict = widgets_data[0]
-                wid_dict['widget_priority'] = data['widget_priority']
-                wid_dict['is_drilldown'] = data['is_drilldown']
-                list_wid.append(wid_dict)
-        sorted_dict = sorted(list_wid, key=lambda k: k['widget_priority'])
-        lay_out_order = []
-        for i in sorted_dict:
-            config_name = i.pop('config_name')
-            lay_out_order.append(config_name)
-            final_dict[config_name] = i
-        layout_list.append(final_dict)
-        layout_list.append({'layout': lay_out_order})
-        """
+
         if (len(center_list) & len(project_list)) == 1:
             select_list.append('none')
         if len(center_list) < 2:
@@ -271,8 +359,8 @@ def project(request):
         details['final'] = final_details
         project_names = project_list
         if len(project_names) > 1: 
-            if manager_prj:
-                prj_id = Project.objects.filter(name=manager_prj).values_list('id',flat=True)
+            if multi_project:
+                prj_id = Project.objects.filter(name=multi_project).values_list('id',flat=True)
             else:
                 prj_id = Project.objects.filter(name=project_names[1]).values_list('id',flat=True)
             new_dates = latest_dates(request, prj_id)
@@ -315,7 +403,11 @@ def different_error_type(total_error_types):
                     if er_key != '':
                         all_errors[er_key] = [int(er_value)]
         for error_type,error_value in all_errors.iteritems():
-            new_all_errors[str(error_type)] = sum(error_value)
+            try:
+                new_all_errors[str(error_type)] = sum(error_value)
+            except:
+                error_type = smart_str(error_type)
+                new_all_errors[error_type] = sum(error_value)
     return new_all_errors
 
 
@@ -1103,10 +1195,11 @@ def upload_new(request):
         worktrack_mapping = {}
         headcount_mapping = {}
         target_mapping = {}
+        tat_mapping = {}
         ignorablable_fields = []
         other_fileds = []
         authoring_dates = {}
-        mapping_ignores = ['project_id','center_id','_state','sheet_name','id']
+        mapping_ignores = ['project_id','center_id','_state','sheet_name','id','total_errors_require']
         raw_table_map_query = Authoring_mapping(prj_obj,center_obj,'RawtableAuthoring')
         for map_key,map_value in raw_table_map_query.iteritems():
             if map_key == 'sheet_name':
@@ -1127,6 +1220,8 @@ def upload_new(request):
         for map_key,map_value in internal_error_map_query.iteritems():
             if map_key == 'sheet_name':
                 sheet_names['internal_error_sheet'] = map_value
+            if map_key == 'total_errors_require':
+                intrnl_error_check = map_value 
             if map_value != '' and map_key not in mapping_ignores:
                 internal_error_mapping[map_key]= map_value.lower()
                 if '#<>#' in map_value:
@@ -1135,10 +1230,13 @@ def upload_new(request):
                         other_fileds.append(required_filed[1])
                 if map_key == 'date':
                     authoring_dates['intr_error_date'] = map_value.lower()
+        
         external_error_map_query = Authoring_mapping(prj_obj,center_obj,'ExternalerrorsAuthoring')
         for map_key,map_value in external_error_map_query.iteritems():
             if map_key == 'sheet_name':
                 sheet_names['external_error_sheet'] = map_value
+            if map_key == 'total_errors_require':
+                extrnl_error_check = map_value
             if map_value != '' and map_key not in mapping_ignores:
                 external_error_mapping[map_key]= map_value.lower()
                 if '#<>#' in map_value:
@@ -1185,15 +1283,30 @@ def upload_new(request):
                     else:
                         authoring_dates['target_to_date'] = map_value.lower()
 
+        tat_map_query = Authoring_mapping(prj_obj, center_obj, 'TatAuthoring')
+        for map_key, map_value in tat_map_query.iteritems():
+            if map_key == 'sheet_name':
+                sheet_names['tat_sheet'] = map_value
+            if map_value != '' and map_key not in mapping_ignores:
+                tat_mapping[map_key] = map_value.lower()
+                if '#<>#' in map_value:
+                    required_filed = map_value.split('#<>#')
+                    other_fileds.append(required_filed[1])
+                if map_key == 'received_date':
+                    authoring_dates['tat_date'] = map_value.lower()
+         
+
         other_fileds = filter(None, other_fileds)
         file_sheet_names = sheet_names.values()
         sheet_index_dict = {}
         for sh_name in file_sheet_names:
             if sh_name in excel_sheet_names:
                 sheet_index_dict[sh_name] = open_book.sheet_names().index(sh_name)
+
         db_check = str(Project.objects.filter(name=prj_obj.name,center=center_obj).values_list('project_db_handling',flat=True)[0])
         raw_table_dataset, internal_error_dataset, external_error_dataset, work_track_dataset,headcount_dataset = {}, {}, {}, {},{}
         target_dataset = {}
+        tats_table_dataset = {}
         for key,value in sheet_index_dict.iteritems():
             one_sheet_data = {}
             prod_date_list,internal_date_list,external_date_list=[],[],[]
@@ -1320,7 +1433,7 @@ def upload_new(request):
                                     internal_error_dataset[str(customer_data[date_name])][emp_key] = local_internalerror_data
                     print local_internalerror_data
 
-
+            
                 if key == sheet_names.get('external_error_sheet',''):
                     date_name = authoring_dates['extr_error_date']
                     if not external_error_dataset.has_key(customer_data[date_name]):
@@ -1525,17 +1638,61 @@ def upload_new(request):
                                 target_dataset[str(customer_data[date_name])][emp_key] = local_target_data
                     print local_target_data
 
+                if key == sheet_names.get('tat_sheet', ''):
+                    date_name = authoring_dates['tat_date']
+                    if not tats_table_dataset.has_key(customer_data[date_name]):
+                        tats_table_dataset[str(customer_data[date_name])] = {}
+                    local_tat_data = {}
+                    for raw_key, raw_value in tat_mapping.iteritems():
+                        if '#<>#' in raw_value:
+                            checking_values = raw_value.split('#<>#')
+                            if customer_data.has_key(checking_values[0].lower()):
+                                if customer_data[checking_values[0].lower()].lower() == checking_values[1].lower():
+                                    local_tat_data[raw_key] = customer_data[checking_values[2].lower()]
+                                else:
+                                    local_tat_data[raw_key] = 'not_applicable'
 
+                        elif ('#<>#' not in raw_value) and (raw_value in customer_data.keys()):
+                            local_tat_data[raw_key] = customer_data[raw_value]
+
+                    emp_key = '{0}_{1}_{2}_{3}'.format(local_tat_data.get('sub_project', 'NA'),
+                                                       local_tat_data.get('work_packet', 'NA'),
+                                                       local_tat_data.get('sub_packet', 'NA'),
+                                                       local_tat_data.get('employee_id', 'NA'))
+                    if 'not_applicable' not in local_tat_data.values():
+                        if tats_table_dataset.has_key(str(customer_data[date_name])):
+                            if tats_table_dataset[str(customer_data[date_name])].has_key(emp_key):
+                                for extr_key, extr_value in local_tat_data.iteritems():
+                                    if extr_key not in tats_table_dataset[str(customer_data[date_name])][emp_key].keys():
+                                        tats_table_dataset[str(customer_data[date_name])][emp_key][extr_key] = extr_value
+                                    else:
+                                        if (extr_key == 'total_errors') or (extr_key == 'audited_errors'):
+                                            try:
+                                                extr_value = float(extr_value)
+                                            except:
+                                                extr_value = 0
+                                            try:
+                                                dataset_value = float(tats_table_dataset[str(customer_data[date_name])][emp_key][extr_key])
+                                            except:
+                                                dataset_value = 0
+                                            if db_check == 'aggregate':
+                                                tats_table_dataset[str(customer_data[date_name])][emp_key][extr_key] = extr_value + dataset_value
+                                            elif db_check == 'update':
+                                                tats_table_dataset[str(customer_data[date_name])][emp_key][extr_key] = extr_value
+                            else:
+                                tats_table_dataset[str(customer_data[date_name])][emp_key] = local_tat_data
+                    print local_tat_data  
+        
         for date_key,date_value in internal_error_dataset.iteritems():
             for emp_key,emp_value in date_value.iteritems():
-                emp_data = Error_checking(emp_value)
-                if emp_data['status'] == 'matched':
-                    internalerror_insert = internalerror_query_insertion(emp_data, prj_obj, center_obj,teamleader_obj_name,db_check)
+                emp_data = Error_checking(emp_value,intrnl_error_check)
+                #if emp_data['status'] == 'matched':
+                internalerror_insert = internalerror_query_insertion(emp_data, prj_obj, center_obj,teamleader_obj_name,db_check)
         for date_key,date_value in external_error_dataset.iteritems():
             for emp_key,emp_value in date_value.iteritems():
-                emp_data = Error_checking(emp_value)
-                if emp_data['status'] == 'matched':
-                    externalerror_insert = externalerror_query_insertion(emp_value, prj_obj, center_obj,teamleader_obj_name,db_check)
+                emp_data = Error_checking(emp_value,extrnl_error_check)
+                #if emp_data['status'] == 'matched':
+                externalerror_insert = externalerror_query_insertion(emp_value, prj_obj, center_obj,teamleader_obj_name,db_check)
         for date_key,date_value in work_track_dataset.iteritems():
             for emp_key,emp_value in date_value.iteritems():
                 externalerror_insert = worktrack_query_insertion(emp_value, prj_obj, center_obj,teamleader_obj_name,db_check)
@@ -1545,6 +1702,11 @@ def upload_new(request):
         for date_key, date_value in target_dataset.iteritems():
             for emp_key, emp_value in date_value.iteritems():
                 externalerror_insert = target_table_query_insertion(emp_value, prj_obj, center_obj, teamleader_obj_name,db_check)
+
+        for date_key, date_value in tats_table_dataset.iteritems():
+            for emp_key, emp_value in date_value.iteritems():
+                externalerror_insert = tat_query_insertion(emp_value, prj_obj, center_obj, teamleader_obj_name,db_check)  
+
 
         for date_key,date_value in raw_table_dataset.iteritems():
             for emp_key,emp_value in date_value.iteritems():
@@ -1575,7 +1737,7 @@ def dates_sorting(timestamps):
     sorted_values = [datetime.datetime.strftime(ts, "%Y-%m-%d") for ts in dates]
     return sorted_values
 
-def Error_checking(employee_data):
+def Error_checking(employee_data,error_match=False):
     employee_data['status'] = 'mis_match'
     if employee_data.has_key('individual_errors'):
         if employee_data['individual_errors'].has_key('no_data'):
@@ -1592,13 +1754,23 @@ def Error_checking(employee_data):
                 er_value = 0
             all_error_values.append(er_value)
 
-        if total_errors == sum(all_error_values):
-            all_error_values = [str(value) for value in all_error_values ]
-            employee_data['status'] = 'matched'
-            error_types='#<>#'.join(employee_data['individual_errors'].keys())
+        if error_match ==True:
+            if total_errors == sum(all_error_values):
+                all_error_values = [str(value) for value in all_error_values ]
+                employee_data['status'] = 'matched'
+                error_types='#<>#'.join(employee_data['individual_errors'].keys())
+                error_values = '#<>#'.join(all_error_values)
+                employee_data['error_types'] = error_types
+                employee_data['error_values'] = error_values
+            else:
+                employee_data['error_types'] = None
+                employee_data['error_values'] = 0
+        else:
+            all_error_values = [str(value) for value in all_error_values]
+            error_types = '#<>#'.join(employee_data['individual_errors'].keys())
             error_values = '#<>#'.join(all_error_values)
             employee_data['error_types'] = error_types
-            employee_data['error_values'] = error_values
+            employee_data['error_values'] = error_values 
 
     return employee_data
 
@@ -1747,6 +1919,61 @@ def headcount_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_
                                                                                         non_billable_support_others=non_billable_support_others,
                                                                                         total = total)
     return head_date_list
+
+
+def tat_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, db_check):
+    tat_date_list = customer_data['received_date']
+    check_query = TatTable.objects.filter(project=prj_obj, sub_project=customer_data.get('sub_project', ''),
+                                          work_packet=customer_data['work_packet'],
+                                          sub_packet=customer_data.get('sub_packet', ''),
+                                          date=customer_data['received_date'],
+                                          center=center_obj).values('total_received','met_count','non_met_count','tat_status')
+
+    try:
+        total_received = int(float(customer_data['total_received']))
+    except:
+        total_received = 0
+    try:
+        met_count = int(float(customer_data['met_count']))
+    except:
+        met_count = 0
+    try:
+        non_met_count = int(float(customer_data['non_met_count']))
+    except:
+        non_met_count = 0
+    try:
+        tat_status = customer_data['tat_status']
+    except:
+        tat_status = ''
+
+    if len(check_query) == 0:
+        new_can = TatTable(sub_project=customer_data.get('sub_project', ''),
+                            work_packet=customer_data['work_packet'],
+                            sub_packet=customer_data.get('sub_packet', ''), date=customer_data['received_date'],
+                            total_received=total_received,
+                            met_count = met_count,
+                            non_met_count = non_met_count,
+                            tat_status = tat_status,
+                            project=prj_obj, center=center_obj)
+
+        if new_can:
+            new_can.save()
+
+    if len(check_query) > 0:
+        if db_check == 'aggregate':
+            total_received = total_received + int(check_query[0]['total_received'])
+            met_count = met_count + int(check_query[0]['met_count'])
+            non_met_count = non_met_count + int(check_query[0]['non_met_count'])
+            new_can_agr = TatTable.objects.filter(id=int(check_query[0]['id'])).update(total_received=total_received,
+                                                                                       met_count = met_count,
+                                                                                       non_met_count = non_met_count,
+                                                                                       tat_status = tat_status,)
+        elif db_check == 'update':
+            new_can_upd = TatTable.objects.filter(id=int(check_query[0]['id'])).update(total_received=total_received,
+                                                                                       met_count = met_count,
+                                                                                       non_met_count = non_met_count,)
+    return tat_date_list
+
 
 def user_data(request):
     user_group = request.user.groups.values_list('name',flat=True)[0]
@@ -2401,6 +2628,267 @@ def externalerror_graph(request,date_list,prj_id,center_obj,packet_sum_data,leve
     # print result
     return result
 
+
+def agent_pareto_data_generation(request,date_list,prj_id,center_obj,level_structure_key):
+    prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
+    center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
+    query_set = query_set_generation(prj_id, center_obj, level_structure_key, date_list)
+    extr_volumes_list = Internalerrors.objects.filter(**query_set).values_list('employee_id',flat=True).distinct()
+    agent_count = []
+    agent_name = {}
+    error_count = {}
+    count = 0
+    for agent in extr_volumes_list:
+        total_errors = Internalerrors.objects.filter(project=prj_id, center=center_obj, employee_id=agent,date__range=[date_list[0], date_list[-1]]).aggregate(Sum('total_errors'))
+        if len(total_errors) > 0:
+            for key, value in total_errors.iteritems():
+                agent_name[agent] = value
+        else:
+            agent_name = 0
+        count = count + 1
+
+    error_count = agent_name
+    error_sum = sum(error_count.values())
+    new_list = []
+    new_dict = {}
+    accuracy_dict = {}
+    accuracy_list = []
+    new_emp_list = []
+    final_pareto_data = {}
+    final_pareto_data['error_count']={}
+    final_pareto_data['error_count']['error_count'] =[]
+    final_pareto_data['error_accuracy'] = {}
+    final_pareto_data['error_accuracy']['error_accuracy'] = []
+    error_count_data = []
+    for key,value in sorted(error_count.iteritems(), key=lambda (k, v): (-v, k)):
+        data_values = []
+        data_values.append(key)
+        data_values.append(value)
+        error_count_data.append(value)
+        new_emp_list.append(data_values)
+
+    final_pareto_data['error_count']['error_count'] = error_count_data[:10]
+
+    emp_error_count = 0
+    for key, value in sorted(error_count.iteritems(), key=lambda (k, v): (-v, k)):
+        data_list = []
+        emp_error_count = emp_error_count +value
+        data_list.append(key)
+        data_list.append(emp_error_count)
+        new_list.append(data_list)
+    new_dict.update(new_list)
+    for key, value in new_dict.iteritems():
+        if error_sum > 0:
+            accuracy = (float(float(value)/float(error_sum)))*100
+            accuracy_perc = float('%.2f' % round(accuracy, 2))
+            accuracy_dict[key] = accuracy_perc
+        else:
+            accuracy_dict[key] = 0
+    error_accuracy = []
+    final_emps = []
+    for key, value in sorted(accuracy_dict.iteritems(), key=lambda (k, v): (v, k)):
+        acc_list = []
+        #acc_list.append(key)
+        final_emps.append(key)
+        #acc_list.append(value)
+        error_accuracy.append(value)
+        #accuracy_list.append(acc_list)
+    final_pareto_data['error_accuracy']['error_accuracy'] = error_accuracy[:10]
+
+    final_data = pareto_graph_data(final_pareto_data)
+    result = {}
+    result['emp_names'] = final_emps[:10]
+    result ['agent_pareto_data'] = final_data
+
+    return result
+
+
+def agent_external_pareto_data_generation(request,date_list,prj_id,center_obj,level_structure_key):
+    prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
+    center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
+    query_set = query_set_generation(prj_id, center_obj, level_structure_key, date_list)
+    extrnal_volumes_list = Externalerrors.objects.filter(**query_set).values_list('employee_id',flat=True).distinct()
+    agent_count = []
+    extrnl_agent_name = {}
+    extrnl_error_count = {}
+    count = 0
+    for agent in extrnal_volumes_list:
+        total_errors = Externalerrors.objects.filter(project=prj_id, center=center_obj, employee_id=agent,date__range=[date_list[0], date_list[-1]]).aggregate(Sum('total_errors'))
+        if len(total_errors) > 0:
+            for key, value in total_errors.iteritems():
+                extrnl_agent_name[agent] = value
+        else:
+            extrnl_agent_name = 0
+        count = count + 1
+
+    extrnl_error_count = extrnl_agent_name
+    extrnl_error_sum = sum(extrnl_error_count.values())
+    new_list = []
+    new_extrnl_dict = {}
+    extrnl_accuracy_dict = {}
+    final_pareto_data = {}
+    final_pareto_data['error_count']={}
+    final_pareto_data['error_count']['error_count'] =[]
+    final_pareto_data['error_accuracy'] = {}
+    final_pareto_data['error_accuracy']['error_accuracy'] = []
+    extrnl_error_count_data = []
+    for key,value in sorted(extrnl_error_count.iteritems(), key=lambda (k, v): (-v, k)):
+        extrnl_error_count_data.append(value)
+
+    final_pareto_data['error_count']['error_count'] = extrnl_error_count_data[:10]
+
+    emp_error_count = 0
+    for key, value in sorted(extrnl_error_count.iteritems(), key=lambda (k, v): (-v, k)):
+        data_list = []
+        emp_error_count = emp_error_count +value
+        data_list.append(key)
+        data_list.append(emp_error_count)
+        new_list.append(data_list)
+    new_extrnl_dict.update(new_list)
+
+    #import pdb;pdb.set_trace()
+    for key, value in new_extrnl_dict.iteritems():
+        if extrnl_error_sum > 0:
+            accuracy = (float(float(value)/float(extrnl_error_sum)))*100
+            accuracy_perc = float('%.2f' % round(accuracy, 2))
+            extrnl_accuracy_dict[key] = accuracy_perc
+        else: 
+            extrnl_accuracy_dict[key] = 0
+    
+    extrnl_error_accuracy = []
+    final_emps = []
+    for key, value in sorted(extrnl_accuracy_dict.iteritems(), key=lambda (k, v): (v, k)):
+        final_emps.append(key)
+        extrnl_error_accuracy.append(value)
+
+    final_pareto_data['error_accuracy']['error_accuracy'] = extrnl_error_accuracy[:10]
+    final_data = pareto_graph_data(final_pareto_data)
+    result_dict = {}
+    result_dict['emp_names'] = final_emps[:10]
+    result_dict ['agent_pareto_data'] = final_data
+    return result_dict
+
+
+def sample_pareto_analysis(request,date_list,prj_id,center_obj,level_structure_key,err_type):
+    prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
+    center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
+    query_set = query_set_generation(prj_id, center_obj, level_structure_key,date_list)
+    if err_type =='Internal' :
+        extr_volumes_list = Internalerrors.objects.filter(**query_set).values('sub_project','work_packet','sub_packet').distinct()
+        err_key_type = 'error'
+    if err_type == 'External':
+        extr_volumes_list = Externalerrors.objects.filter(**query_set).values('sub_project','work_packet','sub_packet').distinct()
+        err_key_type = 'externalerror'
+    conn = redis.Redis(host="localhost", port=6379, db=0)
+    result = {}
+    vol_error_values = {}
+    vol_audit_data = {}
+    extrnl_error_values = {}
+    extrnl_err_type = {}
+    extr_volumes_list_new=[]
+    all_error_types = []
+    for date_va in date_list:
+        count =0
+        total_done_value = RawTable.objects.filter(project=prj_id, center=center_obj, date=date_va).aggregate(Max('per_day'))
+        if total_done_value['per_day__max'] > 0:
+            for vol_type in extr_volumes_list:
+                final_work_packet = level_hierarchy_key(level_structure_key, vol_type)
+                if not final_work_packet:
+                    final_work_packet = level_hierarchy_key(extr_volumes_list[count],vol_type)
+                count = count+1
+                extr_volumes_list_new.append(final_work_packet)
+                key_pattern = '{0}_{1}_{2}_{3}_{4}'.format(prj_name[0], str(center_name[0]), final_work_packet, date_va,err_key_type)
+                audit_key_list = conn.keys(pattern=key_pattern)
+                if not audit_key_list:
+                    if vol_error_values.has_key(final_work_packet):
+                        vol_error_values[final_work_packet].append("NA")
+                        vol_audit_data[final_work_packet].append("NA")
+                    else:
+                        vol_error_values[final_work_packet] = ["NA"]
+                        vol_audit_data[final_work_packet] = ["NA"]
+                for cur_key in audit_key_list:
+                    var = conn.hgetall(cur_key)
+                    for key, value in var.iteritems():
+                        if key == 'types_of_errors':
+                            all_error_types.append(value)
+                        else:
+                            if value == 'None':
+                                value = "NA"
+                            error_vol_type = final_work_packet
+                            if key == 'total_errors':
+                                if vol_error_values.has_key(error_vol_type):
+                                    if value =="NA":
+                                        vol_error_values[error_vol_type].append(value)
+                                    else:
+                                        vol_error_values[error_vol_type].append(int(value))
+                                else:
+                                    if value =="NA":
+                                        vol_error_values[error_vol_type] = [value]
+                                    else:
+                                        vol_error_values[error_vol_type] = [int(value)]
+                            else:
+                                if vol_audit_data.has_key(error_vol_type):
+                                    if value=="NA":
+                                        vol_audit_data[error_vol_type].append(value)
+                                    else:
+                                        vol_audit_data[error_vol_type].append(int(value))
+                                else:
+                                    if value=="NA":
+                                        vol_audit_data[error_vol_type] = [value]
+                                    else:
+                                        vol_audit_data[error_vol_type] = [int(value)]
+
+    accuracy_cate_dict = {}
+    accuracy_cate_list = []
+    final_external_pareto_data = {}
+    final_external_pareto_data['error_count'] = {}
+    final_external_pareto_data['error_count']['error_count'] = []
+    final_external_pareto_data['error_accuracy'] = {}
+    final_external_pareto_data['error_accuracy']['error_accuracy'] = []
+
+    indicidual_error_calc = error_types_sum(all_error_types)
+    error_cate_sum = sum(indicidual_error_calc.values())
+    error_list = []
+    cate_count = 0
+    new_cate_dict = {}
+    cate_data_values = []
+    for key, value in sorted(indicidual_error_calc.iteritems(), key=lambda (k, v): (-v, k)):
+        err_list = []
+        cate_count = cate_count + value
+        err_list.append(key)
+        err_list.append(cate_count)
+        cate_data_values.append(value)
+        error_list.append(err_list)
+    new_cate_dict.update(error_list)
+
+    final_external_pareto_data['error_count']['error_count'] = cate_data_values[:10]
+
+    cate_accuracy_list = []
+    final_cate_list = []
+    cate_accuracy_dict = {}
+    for key, value in new_cate_dict.iteritems():
+        if error_cate_sum > 0:
+            accuracy = (float(float(value) / float(error_cate_sum))) * 100
+            accuracy_perc = float('%.2f' % round(accuracy, 2))
+            cate_accuracy_dict[key] = accuracy_perc
+        else:
+            cate_accuracy_dict[key] = 100
+
+    error_accuracy = []
+    final_cate_list = []
+    for key, value in sorted(cate_accuracy_dict.iteritems(), key=lambda (k, v): (v, k)):
+        acc_list = []
+        final_cate_list.append(key)
+        cate_accuracy_list.append(value)
+    final_external_pareto_data['error_accuracy']['error_accuracy'] = cate_accuracy_list[:10]
+    final_external_data = pareto_graph_data(final_external_pareto_data)
+    result = {}
+    result['category_name'] = final_cate_list[:10]
+    result['category_pareto'] = final_external_data
+    return result
+
+
+
 def external_internal_without_audit_graph(request,date_list,prj_id,center_obj,packet_sum_data,level_structure_key,err_type):
     prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
     center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
@@ -2580,16 +3068,16 @@ def external_internal_without_audit_graph(request,date_list,prj_id,center_obj,pa
 def internal_extrnal_graphs(request,date_list,prj_id,center_obj,packet_sum_data,level_structure_key):
     prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
     center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
-    if prj_name[0] in ['Ujjivan']:
+    if prj_name[0] in ['Ujjivan','Walmart']:
         final_internal_data = external_internal_without_audit_graph(request, date_list, prj_id, center_obj, packet_sum_data,level_structure_key,err_type='Internal')
     else:
         final_internal_data = internal_extrnal_graphs_same_formula(request, date_list, prj_id, center_obj,level_structure_key,err_type='Internal')
-    if prj_name[0] in ['DellBilling','DellCoding','Mobius','Gooru','3iKYC','Bigbasket','Sulekha','Tally','Nextwealth','Wipro']:
+    if prj_name[0] in ['DellBilling','DellCoding','Mobius','Gooru','3iKYC','Bigbasket','Sulekha','Tally','Nextwealth','Wipro','Federal Bank','E4U','indix']:
         final_external_data = internal_extrnal_graphs_same_formula(request, date_list, prj_id, center_obj,level_structure_key,err_type='External')
         final_internal_data.update(final_external_data)
         return final_internal_data
 
-    elif prj_name[0] in ['Probe','Ujjivan']:
+    elif prj_name[0] in ['Probe','Ujjivan','IBM','IBM Africa']:
         #final_internal_data = internal_extrnal_graphs_same_formula(request, date_list, prj_id, center_obj,level_structure_key, err_type='Internal')
         final_external_data = externalerror_graph(request, date_list, prj_id, center_obj,packet_sum_data,level_structure_key)
         final_internal_data.update(final_external_data)
@@ -2794,20 +3282,111 @@ def adding_min_max(high_chart_key,values_dict):
     result['max_' + high_chart_key] = min_max_values['max_value']
     return result
 
+def tat_graph(date_list, prj_id, center, level_structure_key):
+    data_list = []
+    conn = redis.Redis(host="localhost", port=6379, db=0)
+    date_values = {}
+    prj_name = Project.objects.filter(id=prj_id).values_list('name', flat=True)
+    center_name = Center.objects.filter(id=center).values_list('name', flat=True)
+    query_set = query_set_generation(prj_id, center, level_structure_key, date_list)
+    new_date_list = []
+    new_dict = {}
+
+    if level_structure_key.has_key('sub_project'):
+        if level_structure_key['sub_project'] == "All":
+            volume_list = TatTable.objects.filter(**query_set).values('sub_project').distinct()
+        else:
+            if level_structure_key.has_key('work_packet'):
+                if level_structure_key['work_packet'] == "All":
+                    volume_list = TatTable.objects.filter(**query_set).values('sub_project', 'work_packet').distinct()
+                else:
+                    volume_list = TatTable.objects.filter(**query_set).values('sub_project', 'work_packet','sub_packet').distinct()
+    elif level_structure_key.has_key('work_packet') and len(level_structure_key) == 1:
+        if level_structure_key['work_packet'] == "All":
+            volume_list = TatTable.objects.filter(**query_set).values('sub_project', 'work_packet').distinct()
+        else:
+            volume_list = TatTable.objects.filter(**query_set).values('sub_project', 'work_packet','sub_packet').distinct()
+    elif level_structure_key.has_key('work_packet') and level_structure_key.has_key('sub_packet'):
+        volume_list = TatTable.objects.filter(**query_set).values('sub_project', 'work_packet', 'sub_packet').distinct()
+    else:
+        volume_list = []
+
+    for date in date_list:
+        total_done_value = RawTable.objects.filter(project=prj_id, center=center, date=date).aggregate(Max('per_day'))
+        print total_done_value['per_day__max']
+        if total_done_value['per_day__max'] > 0:
+            data_list.append(date)
+            count = 0
+            final_data = []
+            final_notmet_data = []
+            if level_structure_key.get('work_packet','') == "All":
+                tat_status = TatTable.objects.filter(project = prj_id,center= center,date=date).values_list('tat_status',flat=True)
+                for i in tat_status:
+                    if i == 'Met':
+                        tat_value = 100
+                        final_data.append(tat_value)
+                    else:
+                        tat_value = 0
+                        final_notmet_data.append(tat_value)
+
+            elif level_structure_key.get('sub_project', '') == "All":
+                tat_status = TatTable.objects.filter(project=prj_id, center=center, date=date).values_list(
+                    'tat_status', flat=True)
+                for i in tat_status:
+                    if i == 'Met':
+                        tat_value = 100
+                        final_data.append(tat_value)
+                    else:
+                        tat_value = 0
+                        final_notmet_data.append(tat_value)
+
+                tat_count = len(final_data)
+                tat_not_count = len(final_notmet_data)
+                if tat_count != 0:
+                    tat_accuracy = float((float(tat_not_count)/float(tat_count+tat_not_count))*100)
+                    tat_accuracy = 100 - (float('%.2f' % round(tat_accuracy, 2)))
+                    new_date_list.append(tat_accuracy)
+            else:
+                for vol_type in volume_list:
+                    if level_structure_key.has_key('sub_project'):
+                        local_level_hierarchy_key = vol_type
+                    else:
+                        local_level_hierarchy_key = level_structure_key
+                    final_work_packet = level_hierarchy_key(local_level_hierarchy_key, vol_type)
+                    tat_table_query_set = tat_table_query_generations(prj_id, center, date, final_work_packet,level_structure_key)
+
+                    if not final_work_packet:
+                        final_work_packet = level_hierarchy_key(volume_list[count], vol_type)
+                    count = count + 1
+                    tat_status_value = TatTable.objects.filter(**tat_table_query_set).values_list('tat_status',flat=True)
+                    for i in tat_status_value:
+                        if  i == 'Met':
+                            tat_value = 100
+                        else:
+                            tat_value = 0
+                        new_date_list.append(tat_value)
+        new_dict['Tat Met Status'] = new_date_list
+    return new_dict
+
 
 def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_structure_key):
     if dwm_dict.has_key('day'):
         final_dict = {}
         final_details = {}
         result_dict =  product_total_graph(dwm_dict['day'], prj_id, center, work_packets, level_structure_key)
+        tat_graph_details = tat_graph(dwm_dict['day'], prj_id, center,level_structure_key)
         volume_graph = volume_graph_data(dwm_dict['day'], prj_id, center, level_structure_key)
         result_dict['volume_graphs'] = {}
         result_dict['volume_graphs']['bar_data'] = graph_data_alignment(volume_graph['bar_data'], name_key='data')
         result_dict['volume_graphs']['line_data'] = graph_data_alignment(volume_graph['line_data'], name_key='data')
 
         monthly_volume_graph_details = Monthly_Volume_graph(dwm_dict['day'], prj_id, center, level_structure_key)
+        #import pdb;pdb.set_trace()
         result_dict['monthly_volume_graph_details'] = graph_data_alignment_color(monthly_volume_graph_details,'data', level_structure_key,prj_id, center)
 
+        result_dict['tat_details'] = graph_data_alignment_color(tat_graph_details, 'data', level_structure_key, prj_id,center)
+        tat_min_max = adding_min_max('tat_details',tat_graph_details)
+        result_dict.update(tat_min_max)
         productivity_utilization_data = main_productivity_data(center, prj_id, dwm_dict['day'], level_structure_key)
         utilization_fte_details = utilization_work_packet_data(center, prj_id, dwm_dict['day'], level_structure_key)
         utilization_operational_details = utilization_operational_data(center, prj_id, dwm_dict['day'], level_structure_key)
@@ -3350,18 +3929,13 @@ def fte_calculation_sub_project_work_packet(result,level_structure_key):
             for wp_key_new, wp_name in wp_subpackets.iteritems():
                 local_sum = 0
                 for sub_packet in wp_name:
-                    # final_work_packet = wp_key_new + '_' + sub_packet
-                    # final_work_packet = level_hierarchy_key(level_structure_key, wp_packet)
                     new_level_structu_key = {}
                     if level_structure_key.has_key('sub_project'):
                         new_level_structu_key['sub_project'] = level_structure_key['sub_project']
                     new_level_structu_key['work_packet'] = wp_key_new
                     new_level_structu_key['sub_packet'] = sub_packet
-                    # final_work_packet = wp_key+'_'+sub_packet
                     final_work_packet = level_hierarchy_key(level_structure_key, new_level_structu_key)
 
-                    # if prj_name[0] in ['DellCoding'] :
-                    #   final_work_packet ='WV - 1_'+wp_key+'_'+sub_packet
                     if result['data']['data'].has_key(final_work_packet):
                         local_sum = local_sum + result['data']['data'][final_work_packet][count]
                     else:
@@ -3428,7 +4002,6 @@ def fte_calculation_sub_project_sub_packet(prj_id,center_obj,work_packet_query,l
                         new_level_structu_key['sub_project'] = level_structure_key['sub_project']
                     new_level_structu_key['work_packet'] = wp_key
                     new_level_structu_key['sub_packet'] = sub_packet
-                    # final_work_packet = wp_key+'_'+sub_packet
                     final_work_packet = level_hierarchy_key(level_structure_key, new_level_structu_key)
                     date_pattern = '{0}_{1}_{2}_{3}'.format(prj_name[0], str(center_name[0]), str(final_work_packet),date_va)
                     key_list = conn.keys(pattern=date_pattern)
@@ -3437,6 +4010,7 @@ def fte_calculation_sub_project_sub_packet(prj_id,center_obj,work_packet_query,l
                             date_values[final_work_packet].append(0)
                         else:
                             date_values[final_work_packet] = [0]
+                    #import pdb;pdb.set_trace()
                     for cur_key in key_list:
                         var = conn.hgetall(cur_key)
                         for key, value in var.iteritems():
@@ -3468,13 +4042,11 @@ def fte_calculation(request,prj_id,center_obj,date_list,level_structure_key):
     center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
     work_packet_query =  query_set_generation(prj_id,center_obj,level_structure_key,[])
     work_packets = Targets.objects.filter(**work_packet_query).values('sub_project','work_packet','sub_packet','fte_target').distinct()
-    #work_packets = Targets.objects.filter(**query_set).values('sub_project','work_packet','sub_packet','fte_target').distinct()
     sub_packet_query = query_set_generation(prj_id,center_obj,level_structure_key,[])
     sub_packets = filter(None,Targets.objects.filter(**sub_packet_query).values_list('sub_packet',flat=True).distinct())
     conn = redis.Redis(host="localhost", port=6379, db=0)
     new_date_list = []
     status = 0
-    #if (len(sub_packets) == 0) or level_structure_key.get('sub_packet','') != '':
     if len(sub_packets) == 0:
         work_packets = Targets.objects.filter(**work_packet_query).values('sub_project', 'work_packet', 'sub_packet','fte_target').distinct()
         date_values = {}
@@ -3486,8 +4058,6 @@ def fte_calculation(request,prj_id,center_obj,date_list,level_structure_key):
             if total_done_value['per_day__max'] > 0:
                 new_date_list.append(date_va)
                 for wp_packet in work_packets:
-                    #for sub_packet in wp_name:
-                    #final_work_packet = str(wp_packet['work_packet'])
                     final_work_packet = level_hierarchy_key(level_structure_key, wp_packet)
                     date_pattern = '{0}_{1}_{2}_{3}'.format(prj_name[0], str(center_name[0]), str(final_work_packet),date_va)
                     key_list = conn.keys(pattern=date_pattern)
@@ -3543,7 +4113,6 @@ def fte_calculation(request,prj_id,center_obj,date_list,level_structure_key):
             final_fte= result['data']['data']
             for wp_key, wp_value in final_fte.iteritems():
                 final_fte[wp_key] = [float('%.2f' % round(wp_values, 2)) for wp_values in wp_value]
-                #final_fte_sum = float('%.2f' % round(wp_value, 2))
     else :
         if level_structure_key.get('sub_project', '') != 'All':
             final_fte = {}
@@ -3554,8 +4123,6 @@ def fte_calculation(request,prj_id,center_obj,date_list,level_structure_key):
                     for wp_key_new, wp_name in wp_subpackets.iteritems():
                         local_sum = 0
                         for sub_packet in wp_name:
-                            #final_work_packet = wp_key_new + '_' + sub_packet
-                            #final_work_packet = level_hierarchy_key(level_structure_key, wp_packet)
                             new_level_structu_key = {}
                             if level_structure_key.has_key('sub_project'):
                                 new_level_structu_key['sub_project']=level_structure_key['sub_project']
@@ -3564,8 +4131,6 @@ def fte_calculation(request,prj_id,center_obj,date_list,level_structure_key):
                             #final_work_packet = wp_key+'_'+sub_packet
                             final_work_packet = level_hierarchy_key(level_structure_key, new_level_structu_key)
 
-                            #if prj_name[0] in ['DellCoding'] :
-                             #   final_work_packet ='WV - 1_'+wp_key+'_'+sub_packet
                             if result['data']['data'].has_key(final_work_packet):
                                 local_sum = local_sum + result['data']['data'][final_work_packet][count]
                             else:
@@ -3596,7 +4161,6 @@ def fte_calculation(request,prj_id,center_obj,date_list,level_structure_key):
     work_packet_fte['total_fte'] = [sum(i) for i in zip(*final_fte.values())]
     work_packet_fte['total_fte'] = [float('%.2f' % round(wp_values, 2)) for wp_values in work_packet_fte['total_fte']]
     fte_high_charts = {}
-    #fte_high_charts['total_fte'] = graph_data_alignment(work_packet_fte, name_key='data')
     #fte_high_charts['total_fte'] = graph_data_alignment_color(work_packet_fte, 'data', level_structure_key, prj_id, center_obj)
     fte_high_charts['total_fte'] = work_packet_fte
     #fte_high_charts['work_packet_fte'] = graph_data_alignment(final_fte, name_key='data')
@@ -3851,7 +4415,15 @@ def from_to(request):
     final_result_dict['only_top_five'] = only_top_five
     #volumes_graphs_details = volumes_graphs_data(date_list,prj_id,center,level_structure_key)
     volumes_graphs_details = volumes_graphs_data_table(employe_dates['days'],prj_id,center,level_structure_key)
+    agent_internal_pareto_data = agent_pareto_data_generation(request,employe_dates['days'],prj_id,center,level_structure_key)
+    extrnl_agent_pareto_data = agent_external_pareto_data_generation(request, employe_dates['days'], prj_id, center, level_structure_key)
+    category_error_count = sample_pareto_analysis(request, date_list, prj_id, center, level_structure_key,"Internal")
+    extrnl_category_error_count = sample_pareto_analysis(request, date_list, prj_id, center, level_structure_key, "External")
     final_result_dict['volumes_graphs_details'] = volumes_graphs_details
+    final_result_dict['Internal_Error_Category'] = category_error_count
+    final_result_dict['External_Error_Category'] = extrnl_category_error_count
+    final_result_dict['External_Pareto_data'] = extrnl_agent_pareto_data
+    final_result_dict['Pareto_data'] = agent_internal_pareto_data 
     internal_error_types = internal_extrnal_error_types(request, employe_dates['days'], prj_id, center, level_structure_key,"Internal")
     external_error_types = internal_extrnal_error_types(request, employe_dates['days'], prj_id, center,level_structure_key, "External")
     final_result_dict['internal_errors_types'] = graph_data_alignment_color(internal_error_types,'y',level_structure_key,prj_id,center)
@@ -4073,7 +4645,7 @@ def accuracy_query_generations(pro_id,cen_id,date,main_work_packet):
 
 
 def internal_bar_data(pro_id, cen_id, from_, to_, main_work_packet, chart_type,project):
-    if (project == "Probe" and chart_type == 'External Accuracy') or (project == 'Ujjivan' and chart_type in ['External Accuracy','Internal Accuracy']):
+    if (project == "Probe" and chart_type == 'External Accuracy') or (project == 'Ujjivan' and chart_type in ['External Accuracy','Internal Accuracy']) or (project == "IBM" and chart_type == 'External Accuracy'):
         date_range = num_of_days(to_, from_)
         final_internal_bar_drilldown = {} 
         final_internal_bar_drilldown['type'] = chart_type
@@ -4256,13 +4828,13 @@ def internal_bar_data(pro_id, cen_id, from_, to_, main_work_packet, chart_type,p
 
 
 def internal_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type,project):
-    if (project == 'Probe' and chart_type == 'External Accuracy Trends') or (project == 'Ujjivan' and chart_type == 'External Accuracy Trends'):
+    if (project == 'Probe' and chart_type == 'External Accuracy Trends') or (project == 'Ujjivan' and chart_type == 'External Accuracy Trends') or (project == 'IBM' and chart_type == 'External Accuracy Trends'):
         final_internal_drilldown = {}
         final_internal_drilldown['type'] = chart_type
         final_internal_drilldown['project'] = project
         #list_of_internal = Externalerrors.objects.filter(project=pro_id,center=cen_id,date__range=[to_date[0], to_date[-1]],work_packet=work_packet).values_list('employee_id','work_packet','total_errors','date')
         accuracy_query_set = accuracy_query_generations(pro_id, cen_id, to_date, work_packet)
-        if project == 'UjjivanNew' and chart_type == 'Internal Accuracy Trends':
+        if project == 'Ujjivan' and chart_type == 'Internal Accuracy Trends':
             #list_of_internal = Internalerrors.objects.filter(project=pro_id,center=cen_id,date__range=[to_date[0], to_date[-1]],work_packet=work_packet).values_list('employee_id','work_packet','total_errors','date')
             list_of_internal = Internalerrors.objects.filter(**accuracy_query_set).values_list('employee_id','work_packet','total_errors','date')
         elif chart_type == 'External Accuracy Trends':
@@ -4450,7 +5022,7 @@ def internal_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type,proje
 
 
 def internal_chart_data(pro_id,cen_id,to_date,work_packet,chart_type,project):
-    if (project == 'Probe' and chart_type == 'External Accuracy Trends') or (project == "Ujjivan" and chart_type in ['External Accuracy Trends','Internal Accuracy Trends']):
+    if (project == 'Probe' and chart_type == 'External Accuracy Trends') or (project == "Ujjivan" and chart_type in ['External Accuracy Trends','Internal Accuracy Trends']) or (project == 'IBM' and chart_type == 'External Accuracy Trends'):
         if len(to_date) == 2:
             final_internal_drilldown = {}
             final_val_res = internal_chart_data_multi(pro_id,cen_id,to_date,work_packet,chart_type,project)
@@ -5386,6 +5958,33 @@ def rawtable_query_generations(pro_id,cen_id,date,main_work_packet,level_structu
             rawtable_query_set['work_packet'] = main_work_packet
     return rawtable_query_set
 
+def tat_table_query_generations(pro_id,cen_id,date,main_work_packet,level_structure_key):
+    tat_table_query_set = {}
+    tat_table_query_set['project'] = pro_id
+    tat_table_query_set['center'] = cen_id
+    tat_table_query_set['date'] = date
+    if '_' in main_work_packet:
+        packets_list = main_work_packet.split('_')
+        if len(packets_list) == 3:
+            tat_table_query_set['sub_project'] = packets_list[0]
+            tat_table_query_set['work_packet'] = packets_list[1]
+            tat_table_query_set['sub_packet'] = packets_list[2]
+        elif len(packets_list) == 2:
+            if level_structure_key.has_key('sub_project'):
+                tat_table_query_set['sub_project'] = packets_list[0]
+                tat_table_query_set['work_packet'] = packets_list[1]
+            else:
+                tat_table_query_set['work_packet'] = packets_list[0]
+                tat_table_query_set['sub_packet'] = packets_list[1]
+
+        else:
+            tat_table_query_set['work_packet'] = packets_list[0]
+    else:
+        if level_structure_key.has_key('sub_project'):
+            tat_table_query_set['sub_project'] = main_work_packet
+        else:
+            tat_table_query_set['work_packet'] = main_work_packet
+    return tat_table_query_set
 
 
 def Monthly_Volume_graph(date_list, prj_id, center, level_structure_key):
@@ -5695,7 +6294,4 @@ def update_annotation(request):
 
         return HttpResponse(json.dumps({"status": "error", "message": "Invalid ID"}), "error")
 
-    if not annotation:
-
-        return HttpResponse(json.dumps({"status": "error", "message": "Permission Denied!"}))
-"""
+    if not annotation:"""

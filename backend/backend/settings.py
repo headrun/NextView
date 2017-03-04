@@ -28,6 +28,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.rediffmailpro.com'
+EMAIL_PORT = 587 
+EMAIL_HOST_USER = 'nextpulse@nextwealth.in'
+EMAIL_HOST_PASSWORD = 'rootuser123'
 
 # Application definition
 

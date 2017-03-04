@@ -43,10 +43,17 @@ class WidgetsAdmin(admin.ModelAdmin):
     list_display = ['config_name','name','col','api','opt','id_num','day_type_widget','priority']
 admin.site.register(Widgets,WidgetsAdmin)
 
+'''
 class Widget_MappingAdmin(admin.ModelAdmin):
     list_display = ['widget_name','user_name','widget_priority','is_display','is_drilldown']
     list_filter = ['user_name']
 admin.site.register(Widget_Mapping,Widget_MappingAdmin)
+'''
+
+class Widgets_groupAdmin(admin.ModelAdmin):
+    list_display = ['User_Group','widget_name','widget_priority','is_display','is_drilldown','project']
+    list_filter = ['User_Group','project']
+admin.site.register(Widgets_group,Widgets_groupAdmin)
 
 class RawtableAuthoringAdmin(admin.ModelAdmin):
     list_display = ['sub_project','work_packet','sub_packet','employee_id','per_day','norm','date','project','center','sheet_name']
@@ -88,7 +95,7 @@ class AuthoringtableAdmin(admin.ModelAdmin):
 admin.site.register(Authoringtable,AuthoringtableAdmin)
 
 class HeadcountAuthoringAdmin(admin.ModelAdmin):
-    list_display = ['project','billable_agent','work_packet','work_packet','sub_packet']
+    list_display = ['project','billable_agent','work_packet','sub_packet']
 admin.site.register(HeadcountAuthoring,HeadcountAuthoringAdmin)
 
 class TargetsAdmin(admin.ModelAdmin):
@@ -98,7 +105,7 @@ admin.site.register(Targets,TargetsAdmin)
 
 
 class TargetsAuthoringAdmin(admin.ModelAdmin):
-    list_display = ['work_packet','sub_project','sub_packet']
+    list_display = ['work_packet','sub_project','sub_packet','project']
     list_filter = ['project']
 admin.site.register(TargetsAuthoring,TargetsAuthoringAdmin)
 
@@ -108,11 +115,30 @@ class WorktrackAdmin(admin.ModelAdmin):
 admin.site.register(Worktrack,WorktrackAdmin)
 
 class WorktrackAuthoringAdmin(admin.ModelAdmin):
-    list_display = ['work_packet','sub_project','sub_packet']
+    list_display = ['work_packet','sub_project','sub_packet','project']
     list_filter = ['project']
 admin.site.register(WorktrackAuthoring,WorktrackAuthoringAdmin)
 
+class TatAuthoringAdmin(admin.ModelAdmin):
+    list_display = ['work_packet','sub_project','sub_packet','tat_status']
+    list_filter = ['project']
+admin.site.register(TatAuthoring,TatAuthoringAdmin)
 
+class TatTableAdmin(admin.ModelAdmin):
+    list_display = ['work_packet','sub_project','tat_status','project','date']
+    list_filter = ['project','date']
+    list_display_links = ('project',)
+admin.site.register(TatTable,TatTableAdmin)
+
+class Alias_WidgetAdmin(admin.ModelAdmin):
+    list_display = ['project']
+    list_filter = ['project']
+admin.site.register(Alias_Widget,Alias_WidgetAdmin)
+
+class Alias_packetsAdmin(admin.ModelAdmin):
+    list_display = ['alias_name']
+    list_filter = ['alias_name']
+admin.site.register(Alias_packets,Alias_packetsAdmin)
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User

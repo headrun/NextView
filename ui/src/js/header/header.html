@@ -7,6 +7,42 @@
 
      }
  }
+
+@media (max-width: 320px) {
+    .upload {
+        margin-left : -6px !important;
+        margin-right: -6px !important;
+        margin-bottom: -6px !important;
+        margin-top: -3px !important;
+    }   
+    .navbar-brand {
+        font-size : 1em !important;
+        font-weight: 100 !important;
+    }   
+    a.color-out {
+        font-size: 2px;
+        margin-left: -12px !important;
+        margin-right: 4px !important;
+        padding: 0px !important;
+    }   
+        span {
+            margin-right: -11px;
+            font-size: 11px !important;
+        }   
+        .name {
+            font-size: 13px !important;
+            margin-right: 3px !important;
+        }   
+    }   
+}
+
+.ajax-file-upload {
+
+    background: white !important;
+    color: black !important;
+    border: none;
+}
+
  .navbar-collapse.in {
 
      overflow-y: inherit;
@@ -35,7 +71,7 @@
 
 .name {
     font-size:22px;
-    margin-right: 10px;
+    margin-right: 3px;
  }
  .admin {
     padding:5px; 
@@ -45,17 +81,27 @@
     border-color:white;
     color:white;
 }
-img {
-    width:15%;
-    margin-left:-3%;
- }
 .upload {
     cursor: pointer;
 }
 
+img {
+    width: 27%;
+    margin-left: -3%;
+    margin-top: -14px;
+ }
+.position {
+    position: fixed;
+    margin-top: 0px;
+    box-shadow: none !important;
+}
+dashboard div.dashboard-content {
+    margin-top: 79px;
+}
+
 </style>
 
-<nav class="navbar navbar-default navbar-fixed-top" style="position: initial;">
+<nav class="navbar navbar-default navbar-fixed-top position">
 
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed"  data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -65,15 +111,23 @@ img {
                 <span class="icon-bar"></span>
             </button>
           <!--<a class="navbar-brand" style="font-size:2.0em;margin-left:-15px;font-weight:bold;color:black;">NextPulse </a>-->
-          <img src="/img/Nextwealth_Logo.png" alt="Nexwealth_Logo" style="float:left;">
-          <a class="navbar-brand" style="font-size:2.0em;margin-left:-2%;font-weight:bold;color:black;">NextPulse </a> 
+          <img src="/img/nextwealth.png" alt="Nexwealth_Logo" style="float:left;">
+          <a class="navbar-brand" style="font-size:2.0em;margin-left:-2%;font-weight:100;color:#555;">NextPulse </a> 
         </div>
         <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-              <div class=""style="font-size:1.2em;padding-right:15px;">
-                  <ul class="nav navbar-nav pull-right">
-                  <li>
-                     <div class="dropdown" id="select_dropdown">
+           <div class="data">
+              <ul class="nav nav-tabs" style="border-bottom: none;">
+                  <li><a href="" id="Abt" style="margin-left:115px;">About</a></li>
+                  <li><a href="" id="Ser">Services</a></li>
+                  <li><a href="" id="Wid">Features</a></li>
+                  <li><a href="" id="Proj" class="active">Customers</a></li>
+              </ul>
+            </div> 
+            <ul class="nav navbar-nav navbar-right" style="margin-top:-50px;">
+                <div class=""style="font-size:1.2em;padding-right:10px;">
+                    <ul class="nav navbar-nav pull-right">
+                    <li>
+                        <div class="dropdown" id="select_dropdown">
                             <ul class="nav nav-pills left">
                                <li class="dropdown active span8">
                                   <a class="dropdown-toggle" id="inp_impact" data-toggle="dropdown" style="color:black;">
@@ -88,10 +142,10 @@ img {
                                    </ul>
                                </li>
                             </ul>
-                     </div>
+                       </div>
                         <li>
                             <div>
-                                <a href="http://dashboards.nextwealth.in:8188/admin" class="btn btn-info" id="admin_but" style="padding:5px;margin-top:10px;margin-right:-5px;color:black;border-color:black;background-color:white;" role="button" target="_blank">Admin</a>
+                                <a href="http://dashboards.nextwealth.in:8188/admin" class="btn btn-info" id="admin_but" style="padding:5px;margin-top:10px;margin-right:-5px;color:black;border-color:white;background-color:white;" role="button" target="_blank">Admin</a>
                             </div>
                         </li>
                         <li>
@@ -118,8 +172,6 @@ img {
 
 </nav>
 
-
-
 <script>
     $(function () {
        $("#fileupload").uploadFile({
@@ -127,10 +179,14 @@ img {
           fileName:"myfile",
           dragDrop: false,
           onSuccess:function(files,data,xhr,pd){
+             var file_name = files[0];
+             var str_to_display = "You Trying to Upload a Wrong File.Please upload a correct a file";
              console.log(data.result);
+            
              if (data.result == 'Duplicate Sheet'){
                      alert('Duplicate Sheet');
-                 }
+                 } 
+
              else{
                  console.log("in upload refresh");
                  location.reload();

@@ -29,8 +29,32 @@
              var lastDate = la_y + '-' + la_mm + '-' + la_dd;
              var project = 'api/project/';
              var drop_down_link = '/api/dropdown_data/';
+             var landing_pro = $state.params.selpro;
+             self.pro_landing_url = 'api/project/?name='+landing_pro
 
              //self.sell_proo = $state.params.selpro;
+             $scope.singleModel = 1; 
+
+             $scope.radioModel = 'Day';
+
+             $scope.checkModel = {
+                day: true,
+                week: false,
+                month: false
+             };   
+
+             $scope.checkResults = [];
+
+             $scope.$watchCollection('checkModel', function () { 
+                $scope.checkResults = [];
+                angular.forEach($scope.checkModel, function (value, key) {
+                    if (value) {
+                        $scope.checkResults.push(key);
+
+                    }
+                });  
+             }); 
+
              self.annotations_data = {};
 
              $('#annotation_button').click(function(){
@@ -53,7 +77,7 @@
                 self.click(start,end);
                });
 
-             $http({method:"GET", url:project}).success(function(result){
+             $http({method:"GET", url:self.pro_landing_url}).success(function(result){
                 if (result.result.role === 'customer'){
                     $('#emp_widget').hide();    
                      }
@@ -102,6 +126,11 @@
                     'self.chartOptions24':self.chartOptions24,
                     'self.chartOptions25':self.chartOptions25,
                     'self.chartOptions26':self.chartOptions26,
+                    'self.chartOptions27':self.chartOptions27,
+                    'self.chartOptions28':self.chartOptions28,
+                    'self.chartOptions29':self.chartOptions29,
+                    'self.chartOptions30':self.chartOptions30,
+                    'self.chartOptions31':self.chartOptions31
                     };
 
                     var final_layout_list = [];
@@ -239,24 +268,24 @@
                             if ((result.result.fin.sub_project) && (result.result.fin.work_packet)){
                                 $('#0').on('change', function(){
                                             if (self.day_type === 'week'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.day_type === 'month'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'day'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'week'){
-                                                $('.week').addClass('active');
-                                                $('.week').siblings().removeClass('active');
+                                                $('.week').addClass('active btn-success');
+                                                $('.week').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'month'){
-                                                $('.month').addClass('active');
-                                                $('.month').siblings().removeClass('active');
+                                                $('.month').addClass('active btn-success');
+                                                $('.month').siblings().removeClass('active btn-success');
                                             }
 
                                     self.showLoading();
@@ -285,24 +314,24 @@
                                 });
                                 $('#1').on('change', function(){
                                             if (self.day_type === 'week'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.day_type === 'month'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'day'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'week'){
-                                                $('.week').addClass('active');
-                                                $('.week').siblings().removeClass('active');
+                                                $('.week').addClass('active btn-success');
+                                                $('.week').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'month'){
-                                                $('.month').addClass('active');
-                                                $('.month').siblings().removeClass('active');
+                                                $('.month').addClass('active btn-success');
+                                                $('.month').siblings().removeClass('active btn-success');
                                             }
                                     self.showLoading();
                                     self.drop_sub_proj = self.sub_pro_sel.value
@@ -329,24 +358,24 @@
                                 });
                                     $('#2').on('change', function(){
                                             if (self.day_type === 'week'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.day_type === 'month'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'day'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'week'){
-                                                $('.week').addClass('active');
-                                                $('.week').siblings().removeClass('active');
+                                                $('.week').addClass('active btn-success');
+                                                $('.week').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'month'){
-                                                $('.month').addClass('active');
-                                                $('.month').siblings().removeClass('active');
+                                                $('.month').addClass('active btn-success');
+                                                $('.month').siblings().removeClass('active btn-success');
                                             }
 
                                         self.showLoading();
@@ -381,24 +410,24 @@
                                         self.drop_sub_proj = 'undefined';
                                         self.drop_sub_pack = self.sub_pac_sel.value;
                                             if (self.day_type === 'week'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.day_type === 'month'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'day'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'week'){
-                                                $('.week').addClass('active');
-                                                $('.week').siblings().removeClass('active');
+                                                $('.week').addClass('active btn-success');
+                                                $('.week').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'month'){
-                                                $('.month').addClass('active');
-                                                $('.month').siblings().removeClass('active');
+                                                $('.month').addClass('active btn-success');
+                                                $('.month').siblings().removeClass('active btn-success');
                                             }
 
                         //$('.day').addClass('active');
@@ -429,24 +458,24 @@
                                             self.drop_sub_proj = 'undefined';
                                             self.drop_sub_pack = 'undefined';
                                             if (self.day_type === 'week'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.day_type === 'month'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'day'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'week'){
-                                                $('.week').addClass('active');
-                                                $('.week').siblings().removeClass('active');
+                                                $('.week').addClass('active btn-success');
+                                                $('.week').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'month'){
-                                                $('.month').addClass('active');
-                                                $('.month').siblings().removeClass('active');
+                                                $('.month').addClass('active btn-success');
+                                                $('.month').siblings().removeClass('active btn-success');
                                             }
                                             var is_exist = self.drop_work_pack.indexOf('&');
                                             if (is_exist > 0){
@@ -471,24 +500,24 @@
                                 if (result.result.fin.sub_packet) {
                                     $('#1').on('change', function(){
                                             if (self.day_type === 'week'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.day_type === 'month'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'day'){
-                                                $('.day').addClass('active');
-                                                $('.day').siblings().removeClass('active');
+                                                $('.day').addClass('active btn-success');
+                                                $('.day').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'week'){
-                                                $('.week').addClass('active');
-                                                $('.week').siblings().removeClass('active');
+                                                $('.week').addClass('active btn-success');
+                                                $('.week').siblings().removeClass('active btn-success');
                                             }
                                             if (self.sel_type === 'month'){
-                                                $('.month').addClass('active');
-                                                $('.month').siblings().removeClass('active');
+                                                $('.month').addClass('active btn-success');
+                                                $('.month').siblings().removeClass('active btn-success');
                                             }
 
                                         self.showLoading();
@@ -566,9 +595,100 @@
                         if (self.sub_pac_sel != null){
                             self.removeOptions(self.sub_pac_sel);
                         }
-                        var url_to_call = 'api/project/?name=' + self.project;
+                        var url_to_call = 'api/project/?name=' + newVal.state;
                         $http({method:"GET", url:url_to_call}).success(function(result){
-                            var pro_cen_nam = result.result.list[1]
+                            var pro_cen_nam = self.location + self.project.replace(' - ','');
+                            self.useful_layout = [];
+                            self.list_object = result.result.lay[0];
+                if((result.result.role === 'customer') || (result.result.role === 'team_lead') || (result.result.role === 'center_manager') || (result.result.role === 'nextwealth_manager'))
+                {
+                    self.first = result.result.dates.from_date;
+                    self.lastDate = self.first;
+                    self.last = result.result.dates.to_date;
+                    self.firstDate = self.last;
+                    $('#select').val(self.first + ' to ' + self.last)
+
+                    if ((result.result.role === 'customer') || (result.result.role === 'team_lead') || (result.result.role === 'nextwealth_manager') || (result.result.role === 'center_manager')){
+                       self.layout_list = result.result.lay[1].layout;
+                    }
+                    else {
+                        if (result.result.lay.length == 1){
+                            self.layout_list = result.result.lay[0][pro_cen_nam]
+                        }
+                        else {
+                            self.layout_list = result.result.lay[1][pro_cen_nam]
+                        }
+                    }
+                    self.final_layout_values_list = {
+                    'self.chartOptions':self.chartOptions,
+                    'self.chartOptions4':self.chartOptions4,
+                    'self.chartOptions6':self.chartOptions6,
+                    'self.chartOptions9':self.chartOptions9,
+                    'self.chartOptions9_2':self.chartOptions9_2,
+                    'self.chartOptions10':self.chartOptions10,
+                    'self.chartOptions15':self.chartOptions15,
+                    'self.chartOptions15_2':self.chartOptions15_2,
+                    'self.chartOptions16':self.chartOptions16,
+                    'self.chartOptions16_2':self.chartOptions16_2,
+                    'self.chartOptions17':self.chartOptions17,
+                    'self.chartOptions18':self.chartOptions18,
+                    'self.chartOptions5':self.chartOptions5,
+                    'self.chartOptions5_2':self.chartOptions5_2,
+                    'self.chartOptions19':self.chartOptions19,
+                    'self.chartOptions20':self.chartOptions20,
+                    'self.chartOptions21':self.chartOptions21,
+                    'self.chartOptions22':self.chartOptions22,
+                    'self.chartOptions23':self.chartOptions23,
+                    'self.chartOptions24':self.chartOptions24,
+                    'self.chartOptions25':self.chartOptions25,
+                    'self.chartOptions26':self.chartOptions26,
+                    'self.chartOptions27':self.chartOptions27,
+                    'self.chartOptions28':self.chartOptions28,
+                    'self.chartOptions29':self.chartOptions29,
+                    'self.chartOptions30':self.chartOptions30,
+                    'self.chartOptions31':self.chartOptions31
+                    };
+                    var final_layout_list = [];
+                    for (var single in self.layout_list){   
+                        for (var double in self.list_object){
+                            if (self.layout_list[single] === double) {
+                                final_layout_list.push(self.list_object[double])
+                            }
+                        }
+                    }
+
+                    var is_filled = 0;
+                    var col_size = 0;
+                    var first_row = [];
+                    var second_row = [];
+                    for (var one_lay in final_layout_list){
+                        col_size = col_size + final_layout_list[one_lay].col;
+                        if (col_size > 12){
+                            is_filled = 1;
+                            if (col_size >= 12){
+                                col_size = 0;
+                            }
+                        }
+                        if (is_filled){
+                            second_row.push(final_layout_list[one_lay]);
+                        }
+                        else{
+                            first_row.push(final_layout_list[one_lay]);
+                        }
+                        if ((col_size%12 == 0) | (col_size > 12)){
+                            is_filled = 1;
+                            if (col_size >= 12){
+                                col_size = 0;
+                            }
+                        }
+                    }
+                    self.useful_layout.push(first_row,second_row);
+
+                    self.location = pro_cen_nam.split('-')[0].replace(' ','') + ' - '
+                    self.project = pro_cen_nam.split('-')[1].replace(' ','') + ' - '
+                    var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + self.project
+                              + '&center=' + self.location  + '&type=' + self.day_type;
+                }
                             //var pro_cen_nam = result.result.list[1].split(' - ')[1];
                             self.first = result.result.dates.from_date;
                             self.lastDate = self.first;
@@ -578,8 +698,8 @@
                         $("#0").append(new Option("All"));
                         $("#1").append(new Option("All"));
                         $("#2").append(new Option("All"));
-                        $('.day').addClass('active');
-                        $('.day').siblings().removeClass('active');
+                        $('.day').addClass('active btn-success');
+                        $('.day').siblings().removeClass('active btn-success');
                         if (self.project == "Wallmart - "){
                             var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + 'DellBilling - ' +
                                  '&center=' + 'Salem' + '&type=' + self.day_type;
@@ -1473,6 +1593,17 @@
             }
                          });
             }
+
+            self.active_filters = function(type){
+                var from_to_data = from_to +'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + self.project + '&center=' + self.location + '&type=' + type;
+                self.showLoading();
+                $http({method:"GET", url:from_to_data}).success(function(result){
+                    self.hideLoading();
+                    self.chart_render(result,self.project,self.location);
+                });  
+
+            } 
+
             self.chart_render = function(result,pro,loc){
                             self.hideLoading();
                             self.high_data_gener = [];
@@ -1832,6 +1963,125 @@ plotOptions: {
                             series: self.high_data_gener[0].external_pareto_graph_data
                             });
 
+
+
+                           angular.extend(self.chartOptions27, {
+
+                            xAxis: {
+                                categories: self.high_data_gener[0].Pareto_data.emp_names,
+                                title: {
+                                    text: '',
+                                }
+                            },
+plotOptions: {
+                series : {
+                    allowPointSelect: true,
+                    cursor: 'pointer'
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+                            series: self.high_data_gener[0].Pareto_data.agent_pareto_data
+                            });
+
+
+                            angular.extend(self.chartOptions28, {
+
+                            xAxis: {
+                                categories: self.high_data_gener[0].External_Pareto_data.emp_names,
+                                title: {
+                                    text: '',
+                                }
+                            },
+plotOptions: {
+                series : {
+                    allowPointSelect: true,
+                    cursor: 'pointer'
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+                            series: self.high_data_gener[0].External_Pareto_data.agent_pareto_data
+                            });
+
+
+                            angular.extend(self.chartOptions29, {
+
+                            xAxis: {
+                                categories: self.high_data_gener[0].Internal_Error_Category.category_name,
+                                title: {
+                                    text: '',
+                                }
+                            },
+plotOptions: {
+                series : {
+                    allowPointSelect: true,
+                    cursor: 'pointer'
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+                            series: self.high_data_gener[0].Internal_Error_Category.category_pareto
+                            });
+
+                            angular.extend(self.chartOptions31.yAxis,{
+                                min:result.result.min_tat_details,
+                                max:result.result.max_tat_details
+                            });                              
+
+                            angular.extend(self.chartOptions31, {
+                            xAxis: {
+                                categories: self.high_data_gener[0].data.date,
+                                title: {
+                                    text: '',
+                                }
+                            },
+plotOptions: {
+                series : {
+                    allowPointSelect: true,
+                    cursor: 'pointer'
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+                            series: self.high_data_gener[0].tat_details
+                            }); 
+
+
+                            angular.extend(self.chartOptions30, {
+
+                            xAxis: {
+                                categories: self.high_data_gener[0].External_Error_Category.category_name,
+                                title: {
+                                    text: '',
+                                }
+                            },
+plotOptions: {
+                series : {
+                    allowPointSelect: true,
+                    cursor: 'pointer'
+                },
+                bar: {
+                 dataLabels: {
+                 enabled: true
+                 }
+                }
+               },
+                            series: self.high_data_gener[0].External_Error_Category.category_pareto
+                            });
+                                                                                    
 
                             angular.extend(self.chartOptions10, {
 
@@ -2572,8 +2822,8 @@ plotOptions: {
                 var final_work =  '&sub_project=' + self.sub_pro_sel_two + '&sub_packet=' + self.sub_pac_sel_two + '&work_packet=' + self.packet_clicked;
                 var from_to_data = from_to + 'from=' + dates_list[0] + '&to=' + dates_list[1] + '&project=' + self.project
                        + '&center=' + self.location + '&type=' + 'day' + final_work;
-                $('.day').addClass('active');
-                $('.day').siblings().removeClass('active');
+                $('.day').addClass('active btn-success');
+                $('.day').siblings().removeClass('active btn-success');
 
                 /*var from_to_data = from_to + 'from=' + dates_list[0] + '&to=' + dates_list[1] + '&project=' + self.project
                          + '&center=' + self.location + '&type=' + self.day_type;*/
@@ -2581,16 +2831,16 @@ plotOptions: {
                             $('#select').val(self.start + ' to ' + self.end)
                             self.sel_type = result.result.days_type;
                             if (self.sel_type === 'week'){
-                                $('.week').addClass('active');
-                                $('.week').siblings().removeClass('active');
+                                $('.week').addClass('active btn-success');
+                                $('.week').siblings().removeClass('active btn-success');
                             }
                             if (self.sel_type === 'month'){
-                                $('.month').addClass('active');
-                                $('.month').siblings().removeClass('active');
+                                $('.month').addClass('active btn-success');
+                                $('.month').siblings().removeClass('active btn-success');
                             }
                             if (self.sel_type === 'day'){
-                                $('.day').addClass('active');
-                                $('.day').siblings().removeClass('active');
+                                $('.day').addClass('active btn-success');
+                                $('.day').siblings().removeClass('active btn-success');
                             }
                             self.chart_render(result,self.project,self.location);
                          });
@@ -2856,7 +3106,12 @@ angular.extend(self.chartOptions18, {
                },
 
                tooltip: {
-                valueSuffix: ''
+                valueSuffix: '',
+
+                formatter: function () {
+                             return "<small>" + this.x + "</small><br/>" +
+                                    "<b>" + this.series.name + "</b> : " + Highcharts.numberFormat(this.y, null, null, ",");
+                           }
                },
 
                credits: {
@@ -2903,7 +3158,15 @@ angular.extend(self.chartOptions18, {
                 title: {
                     text: ''
                 }
-            }
+            },
+            tooltip: {
+                valueSuffix: '',
+
+                formatter: function () {
+                             return "<small>" + this.x + "</small><br/>" +
+                                    "<b>" + this.series.name + "</b> : " + Highcharts.numberFormat(this.y, null, null, ",");
+                           }
+               },    
             };
 
             self.chartOptions9 = {
@@ -2929,6 +3192,7 @@ angular.extend(self.chartOptions18, {
                 enabled: false
                },
             };
+
             self.chartOptions9_2 = {
                 chart : {
                  backgroundColor: "transparent"
@@ -2952,6 +3216,7 @@ angular.extend(self.chartOptions18, {
                 enabled: false
                },
             };
+
             self.chartOptions4 = {
             chart: {
                 type: 'column',
@@ -3203,12 +3468,237 @@ angular.extend(self.chartOptions18, {
                 },
 
                 tooltip: {
-                    valueSuffix: ''
+                    valueSuffix: '',
+                    formatter: function () {
+                             return "<small>" + this.x + "</small><br/>" +
+                                    "<b>" + this.series.name + "</b> : " + Highcharts.numberFormat(this.y, null, null, ",");
+                           } 
                 },
                 credits: {
                     enabled: false
                 },
             };
+
+
+            self.chartOptions27 = {
+            chart: {
+            zoomType: 'xy',
+            backgroundColor: "transparent",
+
+        },
+        xAxis: [{
+
+            crosshair: true,
+            color:'a2a2a2',
+        }],
+        yAxis: [{
+            gridLineWidth: 0,
+            minorGridLineWidth: 0,
+            gridLineColor: 'a2a2a2',
+
+            labels: {
+                color: 'a2a2a2',
+                format: '{value}',
+            },
+            title: {
+                text: 'Error Accuracy',
+                color:'a2a2a2',
+            }
+        }, { // Secondary yAxis
+            gridLineWidth: 0,
+            minorGridLineWidth: 0,
+            title: {
+                text: 'Error Count',
+                color:'a2a2a2',
+            },
+            labels: {
+                color: 'a2a2a2',
+                format: '{value} ',
+            },
+            opposite: true
+        },],
+        tooltip: {
+            shared: true
+        },
+        legend: {
+
+              itemStyle: {
+                    'color' : '#717171',
+               }
+        },
+    }
+            
+
+           self.chartOptions28 = {
+            chart: {
+            zoomType: 'xy',
+            backgroundColor: "transparent",
+
+        },
+        xAxis: [{
+
+            crosshair: true,
+            color:'a2a2a2',
+        }],
+        yAxis: [{
+            gridLineWidth: 0,
+            minorGridLineWidth: 0,
+            gridLineColor: 'a2a2a2',
+
+            labels: {
+                color: 'a2a2a2',
+                format: '{value}',
+            },
+            title: {
+                text: 'Error Accuracy',
+                color:'a2a2a2',
+            }
+        }, { // Secondary yAxis
+            gridLineWidth: 0,
+            minorGridLineWidth: 0,
+            title: {
+                text: 'Error Count',
+                color:'a2a2a2',
+            },
+            labels: {
+                color: 'a2a2a2',
+                format: '{value} ',
+            },
+            opposite: true
+        },],
+        tooltip: {
+            shared: true
+        },
+        legend: {
+
+              itemStyle: {
+                    'color' : '#717171',
+               }
+        },
+    }
+            
+
+           self.chartOptions29 = {
+            chart: {
+            zoomType: 'xy',
+            backgroundColor: "transparent",
+
+        },
+        xAxis: [{
+
+            crosshair: true,
+            color:'a2a2a2',
+        }],
+        yAxis: [{
+            gridLineWidth: 0,
+            minorGridLineWidth: 0,
+            gridLineColor: 'a2a2a2',
+
+            labels: {
+                color: 'a2a2a2',
+                format: '{value}',
+            },
+            title: {
+                text: 'Error Accuracy',
+                color:'a2a2a2',
+            }
+        }, { // Secondary yAxis
+            gridLineWidth: 0,
+            minorGridLineWidth: 0,
+            title: {
+                text: 'Error Count',
+                color:'a2a2a2',
+            },
+            labels: {
+                color: 'a2a2a2',
+                format: '{value} ',
+            },
+            opposite: true
+        },],
+        tooltip: {
+            shared: true
+        },
+        legend: {
+
+              itemStyle: {
+                    'color' : '#717171',
+               }
+        },
+    }
+
+
+        self.chartOptions31 = {
+                chart : {
+                 backgroundColor: "transparent"
+                },
+                               yAxis: {
+                gridLineColor: 'a2a2a2',
+                min: 0,
+                title: {
+                 text: '',
+                 align: 'high'
+                },
+                labels: {
+                 overflow: 'justify'
+                }
+               },
+
+               tooltip: {
+                valueSuffix: ''
+               },
+               credits: {
+                enabled: false
+               },
+            }; 
+
+        self.chartOptions30 = {
+            chart: {
+            zoomType: 'xy',
+            backgroundColor: "transparent",
+
+        },
+        xAxis: [{
+
+            crosshair: true,
+            color:'a2a2a2',
+        }],
+        yAxis: [{
+            gridLineWidth: 0,
+            minorGridLineWidth: 0,
+            gridLineColor: 'a2a2a2',
+
+            labels: {
+                color: 'a2a2a2',
+                format: '{value}',
+            },
+            title: {
+                text: 'Error Accuracy',
+                color:'a2a2a2',
+            }
+        }, { // Secondary yAxis
+            gridLineWidth: 0,
+            minorGridLineWidth: 0,
+            title: {
+                text: 'Error Count',
+                color:'a2a2a2',
+            },
+            labels: {
+                color: 'a2a2a2',
+                format: '{value} ',
+            },
+            opposite: true
+        },],
+        tooltip: {
+            shared: true
+        },
+        legend: {
+
+              itemStyle: {
+                    'color' : '#717171',
+               }
+        },
+    }
+
 
             self.chartOptions25 = {
                 chart : {
@@ -3321,6 +3811,16 @@ angular.extend(self.chartOptions18, {
                     text: ''
                 }
             },
+            
+            tooltip: {
+                valueSuffix: '',
+
+                formatter: function () {
+                             return "<small>" + this.x + "</small><br/>" +
+                                    "<b>" + this.series.name + "</b> : " + Highcharts.numberFormat(this.y, null, null, ",");
+                           }
+               },
+  
             plotOptions:{
                 series:{
                     allowPointSelect: true,
@@ -3332,6 +3832,7 @@ angular.extend(self.chartOptions18, {
                 }
             }
             };
+
             self.chartOptions18 = {
                 chart : {
                  backgroundColor: "transparent"
@@ -3349,12 +3850,18 @@ angular.extend(self.chartOptions18, {
                },
 
                tooltip: {
-                valueSuffix: ''
+                valueSuffix: '',
+                
+                formatter: function () {
+                             return "<small>" + this.x + "</small><br/>" +
+                                    "<b>" + this.series.name + "</b> : " + Highcharts.numberFormat(this.y, null, null, ",");
+                           }
                },
                credits: {
                 enabled: false
                },
             };
+
             self.chartOptions19 = {
                 chart : {
                  backgroundColor: "transparent"
