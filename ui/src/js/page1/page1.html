@@ -259,11 +259,16 @@ div.content {
 	background-color: #d4d4d4 !important;
 	border-color: #8c8c8c !important;
 }
+
 </style>
  <div class="container volume">
  <div class="row">
     <div id="wrapper">
-        <div><h3 class="pull-left brand_style">{{$ctrl.project}}DASHBOARD</h3></div>
+        <div>
+            <img ng-src="/img/Projectimages/{{$ctrl.project_images[$ctrl.project.split(' - ')[0]]}}" alt="project_Logo" style="float:left;min-width:80px;">
+            <h3 class="pull-left brand_style">{{$ctrl.project}}DASHBOARD</h3>
+        </div>
+        <!--<p>{{$ctrl.project_images[$ctrl.project.split(' - ')[0]]}}</p>-->
              <div id="inner1" class="form-group" style="margin-bottom:initial;">
                  <input class="form-control select" id="select" size="22">
                  <i class="fa fa-calendar date" aria-hidden="true"></i>

@@ -121,6 +121,27 @@
                     'self.chartOptions31':self.chartOptions31
                     };
 
+                    self.project_images = {
+                        "Probe" : "probe.png",
+                        "DellBilling" : "dell.png",
+                        "DellCoding" : "dell.png",
+                        "Gooru" : "gooru.png",
+                        "Mobius" : "mobius.png",
+                        "Bigbasket" : "bigbasket.png",
+                        "Sulekha" : "sulekha.png",
+                        "Tally" : "tally.png",
+                        "Wipro" : "wipro.jpg",
+                        "IBM" : "ibm.png",
+                        "Ujjivan" : "ujjivan.jpg",
+                        "IBM Africa" : "ibm.png",
+                        "Wallmart" : "walmart.png",
+                        "E4U": "eforu.png",
+                        "Federal Bank" : "federalbank.png",
+                        "Indix" : "indix.png",
+                        "Quarto" : "quarto.png",
+                        "3iKYC" : "3ikyc.png"
+                    };
+
                     var final_layout_list = [];
                     for (var single in self.layout_list){
                         for (var double in self.list_object){
