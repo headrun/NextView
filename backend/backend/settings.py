@@ -88,7 +88,7 @@ DATABASES = {
            'init_command': 'SET storage_engine=INNODB,character_set_connection=utf8,collation_connection=utf8_unicode_ci',
            'charset' : 'utf8',
         },
-        'NAME': 'nextview',
+        'NAME': 'nexttview_new',
         'USER': 'root',
         'PASSWORD': 'hdrn59!',
         'HOST': 'localhost',
