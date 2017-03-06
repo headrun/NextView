@@ -265,14 +265,14 @@ div.content {
  <div class="row">
     <div id="wrapper">
         <div>
-            <img ng-src="/img/Projectimages/{{$ctrl.project_images[$ctrl.project.split(' - ')[0]]}}" alt="project_Logo" style="float:left;min-width:80px;">
+            <img ng-src="/img/Projectimages/{{$ctrl.project_images[$ctrl.project.split(' - ')[0]]}}" alt="project_Logo" style="float:left;height:50px;">
             <h3 class="pull-left brand_style">{{$ctrl.project}}DASHBOARD</h3>
         </div>
         <!--<p>{{$ctrl.project_images[$ctrl.project.split(' - ')[0]]}}</p>-->
              <div id="inner1" class="form-group" style="margin-bottom:initial;">
                  <input class="form-control select" id="select" size="22">
                  <i class="fa fa-calendar date" aria-hidden="true"></i>
-            </div>
+             </div>
 
              <div ng-repeat="k in $ctrl.packet_hierarchy_list track by $index">
                 <form>

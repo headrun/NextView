@@ -92,8 +92,9 @@
 dashboard div.dashboard-content {
     margin-top: 79px;
 }
-.home {
-    margin-top: 9px !important;
+#home {
+    margin-top: 10px;
+    font-size: 25px;
 }
 </style>
 <nav class="navbar navbar-default navbar-fixed-top position">
@@ -105,10 +106,11 @@ dashboard div.dashboard-content {
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <!--<img class="logo" src="/img/nextwealth.png" alt="Nexwealth_Logo" style="float:left;">-->
             <a href="http://nextwealth.in" id="nextwealth" target="_blank"><img class="logo" src="/img/nextwealth.png" alt="Nexwealth_Logo" style="float:left;"></a>
             <a class="navbar-brand" style="font-size:2.0em;margin-left:-2%;font-weight:100;color:#555;">NextPulse </a>
-            <a href="http://localhost:8112/#!/landing" id="home_but" class="btn btn-success home" role="button" target="_blank">Home</a>
+            <!--<a href="http://localhost:8112/#!/landing" id="home_but" class="btn btn-success home" role="button">Home</a>-->
+            <a href="http://localhost:8112/#!/landing"><span class="glyphicon glyphicon-home" id="home" aria-hidden="true"></span></a>
+
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <div class="data">
@@ -133,8 +135,7 @@ dashboard div.dashboard-content {
                                            <li >
                                                <a href="" ng-repeat="item in $ctrl.mapping_list" ng-click="$ctrl.clickFun(item)">{{item}}</a>
                                            </li>
-
-                                           </ul>
+                                       </ul>
                                    </li>
                                 </ul>
                          </div>
@@ -163,8 +164,7 @@ dashboard div.dashboard-content {
                       </ul>
               </div>
           </ul>
-        </div>     <!--/.nav-collapse -->
-
+        </div>
 </nav>
 
 <script>
