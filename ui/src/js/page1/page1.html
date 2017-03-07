@@ -1,4 +1,4 @@
-<body>
+<html>
 <style>
 @media (max-width : 320px) {
      .btn-group {
@@ -259,8 +259,15 @@ div.content {
 	background-color: #d4d4d4 !important;
 	border-color: #8c8c8c !important;
 }
+#goTop {
+    float: right;
+    font-size: -webkit-xxx-large;
+    bottom: 0;
+    right: 0;
+}
 
 </style>
+<body>
  <div class="container volume">
  <div class="row">
     <div id="wrapper">
@@ -372,9 +379,10 @@ div.content {
         </div>
     </div>
 </div>
+<a class=”back-to-top” style="display: inline;" id="goTop">
+    <i class="fa fa-arrow-circle-o-up"></i>
+</a>
 </div>
-<div id="topcontrol" title="Scroll to Top" style="position: fixed; bottom: 5px; right: 5px; opacity: 1; cursor: pointer;"><img src="http://i1155.photobucket.com/albums/p559/scrolltotop/arrow200.png"></div>
-
 <div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -407,13 +415,35 @@ div.content {
        </div>
     </div>
   </div>
- <!--</div>-->
 </body>
-
 
 <script>
     $('body').on('click','.btn-group button', function(e) {
      $(this).addClass('active btn-success');
      $(this).siblings().removeClass('active btn-success');
+});
+
+$(document).ready(function() {
+    $(window).scroll(function() {
+        if($(this).scrollTop() > 100){
+            $('#goTop').stop().animate({
+                bottom: '0'
+                }, 500);
+        }
+        else{
+            $('#goTop').stop().animate({
+               bottom: '0'
+            }, 500);
+        }
+    });
+    $('#goTop').click(function() {
+        $('.scroll').stop().animate({
+           scrollTop: 0
+        }, 500, function() {
+           $('#goTop').stop().animate({
+               bottom: '0'
+           }, 500);
+        });
+    });
 });
 </script>
