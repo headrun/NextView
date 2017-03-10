@@ -17,8 +17,10 @@ from django.db.models import Max
 import redis
 from datetime import timedelta
 from datetime import date
+from dateutil.relativedelta import relativedelta
 import re
 import json
+import calendar
 from django.apps import apps
 from collections import OrderedDict
 from django.utils.timezone import utc
@@ -89,10 +91,6 @@ def project(request):
     if 'team_lead' in user_group:
         center = TeamLead.objects.filter(name_id=request.user.id).values_list('center')
         prj_id = TeamLead.objects.filter(name_id=request.user.id).values_list('project')
-
-    '''if 'customer' in user_group:
-        center = Customer.objects.filter(name_id=request.user.id).values_list('center')
-        prj_id = Customer.objects.filter(name_id=request.user.id).values_list('project') '''
 
     if 'customer' in user_group:
         select_list = []
@@ -894,7 +892,7 @@ def target_table_query_insertion(customer_data,prj_obj,center_obj,teamleader_obj
                                           sub_packet=customer_data.get('sub_packet', ''),
                                           from_date=customer_data['from_date'],
                                          to_date=customer_data['to_date'],
-                                         center=center_obj).values('target','fte_target')
+                                         center=center_obj).values('id','target','fte_target')
 
     try:
         target = int(float(customer_data['target']))
@@ -922,10 +920,10 @@ def target_table_query_insertion(customer_data,prj_obj,center_obj,teamleader_obj
         if db_check == 'aggregate':
             target = target + int(check_query[0]['target'])
             fte_target = fte_target + int(check_query[0]['fte_target'])
-            new_can_agr = Targets.objects.filter(id=int(check_query[0]['id'])).update(targer=target,fte_target=fte_target)
+            new_can_agr = Targets.objects.filter(id=int(check_query[0]['id'])).update(target=target,fte_target=fte_target)
         elif db_check == 'update':
             try:
-                new_can_upd = Targets.objects.filter(id=int(check_query[0]['id'])).update(targer=target,fte_target=fte_target)
+                new_can_upd = Targets.objects.filter(id=int(check_query[0]['id'])).update(target=target,fte_target=fte_target)
             except:
                 new_can_upd = 0
 
@@ -1950,7 +1948,7 @@ def worktrack_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_
                                           work_packet=customer_data['work_packet'],
                                           sub_packet=customer_data.get('sub_packet', ''),
                                           date=customer_data['date'],
-                                          center=center_obj).values('opening','received', 'non_workable_count','completed','closing_balance')
+                                          center=center_obj).values('id','opening','received', 'non_workable_count','completed','closing_balance')
 
     try:
         opening = int(float(customer_data['opening']))
@@ -2003,14 +2001,12 @@ def worktrack_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_
                             completed = completed,
                             closing_balance = closing_balance,)
         elif db_check == 'update':
-            try:
-                new_can_upd = Worktrack.objects.filter(id=int(check_query[0]['id'])).update(opening=opening,
-                                received = received,
-                                non_workable_count = non_workable_count,
-                                completed = completed,
-                                closing_balance = closing_balance,)
-            except:
-                new_can_upd = 0
+            new_can_upd = Worktrack.objects.filter(id=int(check_query[0]['id'])).update(opening=opening,
+                                    received = received,
+                                    non_workable_count = non_workable_count,
+                                    completed = completed,
+                                    closing_balance = closing_balance,)
+
     return worktrac_date_list
 
 def headcount_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, db_check):
@@ -2019,7 +2015,7 @@ def headcount_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_
                                           work_packet=customer_data.get('work_packet',''),
                                           sub_packet=customer_data.get('sub_packet', ''),
                                           date=customer_data['date'],
-                                          center=center_obj).values('buffer_support','buffer_agent','billable_support','non_billable_support_others','total','billable_agent')
+                                          center=center_obj).values('id','buffer_support','buffer_agent','billable_support','non_billable_support_others','total','billable_agent')
 
     try:
         billable_agent = float(customer_data['billable_agent'])
@@ -2100,7 +2096,7 @@ def tat_query_insertion(customer_data, prj_obj, center_obj,teamleader_obj_name, 
                                           work_packet=customer_data['work_packet'],
                                           sub_packet=customer_data.get('sub_packet', ''),
                                           date=customer_data['received_date'],
-                                          center=center_obj).values('total_received','met_count','non_met_count','tat_status')
+                                          center=center_obj).values('id','total_received','met_count','non_met_count','tat_status')
 
     try:
         total_received = int(float(customer_data['total_received']))
@@ -2360,13 +2356,11 @@ def product_total_graph(date_list,prj_id,center_obj,work_packets,level_structure
     result = {}
     volumes_dict = {}
     date_values = {}
-    #volume_list = RawTable.objects.filter(project=prj_id,center=center_obj).values_list('volume_type', flat=True).distinct()
     prj_name = Project.objects.filter(id=prj_id).values_list('name',flat=True)
     center_name = Center.objects.filter(id=center_obj).values_list('name', flat=True)
     query_set = query_set_generation(prj_id,center_obj,level_structure_key,date_list)
     new_date_list = []
     for date_va in date_list:
-        #below code for product,wpf graph
         total_done_value = RawTable.objects.filter(project=prj_id,center=center_obj,date=date_va).aggregate(Max('per_day'))
         print total_done_value['per_day__max']
         if total_done_value['per_day__max'] > 0 :
@@ -2389,11 +2383,6 @@ def product_total_graph(date_list,prj_id,center_obj,work_packets,level_structure
                 volume_list = RawTable.objects.filter(**query_set).values('sub_project','work_packet','sub_packet').distinct()
             else:
                 volume_list = []
-            """elif level_structure_key.has_key('sub_project') and len(level_structure_key) ==1:
-                if level_structure_key['sub_project'] == "All":
-                    volume_list = RawTable.objects.filter(**query_set).values('sub_project').distinct()
-                else:
-                    volume_list = RawTable.objects.filter(**query_set).values('sub_project','work_packet').distinct()"""
 
             count =0
             for vol_type in volume_list:
@@ -4121,6 +4110,123 @@ def num_of_days(to_date,from_date):
         date_list.append(str(from_date + timedelta(days=i)))
     return date_list
 
+def static_production_data(request):
+    from_date = datetime.datetime.strptime(request.GET['from'], '%Y-%m-%d').date()
+    to_date = datetime.datetime.strptime(request.GET['to'], '%Y-%m-%d').date()
+
+    try:
+        work_packet = request.GET.get('work_packet')
+        if ' and ' in work_packet:
+            work_packet = work_packet.replace(' and ', ' & ')
+    except:
+        work_packet = []
+    try:
+        sub_project = request.GET.get('sub_project')
+    except:
+        sub_project = ''
+    try:
+        sub_packet = request.GET.get('sub_packet')
+    except:
+        sub_packet = ''
+    date_list = []
+    #days_code
+    from_dates = to_date - timedelta(6)
+    days_list = num_of_days(to_date, from_dates)
+
+    #weeks_code
+    today = date.today()
+    d = today - relativedelta(months=1)
+    from_date = date(d.year, d.month, 1)
+    to_date = date(today.year, today.month, 1) - relativedelta(days=1)
+    months_dict = {}
+    days = (to_date - from_date).days
+    days = days + 1
+    for i in range(0, days):
+        date = from_date + datetime.timedelta(i)
+        month = date.strftime("%B")
+        if month in months_dict:
+            months_dict[month].append(str(date))
+        else:
+            months_dict[month] = [str(date)]
+    weeks = []
+    weekdays = []
+    if months_dict == {}:
+        num_days = to_date.day
+        start = 1
+        end = 7 - from_date.weekday()
+        while start <= num_days:
+            weeks.append({'start': start, 'end': end})
+            sdate = from_date + datetime.timedelta(start - 1)
+            edate = from_date + datetime.timedelta(end - 1)
+            weekdays.append({'start': sdate, 'end': edate})
+            start = end + 1
+            end = end + 7
+            if end > num_days:
+                end = num_days
+
+    month_lst = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October','November', 'December']
+    month_order = OrderedDict(sorted(months_dict.items(), key=lambda x: month_lst.index(x[0])))
+    for month_na in tuple(month_order):
+        one_month = months_dict[month_na]
+        fro_mon = datetime.datetime.strptime(one_month[0], '%Y-%m-%d').date()
+        to_mon = datetime.datetime.strptime(one_month[-1:][0], '%Y-%m-%d').date()
+        no_of_days = to_mon - fro_mon
+        num_days = int(re.findall('\d+', str(no_of_days))[0]) + 1
+        start = 1
+        end = 7 - fro_mon.weekday()
+        while start <= num_days:
+            weeks.append({'start': start, 'end': end})
+            sdate = fro_mon + datetime.timedelta(start - 1)
+            edate = fro_mon + datetime.timedelta(end - 1)
+            weekdays.append({'start': sdate, 'end': edate})
+            start = end + 1
+            end = end + 7
+            if end > num_days:
+                end = num_days
+    week_list = []
+    for w_days in weekdays:
+        date_list = num_of_days(w_days['end'], w_days['start'])
+        week_list.append(date_list)
+
+    level_structure_key = {}
+    if (work_packet) and (work_packet != 'undefined'): level_structure_key['work_packet'] = work_packet
+    if (sub_project) and (sub_project != 'undefined'): level_structure_key['sub_project'] = sub_project
+    if (sub_packet) and (sub_packet != 'undefined'): level_structure_key['sub_packet'] = sub_packet
+
+    project = request.GET['project'].split('-')[0].strip()
+    center_id = request.GET['center'].split('-')[0].strip()
+    count = 0
+    all_count = [count + 1 for key in level_structure_key.values() if key == "All"]
+    if len(all_count) >= 2:
+        if len(level_structure_key) != 3:
+            level_structure_key = {}
+        if len(all_count) == 3:
+            level_structure_key = {}
+
+    center = Center.objects.filter(name=center_id).values_list('id', flat=True)
+    prj_id = Project.objects.filter(name=project).values_list('id', flat=True)
+    if not level_structure_key:
+        sub_pro_level = filter(None, RawTable.objects.filter(project=prj_id, center=center).values_list('sub_project',flat=True).distinct())
+        if len(sub_pro_level) >= 1:
+            level_structure_key['sub_project'] = "All"
+        if not level_structure_key:
+            work_pac_level = filter(None,RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet',flat=True).distinct())
+            if len(work_pac_level) >= 1:
+                level_structure_key['work_packet'] = "All"
+        if not level_structure_key:
+            sub_pac_level = filter(None,RawTable.objects.filter(project=prj_id, center=center).values_list('sub_packet',flat=True).distinct())
+            if len(sub_pac_level) >= 1:
+                level_structure_key['sub_packet'] = "All"
+
+    final_data = product_total_graph(days_list,prj_id,center,work_packet,level_structure_key)
+    final_week_data = product_total_graph(week_list,prj_id,center,work_packet,level_structure_key)
+    del final_data['volumes_data']
+    del final_data['prod_days_data']
+    result = {}
+    result['static_prod_data'] = final_data
+    result['static_week_prod_data'] = final_week_data
+    return HttpResponse(result)
+
 
 def fte_calculation_sub_project_work_packet(result,level_structure_key):
     final_fte ={}
@@ -4419,28 +4525,6 @@ def top_five_emp(center,prj_id,dwm_dict,level_key_structure):
         return final_list
     else:
         return all_details_list
-    """ dict_to_render = []
-    all_packets_list = RawTable.objects.filter(project=prj_id,center=center,date__range=[dwm_dict['days'][0], dwm_dict['days'][-1:][0]]).values_list('work_packet').distinct()
-    for one_pack in all_packets_list:
-        targets = Targets.objects.filter(project=prj_id, center=center,work_packet=one_pack[0]).values_list('target',flat=True).distinct()
-        max_value = RawTable.objects.filter(project=prj_id, center=center, work_packet=one_pack[0],
-            date__range=[dwm_dict['days'][0], dwm_dict['days'][-1:][0]]).aggregate(Max('per_day'))['per_day__max']
-        list_of_values = RawTable.objects.filter(project=prj_id, center=center, work_packet=one_pack[0],
-            date__range=[dwm_dict['days'][0], dwm_dict['days'][-1:][0]], per_day=max_value).values('employee_id',
-                            'date', 'per_day','work_packet')
-        if len(list_of_values) > 0:
-            list_of_values = list_of_values[0]
-        else:
-            continue
-        for key, value in list_of_values.items():
-            list_of_values[key] = str(value)
-            if key == 'per_day':
-                if targets:
-                    productivity = float(value)/int(targets[0])
-                    vol_values = float('%.2f' % round(productivity, 2))
-                    list_of_values['productivity'] =vol_values
-        dict_to_render.append(list_of_values)
-    return dict_to_render"""
 
 
 def from_to(request):
@@ -4448,7 +4532,6 @@ def from_to(request):
     to_date = datetime.datetime.strptime(request.GET['to'],'%Y-%m-%d').date()
     type = request.GET['type']
 
-    #type='day'
     try:
         work_packet = request.GET.get('work_packet')
         if ' and ' in work_packet:
@@ -4468,12 +4551,7 @@ def from_to(request):
     except:
         is_clicked = 'NA'
     level_structure_key ={}
-    """if work_packet== 'all' :
-        work_packet = 'undefined'
-    if sub_project== 'all':
-        sub_project ='undefined'
-    if sub_packet == 'all':
-        sub_packet = 'undefined'"""
+
     if (work_packet) and (work_packet !='undefined'): level_structure_key['work_packet']=work_packet
     if (sub_project) and (sub_project !='undefined'): level_structure_key['sub_project'] = sub_project
     if (sub_packet) and (sub_packet !='undefined'): level_structure_key['sub_packet'] = sub_packet
@@ -4491,22 +4569,18 @@ def from_to(request):
     center = Center.objects.filter(name=center_id).values_list('id', flat=True)
     prj_id = Project.objects.filter(name=project).values_list('id', flat=True)
     if not level_structure_key:
-        #sub_pro_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_project',flat=True).distinct()
         sub_pro_level = filter(None,RawTable.objects.filter(project=prj_id, center=center).values_list('sub_project',flat=True).distinct())
         if len(sub_pro_level)>= 1:
             level_structure_key['sub_project'] = "All"
         if not level_structure_key:
-            #work_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet',flat=True).distinct()
             work_pac_level = filter(None,RawTable.objects.filter(project=prj_id, center=center).values_list('work_packet',flat=True).distinct())
             if len(work_pac_level)>=1:
                 level_structure_key['work_packet'] = "All"
         if not level_structure_key:
-            #sub_pac_level = RawTable.objects.filter(project=prj_id, center=center).values_list('sub_packet',flat=True).distinct()
             sub_pac_level = filter(None,RawTable.objects.filter(project=prj_id, center=center).values_list('sub_packet',flat=True).distinct())
             if len(sub_pac_level)>=1:
                 level_structure_key['sub_packet'] = "All"
 
-    #center = request.GET['center'].split('-')[0].strip()
     date_list = []
     if type == 'day':
         date_list=num_of_days(to_date,from_date)
@@ -4552,7 +4626,7 @@ def from_to(request):
                 end = end + 7
                 if end > num_days:
                     end = num_days
-        #for key, valu in months_dict.iteritems():
+
         month_lst = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September','October', 'November', 'December']
         month_order = OrderedDict(sorted(months_dict.items(), key=lambda x: month_lst.index(x[0])))
         for month_na in tuple(month_order):
@@ -4561,7 +4635,6 @@ def from_to(request):
             to_mon = datetime.datetime.strptime(one_month[-1:][0], '%Y-%m-%d').date()
             no_of_days = to_mon- fro_mon
             num_days = int(re.findall('\d+', str(no_of_days))[0])+1
-            #num_days = 4
             start = 1
             end = 7 - fro_mon.weekday()
             while start <= num_days:
@@ -4574,6 +4647,7 @@ def from_to(request):
                 if end > num_days:
                     end = num_days
         week_list=[]
+        import pdb;pdb.set_trace()
         for w_days in weekdays:
             date_list = num_of_days(w_days['end'],w_days['start'])
             week_list.append(date_list)
@@ -4587,17 +4661,11 @@ def from_to(request):
         months = ['January', 'February', 'March', 'April', 'May', 'June', 'July','August', 'September', 'October', 'November', 'December']
         k = OrderedDict(sorted(months_dict.items(), key=lambda x: months.index(x[0])))
         for month_na in tuple(k):
-            #new_month_dict[month_na] = months_dict[month_na]
             new_month_dict[month_na] = {}
             if employe_dates.has_key('days'):
                 employe_dates['days'] = employe_dates['days']+months_dict[month_na]
             else:
                 employe_dates['days']=months_dict[month_na]
-        """for month_name,month_values in months_dict.iteritems():
-            if employe_dates.has_key('days'):
-                employe_dates['days'] = employe_dates['days']+month_values
-            else:
-                employe_dates['days']=month_values"""
         dwm_dict['month'] = months_dict
 
     if type == 'week':
@@ -4612,7 +4680,6 @@ def from_to(request):
     resul_data = {}
     center = Center.objects.filter(name=center_id).values_list('id', flat=True)
     prj_id = Project.objects.filter(name=project).values_list('id',flat=True)
-    #top_five_employee_details = top_five_emp(center,prj_id,employe_dates)
     top_five_employee_details = top_five_emp(center,prj_id,employe_dates,level_structure_key)
     top_five_employee_details = sorted(top_five_employee_details, key=lambda k: k['productivity'],reverse=True)
     emp_rank = [1,2,3,4,5]
@@ -4630,13 +4697,13 @@ def from_to(request):
     final_result_dict = day_week_month(request,dwm_dict,prj_id,center,work_packet,level_structure_key)
     final_result_dict['top_five_employee_details'] = top_five_employee_details
     final_result_dict['only_top_five'] = only_top_five
+    #static_product_data = static_product_total_graph(employe_dates['days'],prj_id,center,work_packet,level_structure_key)
+    #final_result_dict['static_product_data'] = static_product_data
     agent_internal_pareto_data = agent_pareto_data_generation(request,employe_dates['days'],prj_id,center,level_structure_key)
-    #volumes_graphs_details = volumes_graphs_data(date_list,prj_id,center,level_structure_key)
     extrnl_agent_pareto_data = agent_external_pareto_data_generation(request, employe_dates['days'], prj_id, center, level_structure_key)
     volumes_graphs_details = volumes_graphs_data_table(employe_dates['days'],prj_id,center,level_structure_key)
     category_error_count = sample_pareto_analysis(request, date_list, prj_id, center, level_structure_key,"Internal")
     extrnl_category_error_count = sample_pareto_analysis(request, date_list, prj_id, center, level_structure_key, "External")
-    #final_result_dict['tat_details'] = tat_graph_details
     final_result_dict['Internal_Error_Category'] = category_error_count
     final_result_dict['External_Error_Category'] = extrnl_category_error_count
     final_result_dict['External_Pareto_data'] = extrnl_agent_pareto_data
