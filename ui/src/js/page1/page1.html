@@ -69,18 +69,6 @@
     color: black;
 }
 
-#Abt {
-    display: none;
-}
-
-#Ser {
-    display: none;
-}
-
-#Wid {
-   display: none;
-}
-
 #Proj {
    display: none;
 }
@@ -174,8 +162,8 @@ table {
 
 .date {
      float: right;
-     font-size: 24px;
-     padding-top: 9px;
+     font-size: 29px;
+     padding-top: 6px;
      cursor: pointer;
      color: #555;
 }
@@ -188,7 +176,8 @@ table {
 }
 .form-control {
     width: initial;
-    height: 30px;
+    height: 32px;
+    margin-top: 4px;
 }
 .pos {
     display: block;
@@ -287,25 +276,47 @@ table {
 div.content {
     overflow: hidden;
 }
-.dashboard {
+/*.dashboard {
     margin-top: 1px;
     margin-left: 25%;
     float: left;
     position: fixed;
-}
+}*/
+.dashboard {
+    float: right;
+    top: 3px;
+    margin-right: 16px;
+ }
 .volume {
     margin-left: -1%;
 }
-.btn-success.active:hover {
-    color: #000000 !important;
-    background-color: #d4d4d4 !important;
-    border-color: #8c8c8c !important;
+#goTop {
+    float: right;
+    font-size: -webkit-xxx-large;
+    bottom: 0;
+    right: 0;  
+    color: #308014;
+    margin-right: 3px;
 }
-.btn-success.active {
-    color: #000000 !important;
-    background-color: #d4d4d4 !important;
-    border-color: #8c8c8c !important;
+
+.btn-default.active:hover {
+    color: #ffffff !important;
+    background-color: #398439 !important;
+    border-color: #255625 !important;
 }
+.btn-default.active {
+    color: #ffffff !important;
+    background-color: #398439 !important;
+    border-color: #255625 !important;
+}
+.scroll{
+    margin-top: 5px;
+ }
+ .btn-success {
+    color: black !important;
+    background-color: #fff !important;
+    border-color: #ccc !important;
+ }
 </style>
 <body class="add_annotation">
     <div class="container volume">
@@ -356,40 +367,39 @@ div.content {
         </div>
     </div>
 </div>
-
 <div class="row">
-        <div class="col-md-6">
-            <div class="graph">
-                <div class="widget-title clearfix" title="Sample Widg">
-                    <h4>Volume Status</h4>
-                </div>
-                <table class="table table-bordered line body">
-                        <thead>
-                            <tr class="row_name">
-                                <th style="width:15%;">Date</th>
-                                <th style="width:12%;">Opening</th>
-                                <th style="width:13%;">Received</th>
-                                <th style="width:24%;">NonWorkableCount</th>
-                                <th style="width:14%;">Completed</th>
-                                <th style="width:22%;">Closing</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="l in $ctrl.volume_graphs">
-                                <td style="width:16%;">{{l.date}}</td>
-                                <td style="width:12%;">{{l.opening}}</td>
-                                <td style="width:13%;">{{l.received}}</td>
-                                <td style="width:25%;">{{l.non_workable_count}}</td>
-                                <td style="width:14%;">{{l.completed}}</td>
-                                <td style="width:12%;">{{l.closing_balance}}</td>
-                            </tr>
-                        </tbody>
-                </table>
-            </div>
-        </div>
+      <div class="col-md-6" id= "volume_table">
+       <div class="graph">
+           <div class="widget-title clearfix" title="Sample Widg">
+               <h4>Volume Status</h4>
+           </div>
+           <table class="table table-bordered line body">
+              <thead>
+                <tr class="row_name">
+                    <th style="width:15%;">Date</th>
+                    <th style="width:12%;">Opening</th>
+                    <th style="width:13%;">Received</th>
+                    <th style="width:24%;">NonWorkableCount</th>
+                    <th style="width:14%;">Completed</th>
+                    <th style="width:22%;">Closing</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="l in $ctrl.volume_graphs">
+                    <td style="width:16%;">{{l.date}}</td>
+                    <td style="width:12%;">{{l.opening}}</td>
+                    <td style="width:13%;">{{l.received}}</td>
+                    <td style="width:25%;">{{l.non_workable_count}}</td>
+                    <td style="width:14%;">{{l.completed}}</td>
+                    <td style="width:12%;">{{l.closing_balance}}</td>
+                </tr>
+              </tbody>
+            </table>
+       </div>
+     </div>
 
-    <div class="col-md-6" id="emp_widget">
-        <div class="graph">
+     <div class="col-md-6" id="emp_widget">
+           <div class="graph">
             <div class="widget-title clearfix" title="Sample Widg">
                 <h4>Top Employee Performance Details</h4>
             </div>
@@ -414,6 +424,9 @@ div.content {
             </div>
         </div>
     </div>
+    <a class="back-to-top" id="goTop">
+        <i class="fa fa-arrow-circle-o-up"></i>
+    </a>
 </div>
 
 <div class="modal fade" id="myModal" role="dialog">
@@ -455,6 +468,30 @@ div.content {
     $('body').on('click','.btn-group button', function(e) {
      $(this).addClass('active btn-success');
      $(this).siblings().removeClass('active btn-success');
+});
+
+$(document).ready(function() {
+    $(window).scroll(function() {
+        if($(this).scrollTop() > 100){
+            $('#goTop').stop().animate({
+                bottom: '0'
+                }, 500);
+        }
+        else{
+            $('#goTop').stop().animate({
+               bottom: '0'
+            }, 500);
+        }
+    });
+    $('#goTop').click(function() {
+        $('.scroll').stop().animate({
+           scrollTop: 0
+        }, 500, function() {
+           $('#goTop').stop().animate({
+               bottom: '0'
+           }, 500);
+        });
+    });
 });
 
 </script>

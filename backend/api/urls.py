@@ -18,6 +18,7 @@ urlpatterns = [
     url(r'^annotations/$', 'api.views.get_annotations', name='get_annotations'),
     url(r'^annotations/create/$', 'api.views.add_annotation', name='add_annotation'),
     url(r'^annotations/update/$', 'api.views.update_annotation', name='update_annotation'),
+    url(r'^static_production_data/','api.views.static_production_data', name="static_production_data")
     #url(r'^error_upload/','api.views.error_upload', name="error_upload"),
     #url(r'^def_display/', 'api.views.default_display', name="default_display"),
 

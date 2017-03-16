@@ -4,24 +4,36 @@ body {
     color: #000000;
  }
 
-img {
+/*img {
     width:79%;
     margin-bottom:-2%;
+ }*/
+
+img {
+    margin-left: -8px;
+    margin-bottom: -17px;
+  }
+
+login {
+    overflow: hidden;
  }
 
-label {
+.login-details {
+    margin-top: -650px;
+  }
+
+/*label {
     color: #555;    
- }
+ }*/
 </style>
 <div class="login-form-container">
+  <div class="background" style="background-image: url(/img/services_banner.png);background-size: cover;background-position: 50% 50%;width:100%;height:860px;margin-top:-165px;"></div>
   <form method="POST" name="userForm"
         ng-submit="$ctrl.onSubmit($ctrl.credentials)"
         novalidate
         ng-class="{error: $ctrl.errorMsg}">
-
+   <div class="login-details">
     <div class="logo-container">
-      <!--<img src="/img/logo.png" />-->
-      <!--<h1>NextView</h1>-->
       <img src="/img/nextwealth.png" alt="Nexwealth_Logo">
     </div>
 
@@ -55,5 +67,6 @@ label {
              class="btn btn-primary"
              value="{{$ctrl.loadingText}}"/>
     </div>
+   </div> 
   </form>
 </div>

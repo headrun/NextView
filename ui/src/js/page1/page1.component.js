@@ -13,6 +13,7 @@
              var self = this;
              var color = $rootScope.color;
              var from_to = '/api/from_to/?'
+             var static_data = '/api/static_production_data/?'
              var error_api = '/api/error_board'
              var def_disp = '/api/default'
              var yesterdays_data = '/api/yesterdays_data'
@@ -130,7 +131,10 @@
                     'self.chartOptions28':self.chartOptions28,
                     'self.chartOptions29':self.chartOptions29,
                     'self.chartOptions30':self.chartOptions30,
-                    'self.chartOptions31':self.chartOptions31
+                    'self.chartOptions31':self.chartOptions31,
+                    'self.chartOptions32':self.chartOptions32,
+                    'self.chartOptions33':self.chartOptions33,
+                    'self.chartOptions34':self.chartOptions34
                     };
 
                     var final_layout_list = [];
@@ -173,7 +177,12 @@
                     self.project = pro_cen_nam.split('-')[1].replace(' ','') + ' - '
                     var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + self.project
                               + '&center=' + self.location  + '&type=' + self.day_type;
+                    var static_ajax = static_data + '&project=' + self.project + '&center=' + self.location
                     self.main_render(from_to_data)
+                    $http({method:"GET", url:static_ajax}).success(function(result){
+                           self.hideLoading();
+                           self.static_widget_render(result,self.project,self.location);
+                    });
                 }
              })
              console.log(self.firstDate);
@@ -646,7 +655,10 @@
                     'self.chartOptions28':self.chartOptions28,
                     'self.chartOptions29':self.chartOptions29,
                     'self.chartOptions30':self.chartOptions30,
-                    'self.chartOptions31':self.chartOptions31
+                    'self.chartOptions31':self.chartOptions31,
+                    'self.chartOptions32':self.chartOptions32,
+                    'self.chartOptions33':self.chartOptions33,
+                    'self.chartOptions34':self.chartOptions34
                     };
                     var final_layout_list = [];
                     for (var single in self.layout_list){   
@@ -2749,6 +2761,75 @@ plotOptions: {
                             });
 
             }
+
+            self.static_widget_render = function(result,pro,loc) {
+                self.high_data_gener = [];
+                var final_data_gener = result.result;
+                self.high_data_gener.push(final_data_gener);
+                angular.extend(self.chartOptions32, {
+                    xAxis: {
+                        categories: self.high_data_gener[0].month_productivity_data.date,
+                        title: {
+                            text: '',
+                        }
+                    },
+                    plotOptions: {
+                        series : {
+                            allowPointSelect: true,
+                            cursor: 'pointer'
+                        },
+                        bar: {
+                            dataLabels: {
+                            enabled: true
+                            }
+                        }
+                    },
+                    series: self.high_data_gener[0].month_productivity_data.data,
+                });
+
+                angular.extend(self.chartOptions33, {
+                    xAxis: {
+                        categories: self.high_data_gener[0].week_productivity_data.date,
+                        title: {
+                            text: '',
+                        }
+                    },
+                    plotOptions: {
+                        series : {
+                            allowPointSelect: true,
+                            cursor: 'pointer'
+                        },
+                        bar: {
+                            dataLabels: {
+                            enabled: true
+                            }
+                        }
+                    },
+                    series: self.high_data_gener[0].week_productivity_data.data,
+                });
+        
+                angular.extend(self.chartOptions34, {
+                    xAxis: {
+                        categories: self.high_data_gener[0].data.date,
+                        title: {
+                            text: '',
+                        }
+                    },
+                    plotOptions: {
+                        series : {
+                            allowPointSelect: true,
+                            cursor: 'pointer'
+                        },
+                        bar: {
+                            dataLabels: {
+                            enabled: true
+                            }
+                        }
+                    },
+                    series: self.high_data_gener[0].data.data,
+                });
+            }               
+
             self.get_date = function(){
                 var dateEntered = document.getElementById('select').value;
                 dateEntered = dateEntered.replace(' to ','to');
@@ -3982,6 +4063,107 @@ angular.extend(self.chartOptions18, {
         },
     }
 
+   self.chartOptions32 = {
+                chart : {
+                 backgroundColor: "transparent"
+                },
+                lang: {
+                   thousandsSeparator: ','
+                },
+                yAxis: {
+                gridLineColor: 'a2a2a2',
+
+                min: 0,
+                title: {
+                 text: '',
+                 align: 'high'
+                },
+                labels: {
+                 overflow: 'justify',
+
+                }
+               },
+
+               tooltip: {
+                valueSuffix: '',
+                formatter: function () {
+                             return "<small>" + this.x + "</small><br/>" +
+                                    "<b>" + this.series.name + "</b> : " + Highcharts.numberFormat(this.y, null, null, ",");
+                           }
+               },
+
+               credits: {
+                enabled: false
+               },
+            };
+
+    self.chartOptions33 = {
+                chart : {
+                 backgroundColor: "transparent"
+                },
+                lang: {
+                   thousandsSeparator: ','
+                },
+                yAxis: {
+                gridLineColor: 'a2a2a2',
+
+                min: 0,
+                title: {
+                 text: '',
+                 align: 'high'
+                },
+                labels: {
+                 overflow: 'justify',
+
+                }
+               },
+
+               tooltip: {
+                valueSuffix: '',
+                formatter: function () {
+                             return "<small>" + this.x + "</small><br/>" +
+                                    "<b>" + this.series.name + "</b> : " + Highcharts.numberFormat(this.y, null, null, ",");
+                           }
+               },
+
+               credits: {
+                enabled: false
+               },
+            };
+
+    self.chartOptions34 = {
+                chart : {
+                 backgroundColor: "transparent"
+                },
+                lang: {
+                   thousandsSeparator: ','
+                },
+                yAxis: {
+                gridLineColor: 'a2a2a2',
+
+                min: 0,
+                title: {
+                 text: '',
+                 align: 'high'
+                },
+                labels: {
+                 overflow: 'justify',
+
+                }
+               },
+
+               tooltip: {
+                valueSuffix: '',
+                formatter: function () {
+                             return "<small>" + this.x + "</small><br/>" +
+                                    "<b>" + this.series.name + "</b> : " + Highcharts.numberFormat(this.y, null, null, ",");
+                           }
+               },
+
+               credits: {
+                enabled: false
+               },
+            };        
 
     self.chartOptions22 = '<p> workpacket </p>'
 

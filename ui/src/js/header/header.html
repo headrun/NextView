@@ -85,11 +85,31 @@
     cursor: pointer;
 }
 
-img {
+/*img {
     width: 27%;
     margin-left: -3%;
     margin-top: -14px;
+ }*/
+.title {
+    font-family: sans-serif;
+    color: #3D8B37;
+    margin-left:445px;
+    font-size: x-large;
+}
+#home {
+    margin-top: 16px;
+    font-size: 29px;
+    float: left;
+    margin-left: 10px;
+    color: #63AB62;
  }
+ 
+.logo { 
+        float: left;
+        width: 13%;
+        margin-left: -6px;
+        margin-top: -11px;
+    }                                         
 .position {
     position: fixed;
     margin-top: 0px;
@@ -98,7 +118,23 @@ img {
 dashboard div.dashboard-content {
     margin-top: 79px;
 }
-
+#divNewNotifications {
+    height:300px;
+    overflow-y: scroll;
+ }
+.dropdown_items {
+    text-decoration: none;
+    display: block !important;
+}
+#Proj {
+    display: none;
+}
+#dropdown_title {
+    display: none;
+}
+.caret{
+    display: none;    
+ }
 </style>
 
 <nav class="navbar navbar-default navbar-fixed-top position">
@@ -110,17 +146,15 @@ dashboard div.dashboard-content {
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-          <!--<a class="navbar-brand" style="font-size:2.0em;margin-left:-15px;font-weight:bold;color:black;">NextPulse </a>-->
-          <img src="/img/nextwealth.png" alt="Nexwealth_Logo" style="float:left;">
-          <a class="navbar-brand" style="font-size:2.0em;margin-left:-2%;font-weight:100;color:#555;">NextPulse </a> 
+            <!--<img src="/img/nextwealth.png" alt="Nexwealth_Logo" style="float:left;">-->
+            <a href="http://nextwealth.in" id="nextwealth" target="_blank"><img class="logo" src="/img/nextwealth.png" alt="Nexwealth_L                     ogo"></a>
+            <a href="http://nextpulse.nextwealth.in/#!/landing"><span class="glyphicon glyphicon-home" id="home" aria-hidden="true"></span></a>
+            <a class="navbar-brand" style="margin-top:4px;"><p class="title">NextPulse </p></a> 
         </div>
         <div id="navbar" class="navbar-collapse collapse">
            <div class="data">
               <ul class="nav nav-tabs" style="border-bottom: none;">
-                  <li><a href="" id="Abt" style="margin-left:115px;">About</a></li>
-                  <li><a href="" id="Ser">Services</a></li>
-                  <li><a href="" id="Wid">Features</a></li>
-                  <li><a href="" id="Proj" class="active">Customers</a></li>
+                  <li><a href="" id="Proj" class="active">Projects</a></li>
               </ul>
             </div> 
             <ul class="nav navbar-nav navbar-right" style="margin-top:-50px;">
@@ -136,7 +170,7 @@ dashboard div.dashboard-content {
                                   </a>
                                    <ul ID="divNewNotifications" class="dropdown-menu">
                                        <li >
-                                           <a href="" ng-repeat="item in $ctrl.mapping_list" ng-click="$ctrl.clickFun(item)">{{item}}</a>
+                                           <a href="" class="dropdown_items" ng-repeat="item in $ctrl.mapping_list" ng-click="$ctrl.clickFun(item)">{{item.split(' - ')[1]}}</a>
                                        </li>
 
                                    </ul>
