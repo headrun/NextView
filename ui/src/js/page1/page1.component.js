@@ -11,6 +11,7 @@
              var self = this;
              var color = $rootScope.color;
              var from_to = '/api/from_to/?'
+             var static_data = '/api/static_production_data/?'
              var error_api = '/api/error_board'
              var def_disp = '/api/default'
              var yesterdays_data = '/api/yesterdays_data'
@@ -118,7 +119,10 @@
                     'self.chartOptions28':self.chartOptions28,
                     'self.chartOptions29':self.chartOptions29,
                     'self.chartOptions30':self.chartOptions30,
-                    'self.chartOptions31':self.chartOptions31
+                    'self.chartOptions31':self.chartOptions31,
+                    'self.chartOptions32':self.chartOptions32,
+                    'self.chartOptions33':self.chartOptions33,
+                    'self.chartOptions34':self.chartOptions34,
                     };
 
                     self.project_images = {
@@ -130,7 +134,7 @@
                         "Bigbasket" : "bigbasket.png",
                         "Sulekha" : "sulekha.png",
                         "Tally" : "tally.png",
-                        "Wipro" : "wipro.jpg",
+                        "Wipro" : "wipro.png",
                         "IBM" : "ibm.png",
                         "Ujjivan" : "ujjivan.jpg",
                         "IBM Africa" : "ibm.png",
@@ -180,9 +184,15 @@
                     self.useful_layout.push(first_row,second_row);
                     self.location = pro_cen_nam.split('-')[0].replace(' ','') + ' - '
                     self.project = pro_cen_nam.split('-')[1].replace(' ','') + ' - '
+
                     var from_to_data = from_to + 'from=' + self.lastDate + '&to=' + self.firstDate + '&project=' + self.project
                               + '&center=' + self.location  + '&type=' + self.day_type;
+                    var static_ajax = static_data + '&project=' + self.project + '&center=' + self.location
                     self.main_render(from_to_data)
+                    $http({method:"GET", url:static_ajax}).success(function(result){
+                           self.hideLoading();
+                           self.static_widget_render(result,self.project,self.location);
+                    });
                 }
              })
              console.log(self.firstDate);
@@ -534,8 +544,6 @@
                                         self.drop_sub_pack = this.value;
                                         self.drop_sub_proj = 'undefined';
                                         self.drop_work_pack;
-                        //$('.day').addClass('active');
-                        //$('.day').siblings().removeClass('active');
 
             var final_work =  '&sub_project=' + self.drop_sub_proj + '&sub_packet=' + self.drop_sub_pack + '&work_packet=' + self.drop_work_pack
             var dateEntered = document.getElementById('select').value
@@ -1353,9 +1361,7 @@
                                     self.names = data.result.data;
                                     var proj = data.result.project;
                                     var pro_drill = data.result.table_headers;
-                                    //var pro_drill = drilldown_config[proj];
                                     var chart_type = data.result.type;
-                                    //self.fields_list_drilldown = pro_drill[chart_type];
                                     self.fields_list_drilldown = pro_drill;
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
@@ -1510,7 +1516,6 @@
                                     var pro_drill = data.result.table_headers;
                                     var chart_type = data.result.type;
                                     self.fields_list_drilldown = pro_drill;
-
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
@@ -1625,11 +1630,8 @@ plotOptions: {
                                     self.names = data.result.data;
                                     var proj = data.result.project;
                                     var pro_drill = data.result.table_headers;
-                                    //var pro_drill = drilldown_config[proj];
                                     var chart_type = data.result.type;
                                     self.fields_list_drilldown = pro_drill;
-                                    //self.fields_list_drilldown = pro_drill[chart_type];
-                                    //self.fields_list_drilldown = self.list_object_drilldown[data.result.type];
                                     self.chart_type = data.result.type;
                                     console.log(self.names);
                                 }).error(function(error){ console.log("error")});
@@ -2506,6 +2508,76 @@ plotOptions: {
                             });
 
             }
+
+            /*var static_ajax = static_data + '&project=' + self.project + '&center=' + self.location*/
+            self.static_widget_render = function(result,pro,loc) {
+                self.high_data_gener = [];
+                var final_data_gener = result.result;
+                self.high_data_gener.push(final_data_gener);
+                angular.extend(self.chartOptions32, {
+                    xAxis: {
+                        categories: self.high_data_gener[0].month_productivity_data.date,
+                        title: {
+                            text: '',
+                        }
+                    },
+                    plotOptions: {
+                        series : {
+                            allowPointSelect: true,
+                            cursor: 'pointer'
+                        },
+                        bar: {
+                            dataLabels: {
+                            enabled: true
+                            }
+                        }
+                    },
+                    series: self.high_data_gener[0].month_productivity_data.data,
+                });
+
+                angular.extend(self.chartOptions33, {
+                    xAxis: {
+                        categories: self.high_data_gener[0].week_productivity_data.date,
+                        title: {
+                            text: '',
+                        }
+                    },
+                    plotOptions: {
+                        series : {
+                            allowPointSelect: true,
+                            cursor: 'pointer'
+                        },
+                        bar: {
+                            dataLabels: {
+                            enabled: true
+                            }
+                        }
+                    },
+                    series: self.high_data_gener[0].week_productivity_data.data,
+                });
+
+                angular.extend(self.chartOptions34, {
+                    xAxis: {
+                        categories: self.high_data_gener[0].static_prod_data.date,
+                        title: {
+                            text: '',
+                        }
+                    },
+                    plotOptions: {
+                        series : {
+                            allowPointSelect: true,
+                            cursor: 'pointer'
+                        },
+                        bar: {
+                            dataLabels: {
+                            enabled: true
+                            }
+                        }
+                    },
+                    series: self.high_data_gener[0].static_prod_data.data,
+                });
+            }
+
             self.get_date = function(){
                 var dateEntered = document.getElementById('select').value;
                 dateEntered = dateEntered.replace(' to ','to');
@@ -2568,9 +2640,7 @@ plotOptions: {
                     self.wor_pac_sel_two = wor_pac.value;
                 }
 
-                //self.wor_pac_sel_two = document.getElementById("0").value;
-                //self.sub_pac_sel_two = document.getElementById("1").value;
-                //self.sub_pro_sel_two = 'undefined';
+
                 self.packet_clicked = self.wor_pac_sel_two;
                 var is_exist = self.packet_clicked.indexOf('&');
                 if (is_exist > 0){
@@ -3705,6 +3775,108 @@ angular.extend(self.chartOptions18, {
                }
         },
     }
+
+    self.chartOptions32 = {
+                chart : {
+                 backgroundColor: "transparent"
+                },
+                lang: {
+			       thousandsSeparator: ','
+		        },
+                yAxis: {
+                gridLineColor: 'a2a2a2',
+
+                min: 0,
+                title: {
+                 text: '',
+                 align: 'high'
+                },
+                labels: {
+                 overflow: 'justify',
+
+                }
+               },
+
+               tooltip: {
+                valueSuffix: '',
+                formatter: function () {
+                             return "<small>" + this.x + "</small><br/>" +
+                                    "<b>" + this.series.name + "</b> : " + Highcharts.numberFormat(this.y, null, null, ",");
+                           }
+               },
+
+               credits: {
+                enabled: false
+               },
+            };
+
+    self.chartOptions33 = {
+                chart : {
+                 backgroundColor: "transparent"
+                },
+                lang: {
+			       thousandsSeparator: ','
+		        },
+                yAxis: {
+                gridLineColor: 'a2a2a2',
+
+                min: 0,
+                title: {
+                 text: '',
+                 align: 'high'
+                },
+                labels: {
+                 overflow: 'justify',
+
+                }
+               },
+
+               tooltip: {
+                valueSuffix: '',
+                formatter: function () {
+                             return "<small>" + this.x + "</small><br/>" +
+                                    "<b>" + this.series.name + "</b> : " + Highcharts.numberFormat(this.y, null, null, ",");
+                           }
+               },
+
+               credits: {
+                enabled: false
+               },
+            };
+
+    self.chartOptions34 = {
+                chart : {
+                 backgroundColor: "transparent"
+                },
+                lang: {
+			       thousandsSeparator: ','
+		        },
+                yAxis: {
+                gridLineColor: 'a2a2a2',
+
+                min: 0,
+                title: {
+                 text: '',
+                 align: 'high'
+                },
+                labels: {
+                 overflow: 'justify',
+
+                }
+               },
+
+               tooltip: {
+                valueSuffix: '',
+                formatter: function () {
+                             return "<small>" + this.x + "</small><br/>" +
+                                    "<b>" + this.series.name + "</b> : " + Highcharts.numberFormat(this.y, null, null, ",");
+                           }
+               },
+
+               credits: {
+                enabled: false
+               },
+            };
 
     self.chartOptions22 = '<p> workpacket </p>'
 

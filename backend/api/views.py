@@ -17,6 +17,7 @@ from django.db.models import Max
 import redis
 from datetime import timedelta
 from datetime import date
+#from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import re
 import json
@@ -3892,8 +3893,7 @@ def day_week_month(request, dwm_dict, prj_id, center, work_packets, level_struct
             volume_new_data.append(error_graph)
 
         # result_dict['productivity_data']= graph_data_alignment(final_productivity,name_key='data')
-        result_dict['productivity_data'] = graph_data_alignment_color(final_productivity, 'data', level_structure_key,
-                                                                      prj_id, center)
+        result_dict['productivity_data'] = graph_data_alignment_color(final_productivity, 'data', level_structure_key,prj_id, center)
         result_dict['volumes_data'] = {}
         result_dict['volumes_data']['volume_new_data'] = volume_new_data
         for error_key, error_value in all_internal_error_accuracy.iteritems():
@@ -4111,8 +4111,9 @@ def num_of_days(to_date,from_date):
     return date_list
 
 def static_production_data(request):
-    from_date = datetime.datetime.strptime(request.GET['from'], '%Y-%m-%d').date()
-    to_date = datetime.datetime.strptime(request.GET['to'], '%Y-%m-%d').date()
+    #from_date = datetime.datetime.strptime(request.GET['from'], '%Y-%m-%d').date()
+    #to_date = datetime.datetime.strptime(request.GET['to'], '%Y-%m-%d').date()
+    final_data_dict = {}
 
     try:
         work_packet = request.GET.get('work_packet')
@@ -4130,17 +4131,20 @@ def static_production_data(request):
         sub_packet = ''
     date_list = []
     #days_code
+    #import pdb;pdb.set_trace()
+    to_date = datetime.date.today() - timedelta(1)
     from_dates = to_date - timedelta(6)
     days_list = num_of_days(to_date, from_dates)
 
     #weeks_code
-    today = date.today()
-    d = today - relativedelta(months=1)
-    from_date = date(d.year, d.month, 1)
-    to_date = date(today.year, today.month, 1) - relativedelta(days=1)
-    months_dict = {}
+    date = datetime.date.today()
+    last_date = date - relativedelta(months=1)
+    start_date = datetime.datetime(date.year, date.month, 1)
+    from_date = datetime.datetime(last_date.year, last_date.month, 1).date()
+    to_date = start_date.date() - relativedelta(days=1)
     days = (to_date - from_date).days
     days = days + 1
+    months_dict = {}
     for i in range(0, days):
         date = from_date + datetime.timedelta(i)
         month = date.strftime("%B")
@@ -4187,6 +4191,14 @@ def static_production_data(request):
     for w_days in weekdays:
         date_list = num_of_days(w_days['end'], w_days['start'])
         week_list.append(date_list)
+    dwm_dict = {}
+    employe_dates = {}
+    dwm_dict['week'] = week_list
+    for week in week_list:
+        if week and employe_dates.has_key('days'):
+            employe_dates['days'] = employe_dates['days'] + week
+        else:
+            employe_dates['days'] = week
 
     level_structure_key = {}
     if (work_packet) and (work_packet != 'undefined'): level_structure_key['work_packet'] = work_packet
@@ -4219,13 +4231,105 @@ def static_production_data(request):
                 level_structure_key['sub_packet'] = "All"
 
     final_data = product_total_graph(days_list,prj_id,center,work_packet,level_structure_key)
-    final_week_data = product_total_graph(week_list,prj_id,center,work_packet,level_structure_key)
     del final_data['volumes_data']
     del final_data['prod_days_data']
-    result = {}
-    result['static_prod_data'] = final_data
-    result['static_week_prod_data'] = final_week_data
-    return HttpResponse(result)
+    final_data_dict['static_prod_data'] = final_data
+
+    data_date = []
+    week_num = 0
+    week_names = []
+    final_production = {}
+    productivity_list = {}
+    #import pdb;pdb.set_trace()
+    for week_key, week_dates in dwm_dict.iteritems():
+        for week in week_dates:
+            data_date.append(week[0] + ' to ' + week[-1])
+            result = product_total_graph(week, prj_id, center, work_packet, level_structure_key)
+            if len(result['prod_days_data']) > 0:
+                week_name = str('week' + str(week_num))
+                week_names.append(week_name)
+                productivity_list[week_name] = result['volumes_data']['volume_values']
+                week_num = week_num + 1
+            else:
+                week_name = str('week' + str(week_num))
+                week_names.append(week_name)
+                productivity_list[week_name] = {}
+                week_num = week_num + 1
+
+    final_production = prod_volume_week(week_names, productivity_list, final_production)
+    error_volume_data = {}
+    volume_new_data = []
+    for key, value in final_production.iteritems():
+        error_graph = []
+        error_volume_data[key] = sum(value)
+        error_graph.append(key.replace('NA_', '').replace('_NA', ''))
+        error_graph.append(sum(value))
+        volume_new_data.append(error_graph)
+
+    final_data_dict['week_productivity_data'] = {}
+    final_data_dict['week_productivity_data']['data'] = graph_data_alignment_color(final_production, 'data',level_structure_key, prj_id, center)
+    final_data_dict['week_productivity_data']['date'] = data_date
+    #month code
+    current_date = datetime.date.today()
+    last_mon_date = current_date - relativedelta(months=3)
+    from_date = datetime.datetime(last_mon_date.year, last_mon_date.month, 1).date()
+    start_date = datetime.datetime(current_date.year, current_date.month, 1)
+    to_date = start_date.date() - relativedelta(days=1)
+    days = (to_date - from_date).days
+    days = days + 1
+    months_dict = {}
+    for i in range(0, days):
+        date = from_date + datetime.timedelta(i)
+        month = date.strftime("%B")
+        if month in months_dict:
+            months_dict[month].append(str(date))
+        else:
+            months_dict[month] = [str(date)]
+
+    new_month_dict = {}
+    months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October','November', 'December']
+    k = OrderedDict(sorted(months_dict.items(), key=lambda x: months.index(x[0])))
+    for month_na in tuple(k):
+        new_month_dict[month_na] = {}
+        if employe_dates.has_key('days'):
+            employe_dates['days'] = employe_dates['days'] + months_dict[month_na]
+        else:
+            employe_dates['days'] = months_dict[month_na]
+    dwm_dict['month'] = months_dict
+    month_names = []
+    final_month_productivity = {}
+    production_list = {}
+    data_date = []
+    #month_lst = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October','November', 'December']
+    month_order = OrderedDict(sorted(dwm_dict['month'].items(), key=lambda x: months.index(x[0])))
+    for month_na in tuple(month_order):
+        month_name = month_na
+        month_dates = dwm_dict['month'][month_na]
+        data_date.append(month_dates[0] + ' to ' + month_dates[-1])
+        result = product_total_graph(month_dates, prj_id, center, work_packet, level_structure_key)
+        if len(result['prod_days_data']) > 0:
+            production_list[month_name] = result['volumes_data']['volume_values']
+            month_names.append(month_name)
+        else:
+            production_list[month_name] = {}
+            month_names.append(month_name)
+        packet_sum_data = result['volumes_data']['volume_values']
+    final_month_productivity = prod_volume_week(month_names, production_list, final_month_productivity)
+    error_month_volume_data = {}
+    volume_new_data = []
+    for key, value in final_month_productivity.iteritems():
+        error_month_graph = []
+        error_month_volume_data[key] = sum(value)
+        error_month_graph.append(key.replace('NA_', '').replace('_NA', ''))
+        error_month_graph.append(sum(value))
+        volume_new_data.append(error_month_graph)
+    final_data_dict['month_productivity_data'] = {}
+    final_data_dict['month_productivity_data']['data'] = graph_data_alignment_color(final_month_productivity, 'data', level_structure_key, prj_id,center)
+    final_data_dict['month_productivity_data']['date'] = data_date
+    del result['volumes_data']
+    del result['prod_days_data']
+    del result['data']
+    return HttpResponse(final_data_dict)
 
 
 def fte_calculation_sub_project_work_packet(result,level_structure_key):
@@ -4593,6 +4697,7 @@ def from_to(request):
         months_dict = {}
         days = (to_date - from_date).days
         days = days+1
+        #import pdb;pdb.set_trace()
         for i in range(0, days):
             date = from_date + datetime.timedelta(i)
             month = date.strftime("%B")
@@ -4647,7 +4752,6 @@ def from_to(request):
                 if end > num_days:
                     end = num_days
         week_list=[]
-        import pdb;pdb.set_trace()
         for w_days in weekdays:
             date_list = num_of_days(w_days['end'],w_days['start'])
             week_list.append(date_list)
