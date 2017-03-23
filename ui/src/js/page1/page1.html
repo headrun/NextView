@@ -1,89 +1,14 @@
 <html>
 <style>
-@media (max-width : 320px) {
-     .btn-group {
-        /*top: 4px !important;*/
-        left: 16px !important;
-       }
-       .btn{
-        padding: 1px 5px !important;
-        font-size: 12px !important;
-        line-height: 1.5 !important;
-        }
-        .brand_style {
-            font-size: 13px !important;
-        }
-        .ajax-file-upload {
-            padding: 1px 2px;
-            font-size: 13px;
-            background: white !important;
-            border: none !important;
-            color: black !important;
-        }
-        .pull-left {
-            text-overflow: ellipsis;
-            overflow: hidden;
-            max-width: 147px;
-            white-space: nowrap;
-        }
-        .form-control {
-            width: initial !important;
-            height: 23px !important;
-            padding: 4px;
-            margin-left: 4px !important;
-            font-size: 13px !important;
-        }
-        .date {
-            float: right !important;
-            font-size: 21px !important;
-            padding-top: 6px !important;
-            cursor: pointer !important;
-            color: #555 !important;
-        }
-        #inner1 {
-            float: left !important;
-            margin-left: 5px;
-        }
-     }
 ::-webkit-scrollbar-thumb {
-      background:#4c4c4c;
+    background:#4c4c4c;
 }
 ::-webkit-scrollbar {
-      width: 8px;
+    width: 8px;
 }
-.daterangepicker {
-    color: black;
-}
-
-/*.daterangepicker td.active {
-    background-color: white;
-    border-color: transparent;
-    color: black;
-}
-
-.daterangepicker td.active, .daterangepicker td.active:hover {
-     background-color: white; 
-     border-color: none; 
-     color: black; 
-}*/
-
-.daterangepicker td.active, .daterangepicker td.active:hover {
-    background-color: white;
-    border-color: transparent;
-    color: black;
- }
-
-.daterangepicker td.in-range {
-    background-color: white;
-    border-color: transparent;
-    color: black;
-    border-radius: 0;
-}
-
 #Abt {
     display: none;
 }
-
 #Ser {
     display: none;
 }
@@ -95,211 +20,43 @@
 #Proj {
    display: none;
 }
-
-.button {
-    background-color: #3396C9;
-    color: white;
-    padding-bottom: 3px;
-    padding-top: 4px;
-    padding-left: 2px;
-    padding-right: 2px;
-    font-size: 14px;
-    cursor: pointer;
-  }
-
-.row {
-     margin-left:0px;
-     margin-right:0px;
-    }
-
-table {
-
-    margin : 0 auto;
-    border: 1 px solid #323232;
- }
-
-.date {
-     float: right;
-     font-size: 24px;
-     padding-top: 9px;
-     cursor: pointer;
-     color: #555;
-}
-.select {
-      float: right;
-      color:#0a0909;
-      margin:6px;
-      cursor:pointer;
-}
-.form-control {
-    width: initial;
-    height: 30px;
-}
-.pos {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: inherit;
- }
-#wrapper{
-    margin-left:auto;
-    margin-right:auto;
-    height:auto;
-    width:auto;
-}
-#inner1{
-    float:right;
-    margin-right: -11.75%;
-}
-#inner2{
-    float:right;
-    clear:right;
-    margin-right: 5px;
-    margin-top:-17px;
-}
-.table-responsive {
-    border: 1px solid #ccc;
-    background-color:#ffffff;
-    margin: 5px;
-    padding-right: 10px;
-    padding-left: 10px;
-    /*padding-bottom: 1px;*/
-    /*padding-top: 37px;*/
-}
-.table-bordered>tbody>tr>td {
-    border : none;
-}
-
-.table>tbody>tr>td {
-    border-top: none;
-}
-.table-bordered>tfoot>tr>th {
-    border : none;
-}
-.table-bordered>thead>tr>td {
-    border : none;
-}
-.table-bordered>thead>tr>th {
-    border : none;
-}
-.row_name {
-   font-size: 14px;
-   margin-right: 0px;
-   background-color: #ffffff;
-   color: #000000;
-   border-bottom: 1px solid #000000;
-}
-.line {
-   border:1px solid #3c3c3c;
-   /*margin-left:-2px;*/
-   margin-bottom:12px;
-   margin-left: auto;
-   /*margin-right: auto;*/
-}
-.col-md-6 {
-    padding-left: 0px;
-    padding-right: 0px;
-}
-.widget-content {
-    /*border-radius: 0.3em;*/
-    background-color: #ffffff;
-    border : 1px solid #ccc;
-    padding: 10px;
-}
-.body {
-        width: 100%;
-    }
-.body thead, .body tbody, .body tr, .body td, .body th{
-    display: block;
- }
-.body tr:after {
-    content: ' ';
-    display: block;
-    visibility: hidden;
-    clear: both;
-}
- .body tbody{
-    height: 180px;
-    overflow-y: auto;
-}
-
-.body th {
-    height: 40px;
-}
-
-.body td, .body th {
-    width: 19.7%;
-    float: left;
-}
-.btn-group {
-    top: -11px;
-    left: 15px;
-}
-.dashboard {
-    margin-top: 9px;
-    margin-left: -2%;
-    float: left;
-}
-thead {
-    border: 1px solid black;
-}
 div.content {
     overflow: hidden;
 }
 .volume {
-    margin-left: -1%;
+    margin-top: -64px;
 }
-.btn-success.active:hover {
-	color: #000000 !important;
-	background-color: #d4d4d4 !important;
-	border-color: #8c8c8c !important;
-}
-.btn-success.active {
-    color: #000000 !important;
-	background-color: #d4d4d4 !important;
-	border-color: #8c8c8c !important;
-}
-#goTop {
-    float: right;
-    font-size: -webkit-xxx-large;
-    bottom: 0;
-    right: 0;
-}
-
 </style>
 <body>
- <div class="container volume">
- <div class="row">
-    <div id="wrapper">
-        <div>
-            <img ng-src="/img/Projectimages/{{$ctrl.project_images[$ctrl.project.split(' - ')[0]]}}" alt="project_Logo" style="float:left;height:50px;">
-            <h3 class="pull-left brand_style">{{$ctrl.project}}DASHBOARD</h3>
-        </div>
-        <!--<p>{{$ctrl.project_images[$ctrl.project.split(' - ')[0]]}}</p>-->
-             <div id="inner1" class="form-group" style="margin-bottom:initial;">
+<div class="container volume">
+    <div class="row">
+        <div id="wrapper">
+            <div class="col-md-3 col-sm-3 col-xs-10">
+                <!--<img ng-src="/img/Projectimages/{{$ctrl.project_images[$ctrl.project.split(' - ')[0]]}}" class="projectlogo" alt="project_Logo">-->
+                <h3 class="pull-left brand_style">{{$ctrl.project}}DASHBOARD</h3>
+            </div>
+            <div id="inner1" class="col-md-3 col-sm-3 col-xs-10 form-group">
                  <input class="form-control select" id="select" size="22">
                  <i class="fa fa-calendar date" aria-hidden="true"></i>
-             </div>
-
-             <div ng-repeat="k in $ctrl.packet_hierarchy_list track by $index">
+            </div>
+            <div ng-repeat="k in $ctrl.packet_hierarchy_list track by $index">
                 <form>
-                    <div class="form-group" style="float:left;padding-left:1%;padding-top:5px;margin-bottom:0px;">
-                        <select class="form-control input-sm" id="{{$index}}" style="border: solid 1px #ccc;background:white;color:black;">
+                    <div class="form-group options">
+                        <select class="form-control input-sm inputbox" id="{{$index}}">
                             <option>All</option>
                         </select>
                     </div>
                 </form>
-             </div>
+            </div>
         </div>
-
-        <div class="btn-group dashboard">
-            <button type="button" id="day" ng-model="radioModel" class="btn btn-default day" ng-click="$ctrl.active_filters('day')" uib-btn-radio="'Day'"style="cursor:pointer;">Day</button>
-            <button type="button" id="week" ng-model="radioModel" class="btn btn-default week" ng-click="$ctrl.active_filters('week')" uib-btn-radio="'Week'" style="cursor:pointer;">Week</button>
-            <button type="button" id="Month" ng-model="radioModel" class="btn btn-default month" ng-click="$ctrl.active_filters('month')" uib-btn-radio="'Month'" style="cursor:pointer;">Month</button>
+        <div class="col-md-3 col-sm-3 col-xs-10 btn-group dashboard">
+            <button type="button" id="day" ng-model="radioModel" class="btn btn-default day" ng-click="$ctrl.active_filters('day', 'day_yes')" uib-btn-radio="'Day'">Day</button>
+            <button type="button" id="week" ng-model="radioModel" class="btn btn-default week" ng-click="$ctrl.active_filters('week', 'week_yes')" uib-btn-radio="'Week'">Week</button>
+            <button type="button" id="Month" ng-model="radioModel" class="btn btn-default month" ng-click="$ctrl.active_filters('month', 'month_yes')" uib-btn-radio="'Month'">Month</button>
         </div>
     </div>
- </div>
-    <div class="scroll">
+</div>
+<div class="scroll">
     <div class="row" ng-repeat="i in $ctrl.useful_layout">
         <div ng-repeat="j in i" class="col-sm-{{j.col}} widget">
             <div class="widget-content">
@@ -309,18 +66,17 @@ div.content {
                 <div class="widget-body">
                     <div ng-if="j.day_type_widget" class="input-group"id="inner2">
                         <div class="btn-group">
-                            <button type="button" id="day" ng-model="radioModel" class="btn btn-default day" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" uib-btn-radio="'Day'"style="cursor:pointer;">Day</button>
-                            <button type="button" id="week" ng-model="radioModel" class="btn btn-default week" ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')" uib-btn-radio="'Week'" style="cursor:pointer;">Week</button>
-                            <button type="button" id="Month" ng-model="radioModel" class="btn btn-default month" ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')" uib-btn-radio="'Month'" style="cursor:pointer;">Month</button>
-                         </div>
-                     </div>
+                            <button type="button" id="day" ng-model="radioModel" class="btn btn-default day" ng-click="$ctrl.dateType('day', j.opt, j.api, 'day_yes')" uib-btn-radio="'Day'">Day</button>
+                            <button type="button" id="week" ng-model="radioModel" class="btn btn-default week" ng-click="$ctrl.dateType('week', j.opt, j.api, 'week_yes')" uib-btn-radio="'Week'">Week</button>
+                            <button type="button" id="Month" ng-model="radioModel" class="btn btn-default month" ng-click="$ctrl.dateType('month', j.opt, j.api, 'month_yes')" uib-btn-radio="'Month'">Month</button>
+                        </div>
+                    </div>
                     <highcharts options="$ctrl.final_layout_values_list[j.opt]"></highcharts>
                 </div>
             </div>
         </div>
     </div>
-
- <div class="row">
+    <div class="row">
         <div class="col-md-6">
             <div class="table-responsive">
                 <div class="widget-title clearfix" title="Sample Widg">
@@ -347,53 +103,52 @@ div.content {
             </div>
         </div>
     </div>
-
-<div class="row">
-    <div class="col-md-6">
-        <div class="table-responsive">
-            <div class="widget-title clearfix" title="Sample Widg">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="table-responsive">
+                <div class="widget-title clearfix" title="Sample Widg">
                     <h4>Volume Status</h4>
+                </div>
+                <table class="table table-bordered line">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Opening</th>
+                            <th>Received</th>
+                            <th>NonWorkableCount</th>
+                            <th>Completed</th>
+                            <th>Closing</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="l in $ctrl.volume_graphs">
+                            <td>{{l.date}}</td>
+                            <td>{{l.opening}}</td>
+                            <td>{{l.received}}</td>
+                            <td>{{l.non_workable_count}}</td>
+                            <td>{{l.completed}}</td>
+                            <td>{{l.closing_balance}}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <table class="table table-bordered line">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Opening</th>
-                        <th>Received</th>
-                        <th>NonWorkableCount</th>
-                        <th>Completed</th>
-                        <th>Closing</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="l in $ctrl.volume_graphs">
-                        <td>{{l.date}}</td>
-                        <td>{{l.opening}}</td>
-                        <td>{{l.received}}</td>
-                        <td>{{l.non_workable_count}}</td>
-                        <td>{{l.completed}}</td>
-                        <td>{{l.closing_balance}}</td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
     </div>
+    <a class=”back-to-top”  id="goTop">
+        <i class="fa fa-arrow-circle-o-up"></i>
+    </a>
 </div>
-<a class=”back-to-top” style="display: inline;" id="goTop">
-    <i class="fa fa-arrow-circle-o-up"></i>
-</a>
-</div>
+
 <div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog">
       <div class="modal-content">
          <div class="modal-header">
              <button type="button" class="close" data-dismiss="modal">&times;</button>
              <h4 class="modal-title">{{$ctrl.chart_type}}</h4>
-
          </div>
          <div class="modal-body">
             <div class="row" style="margin-right:16px;">
-                <div class="">
+                <div class="table_data">
                      <table style="border:1px solid #3c3c3c;">
                           <thead style="display:block;">
                               <tr class="row_name">
@@ -405,16 +160,16 @@ div.content {
                                  <td ng-repeat="i in $ctrl.fields_list_drilldown" style="width:200px;padding:5px;text-align:-webkit-center;">{{x[i]}}</td>
                              </tr>
                           </tbody>
-                      </table>
+                     </table>
                 </div>
             </div>
          </div>
          <div class="modal-footer">
            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
          </div>
-       </div>
+      </div>
     </div>
-  </div>
+</div>
 </body>
 
 <script>

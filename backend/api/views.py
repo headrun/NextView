@@ -1538,6 +1538,7 @@ def upload_new(request):
                                 internal_error_dataset[str(customer_data[date_name])][emp_key]=local_internalerror_data
                     else:
                         na_key = [key_value for key_value in local_internalerror_data.values() if key_value=='not_applicable']
+                        na_key = [key_value for key_value in local_internalerror_data.values() if key_value=='not_applicable']
                         if (len(na_key) == 1) and (sheet_names.get('external_error_sheet','')== sheet_names.get('internal_error_sheet','')) and (sheet_names.get('external_error_sheet','')== sheet_names.get('raw_table_sheet','')):
                             if internal_error_dataset[str(customer_data[date_name])].has_key(emp_key):
                                 for intr_key,intr_value in local_internalerror_data.iteritems():
@@ -2820,10 +2821,10 @@ def agent_pareto_data_generation(request,date_list,prj_id,center_obj,level_struc
     accuracy_list = []
     new_emp_list = []
     final_pareto_data = {}
-    final_pareto_data['error_count']={}
-    final_pareto_data['error_count']['error_count'] =[]
-    final_pareto_data['error_accuracy'] = {}
-    final_pareto_data['error_accuracy']['error_accuracy'] = []
+    final_pareto_data['Error Count']={}
+    final_pareto_data['Error Count']['Error Count'] =[]
+    final_pareto_data['Error Accuracy'] = {}
+    final_pareto_data['Error Accuracy']['Error Accuracy'] = []
     error_count_data = []
     for key,value in sorted(error_count.iteritems(), key=lambda (k, v): (-v, k)):
         data_values = []
@@ -2832,7 +2833,7 @@ def agent_pareto_data_generation(request,date_list,prj_id,center_obj,level_struc
         error_count_data.append(value)
         new_emp_list.append(data_values)
 
-    final_pareto_data['error_count']['error_count'] = error_count_data[:10]
+    final_pareto_data['Error Count']['Error Count'] = error_count_data[:10]
 
     emp_error_count = 0
     for key, value in sorted(error_count.iteritems(), key=lambda (k, v): (-v, k)):
@@ -2857,7 +2858,7 @@ def agent_pareto_data_generation(request,date_list,prj_id,center_obj,level_struc
         #acc_list.append(value)
         error_accuracy.append(value)
         #accuracy_list.append(acc_list)
-    final_pareto_data['error_accuracy']['error_accuracy'] = error_accuracy[:10]
+    final_pareto_data['Error Accuracy']['Error Accuracy'] = error_accuracy[:10]
 
     final_data = pareto_graph_data(final_pareto_data)
     result = {}
@@ -3230,7 +3231,7 @@ def internal_extrnal_graphs(request,date_list,prj_id,center_obj,packet_sum_data,
         final_internal_data = external_internal_without_audit_graph(request, date_list, prj_id, center_obj, packet_sum_data,level_structure_key,err_type='Internal')
     else:
         final_internal_data = internal_extrnal_graphs_same_formula(request, date_list, prj_id, center_obj,level_structure_key,err_type='Internal')
-    if prj_name[0] in ['DellBilling','DellCoding','Mobius','Gooru','3iKYC','Bigbasket','Sulekha','Tally','Nextwealth','Wipro']:
+    if prj_name[0] in ['DellBilling','DellCoding','Mobius','Gooru','3iKYC','Bigbasket','Sulekha','Tally','Nextwealth','Wipro','Walmart Chittor']:
         final_external_data = internal_extrnal_graphs_same_formula(request, date_list, prj_id, center_obj,level_structure_key,err_type='External')
         final_internal_data.update(final_external_data)
         return final_internal_data
@@ -3244,16 +3245,6 @@ def internal_extrnal_graphs(request,date_list,prj_id,center_obj,packet_sum_data,
         final_external_data = internal_extrnal_graphs_same_formula(request, date_list, prj_id, center_obj,level_structure_key,err_type='External')
         final_internal_data.update(final_external_data)
         return final_internal_data
-
-
-    """if prj_name[0] in ['Ujjivan']:
-        final_external_data = internalerror_graph(request, date_list, prj_id, center_obj, packet_sum_data,level_structure_key)
-        #final_external_data = internalerror_graph(request, date_list, prj_id, center_obj, packet_sum_data,level_structure_key, err_type='External')
-        #final_internal_data.update(final_external_data)
-        #return final_internal_data
-        return final_external_data"""
-    #return result
-
 
 def errors_week_calcuations(week_names,internal_accuracy_timeline,final_internal_accuracy_timeline):
     for prodct_key, prodct_value in internal_accuracy_timeline.iteritems():
@@ -3415,9 +3406,9 @@ def pareto_graph_data(pareto_dict):
     for key,value in pareto_dict.iteritems():
         alignment_data = graph_data_alignment(value, 'data')
         for single_dict in alignment_data:
-            if key == 'error_accuracy':
+            if key == 'Error Accuracy':
                 single_dict['type']='spline'
-            if key == 'error_count':
+            if key == 'Error Count':
                 single_dict['type'] = 'column'
                 single_dict['yAxis'] = 1
             final_list.append(single_dict)
@@ -4111,8 +4102,6 @@ def num_of_days(to_date,from_date):
     return date_list
 
 def static_production_data(request):
-    #from_date = datetime.datetime.strptime(request.GET['from'], '%Y-%m-%d').date()
-    #to_date = datetime.datetime.strptime(request.GET['to'], '%Y-%m-%d').date()
     final_data_dict = {}
 
     try:
@@ -4131,7 +4120,6 @@ def static_production_data(request):
         sub_packet = ''
     date_list = []
     #days_code
-    #import pdb;pdb.set_trace()
     to_date = datetime.date.today() - timedelta(1)
     from_dates = to_date - timedelta(6)
     days_list = num_of_days(to_date, from_dates)
@@ -4229,18 +4217,21 @@ def static_production_data(request):
             sub_pac_level = filter(None,RawTable.objects.filter(project=prj_id, center=center).values_list('sub_packet',flat=True).distinct())
             if len(sub_pac_level) >= 1:
                 level_structure_key['sub_packet'] = "All"
-
-    final_data = product_total_graph(days_list,prj_id,center,work_packet,level_structure_key)
-    del final_data['volumes_data']
-    del final_data['prod_days_data']
-    final_data_dict['static_prod_data'] = final_data
+    #import pdb;pdb.set_trace()
+    """dwm_dict['day'] = days_list
+    employe_dates['days'] = days_list"""
+    #result = product_total_graph(dwm_dict['day'], prj_id, center, work_packet, level_structure_key)
+    #final_data = product_total_graph(days_list,prj_id,center,work_packet,level_structure_key)
+    #result = product_total_graph(dwm_dict['day'], prj_id, center, work_packet, level_structure_key)
+    #final_data_dict['static_prod_data'] = {}
+    #final_data_dict['static_prod_data']['data'] = product_total_graph(dwm_dict['day'], prj_id, center, work_packet, level_structure_key)
+    #final_data_dict = final_data
 
     data_date = []
     week_num = 0
     week_names = []
     final_production = {}
     productivity_list = {}
-    #import pdb;pdb.set_trace()
     for week_key, week_dates in dwm_dict.iteritems():
         for week in week_dates:
             data_date.append(week[0] + ' to ' + week[-1])
@@ -4300,7 +4291,6 @@ def static_production_data(request):
     final_month_productivity = {}
     production_list = {}
     data_date = []
-    #month_lst = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October','November', 'December']
     month_order = OrderedDict(sorted(dwm_dict['month'].items(), key=lambda x: months.index(x[0])))
     for month_na in tuple(month_order):
         month_name = month_na
@@ -6477,6 +6467,7 @@ def Monthly_Volume_graph(date_list, prj_id, center, level_structure_key):
     final_values['total_workdone'] = []
     final_targets['total'] = []
     final_work_packet = ''
+    #import pdb;pdb.set_trace()
     for date in date_list:
         total_done_value = RawTable.objects.filter(project=prj_id, center=center, date=date).aggregate(Max('per_day'))
         print total_done_value['per_day__max']
@@ -6491,14 +6482,16 @@ def Monthly_Volume_graph(date_list, prj_id, center, level_structure_key):
                 final_work_packet = level_hierarchy_key(local_level_hierarchy_key, vol_type) 
                 target_query_set = target_query_generations(prj_id, center, date, final_work_packet,level_structure_key)
                 rawtable_query_set = rawtable_query_generations(prj_id, center, date, final_work_packet,level_structure_key)
-                employee_names = RawTable.objects.filter(**rawtable_query_set).values_list('employee_id')
-                employee_count = len(employee_names)
+                #employee_names = RawTable.objects.filter(**rawtable_query_set).values_list('employee_id')
+                #employee_count = len(employee_names)
                 targets_list = Targets.objects.filter(**target_query_set).values_list('target',flat=True).distinct()
                 if len(targets_list) > 0:
                     if _targets_list.has_key(final_work_packet):
-                        _targets_list[final_work_packet].append(int(targets_list[0]) * employee_count)
+                        #_targets_list[final_work_packet].append(int(targets_list[0]) * employee_count)
+                        _targets_list[final_work_packet].append(int(targets_list[0]))
                     else:
-                        _targets_list[final_work_packet] = [int(targets_list[0]) * employee_count]
+                        #_targets_list[final_work_packet] = [int(targets_list[0]) * employee_count]
+                        _targets_list[final_work_packet] = [int(targets_list[0])]
                 if not final_work_packet:
                         final_work_packet = level_hierarchy_key(volume_list[count], vol_type)
                 count = count + 1
